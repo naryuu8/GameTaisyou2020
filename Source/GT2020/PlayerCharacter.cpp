@@ -1,6 +1,4 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
-#include "EngineGlobals.h"
-#include "Runtime/Engine/Classes/Engine/Engine.h"
 #include "PlayerCharacter.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
