@@ -13,5 +13,6 @@ UCLASS()
 class GT2020_API AGT2020GameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+public:
+	AGT2020GameModeBase();
 };
