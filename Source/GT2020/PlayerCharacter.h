@@ -43,6 +43,8 @@ protected:
 	void TurnAtRate(float Rate);
 
 	void LookUpAtRate(float Rate);
+	//ƒnƒ“ƒ}[UŒ‚
+	void HammerAttack(void);
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
