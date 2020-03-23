@@ -54,6 +54,9 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+	//ハンマーで叩くアクションのキー登録
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::HammerAttack);
+
 	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
 
@@ -118,4 +121,9 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+void APlayerCharacter::HammerAttack(void)
+{
+
 }
