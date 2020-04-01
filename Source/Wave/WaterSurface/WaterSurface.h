@@ -17,6 +17,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void CreateWave(int32 x, int32 y);
 	void SetLand(int32 sx, int32 sy, int32 ex, int32 ey);
+	UFUNCTION(BlueprintCallable, Category = "MyBPLibrary")
 	void AddPawer(FVector worldPos);
 
 private:

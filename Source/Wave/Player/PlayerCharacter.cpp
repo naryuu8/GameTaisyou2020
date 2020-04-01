@@ -43,6 +43,12 @@ APlayerCharacter::APlayerCharacter()
 
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
+
+	IsAttackHold = false;
+
+	IsPlayAttackAnime = false;
+
+	HammerPower = 0.0f;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -57,7 +63,8 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	//ハンマーで叩くアクションのキー登録
-	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::HammerAttack);
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::TriggerHammerAttack);
+	PlayerInputComponent->BindAction("Attack", IE_Released, this, &APlayerCharacter::ReleaseHammerAttack);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
@@ -86,6 +93,8 @@ void APlayerCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Locat
 
 void APlayerCharacter::MoveForward(float Value)
 {
+	if (IsAttackHold)return;
+	if (IsPlayAttackAnime)return;
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is forward
@@ -100,6 +109,8 @@ void APlayerCharacter::MoveForward(float Value)
 
 void APlayerCharacter::MoveRight(float Value)
 {
+	if (IsAttackHold)return;
+	if (IsPlayAttackAnime)return;
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is right
@@ -125,8 +136,14 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-void APlayerCharacter::HammerAttack(void)
+void APlayerCharacter::TriggerHammerAttack(void)
 {
+//	IsAttackHold = true;
+}
+
+void  APlayerCharacter::ReleaseHammerAttack(void)
+{
+//	IsAttackHold = false;
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
 

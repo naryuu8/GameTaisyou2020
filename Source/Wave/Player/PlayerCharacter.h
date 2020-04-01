@@ -21,6 +21,7 @@ class APlayerCharacter : public ACharacter
 		class UCameraComponent* FollowCamera;
 public:
 	APlayerCharacter();
+	//virtual void Tick(float DeltaTime) override;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseTurnRate;
 
@@ -44,13 +45,26 @@ protected:
 	void TurnAtRate(float Rate);
 
 	void LookUpAtRate(float Rate);
-	//ハンマー攻撃
-	void HammerAttack(void);
+	//キーを押したときのハンマー攻撃
+	void TriggerHammerAttack(void);
+	//キーを離したときのハンマー攻撃
+	void ReleaseHammerAttack(void);
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
 
+	//BlueprintReadWrite=GetとSet関数をブルーブリントで公開
+
+	//ハンマー攻撃でホールド中ならtrue
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+	bool IsAttackHold;
+	//攻撃アニメ再生中ならtrue
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+	bool IsPlayAttackAnime;
+	//ハンマーパワー変数
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+	float HammerPower;
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
