@@ -8,6 +8,8 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "../WaterSurface/WaterSurface.h"
+#include "Animation/AnimInstance.h"
+#include "PlayerAnimInstance.h"
 #include "Kismet/GameplayStatics.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -40,7 +42,7 @@ APlayerCharacter::APlayerCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
-
+	
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 
@@ -49,6 +51,10 @@ APlayerCharacter::APlayerCharacter()
 	IsPlayAttackAnime = false;
 
 	HammerPower = 0.0f;
+
+	//プレイヤーアニメをキャスト（現在はC++でアニメを再生出来ないのでやり方だけ書いておく）
+	//UPlayerAnimInstance* AnimInst = Cast<UPlayerAnimInstance>(this->GetMesh()->GetAnimInstance());
+	//AnimInst->GetIsAttackAnime();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -138,7 +144,9 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 
 void APlayerCharacter::TriggerHammerAttack(void)
 {
+	
 //	IsAttackHold = true;
+	
 }
 
 void  APlayerCharacter::ReleaseHammerAttack(void)
