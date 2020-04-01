@@ -8,8 +8,6 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "../WaterSurface/WaterSurface.h"
-#include "Animation/AnimInstance.h"
-#include "PlayerAnimInstance.h"
 #include "Kismet/GameplayStatics.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -53,7 +51,7 @@ APlayerCharacter::APlayerCharacter()
 	HammerPower = 0.0f;
 
 	//プレイヤーアニメをキャスト（現在はC++でアニメを再生出来ないのでやり方だけ書いておく）
-	//UPlayerAnimInstance* AnimInst = Cast<UPlayerAnimInstance>(this->GetMesh()->GetAnimInstance());
+	AnimInst = Cast<UPlayerAnimInstance>(this->GetMesh()->GetAnimInstance());
 	//AnimInst->GetIsAttackAnime();
 }
 
@@ -144,23 +142,25 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 
 void APlayerCharacter::TriggerHammerAttack(void)
 {
+	//if (IsPlayAttackAnime)return;
+	//AnimInst->HummerChergeEvent()
+	//IsAttackHold = true;
 	
-//	IsAttackHold = true;
-	
+//	AnimInst
 }
 
 void  APlayerCharacter::ReleaseHammerAttack(void)
 {
 //	IsAttackHold = false;
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
+	//TArray<AActor*> FoundActors;
+	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
 
-	for (auto Actor : FoundActors)
-	{
-		AWaterSurface* water = Cast<AWaterSurface>(Actor);
-		if (water)
-		{
-			water->AddPawer(GetActorLocation());
-		}
-	}
+	//for (auto Actor : FoundActors)
+	//{
+	//	AWaterSurface* water = Cast<AWaterSurface>(Actor);
+	//	if (water)
+	//	{
+	//		water->AddPawer(GetActorLocation());
+	//	}
+	//}
 }

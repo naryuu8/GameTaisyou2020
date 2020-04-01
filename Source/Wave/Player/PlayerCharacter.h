@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Animation/AnimInstance.h"
+#include "PlayerAnimInstance.h"
 //generated.hは一番最後にかかないといけない
 #include "PlayerCharacter.generated.h"
 
@@ -69,6 +71,8 @@ protected:
 	//ハンマーパワー変数
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 	float HammerPower;
+private:
+	UPlayerAnimInstance* AnimInst;
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

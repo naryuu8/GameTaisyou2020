@@ -23,6 +23,8 @@ protected:
 		void HummerCherge();
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void HummerAttack();
+
+
 public:
 	// コンストラクタ
 	UPlayerAnimInstance(const FObjectInitializer& ObjectInitializer);
@@ -38,6 +40,9 @@ public:
 
 	// イベント開始時
 	virtual void NativeBeginPlay() override;
+
+	void HummerChergeEvent();
+	void HummerAttackEvent();
 
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 	FORCEINLINE bool GetIsAttackAnime() const { return IsAttackAnime; }
