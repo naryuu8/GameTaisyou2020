@@ -27,6 +27,13 @@ private:
 	const int MaxX = 100;
 	const int MaxY = 100;
 
+	UPROPERTY(EditAnywhere)
+		int32 SplitNumber = 50;
+	UPROPERTY(EditAnywhere)
+		AActor* StartPoint;
+	UPROPERTY(EditAnywhere)
+		AActor* EndPoint;
+
 	TArray<bool> IsLands;
 
 	TArray<float> CurrentHeights;
