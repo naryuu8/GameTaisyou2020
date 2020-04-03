@@ -5,6 +5,7 @@
 // https://www.nicovideo.jp/watch/sm9470923
 
 #include "WaterSurface.h"
+#include "CircleLandPoint.h"
 
 AWaterSurface::AWaterSurface()
 {
@@ -58,12 +59,10 @@ void AWaterSurface::BeginPlay()
 	PrevHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
 	NewHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
 
-	int cx1 = SplitVector.X / 3;
-	int cy1 = SplitVector.Y / 3;
-
-	SetLand(0, 0, SplitVector.X, cy1);
-	SetLand(cx1 * 2, cy1, SplitVector.X, cy1 * 2);
-	SetLand(cx1, cy1 * 2, SplitVector.X, SplitVector.Y);
+	for (int i = 0; i < CircleLandPoints.Num(); i++)
+	{
+		SetCircleLand(CircleLandPoints[i]->GetActorLocation(), CircleLandPoints[i]->GetRadius());
+	}
 }
 
 void AWaterSurface::Tick(float DeltaTime)
@@ -146,6 +145,25 @@ void AWaterSurface::CreateWave(int32 x, int32 y)
 int32 AWaterSurface::CalcIndex(int32 x, int32 y)
 {
 	return x + (y * SplitVector.X);
+}
+
+void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius)
+{
+	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
+	{
+		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
+		{
+			float xp = Vertices[CalcIndex(xi, yi)].X;
+			float yp = Vertices[CalcIndex(xi, yi)].Y;
+			float xc = CirclePostion.X;
+			float yc = CirclePostion.Y;
+			if ((xp - xc)*(xp - xc) + (yp - yc)*(yp - yc) <= Radius * Radius)
+			{
+				IsLands[CalcIndex(xi, yi)] = true;
+				Vertices[CalcIndex(xi, yi)].Z = 10.0f;
+			}
+		}
+	}
 }
 
 void AWaterSurface::SetLand(int32 sx, int32 sy, int32 ex, int32 ey)

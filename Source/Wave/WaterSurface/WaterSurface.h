@@ -6,6 +6,8 @@
 #include "../ProceduralMesh/ProceduralMeshActor.h"
 #include "WaterSurface.generated.h"
 
+class ACircleLandPoint;
+
 UCLASS()
 class WAVE_API AWaterSurface : public AProceduralMeshActor
 {
@@ -16,6 +18,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	void CreateWave(int32 x, int32 y);
+	void SetCircleLand(FVector CirclePostion, float Radius);
 	void SetLand(int32 sx, int32 sy, int32 ex, int32 ey);
 	void AddPawer(FVector worldPos);
 
@@ -32,6 +35,8 @@ private:
 		AActor* StartPoint;
 	UPROPERTY(EditAnywhere)
 		AActor* EndPoint;
+	UPROPERTY(EditAnywhere)
+		TArray<ACircleLandPoint*> CircleLandPoints;
 
 	TArray<bool> IsLands;
 
