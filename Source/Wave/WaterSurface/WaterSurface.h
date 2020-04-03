@@ -23,12 +23,11 @@ private:
 	int32 CalcIndex(int32 x, int32 y);
 
 private:
-	const int PolygonSize = 30;
-	const int MaxX = 100;
-	const int MaxY = 100;
+	float X_Size;
+	float Y_Size;
 
 	UPROPERTY(EditAnywhere)
-		int32 SplitNumber = 50;
+		FVector2D SplitVector = FVector2D(100,100);
 	UPROPERTY(EditAnywhere)
 		AActor* StartPoint;
 	UPROPERTY(EditAnywhere)

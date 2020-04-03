@@ -10,9 +10,9 @@ AWaterSurface::AWaterSurface()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	for (int yi = 0; yi < MaxY; ++yi)
+	for (int yi = 0; yi < SplitVector.Y; ++yi)
 	{
-		for (int xi = 0; xi < MaxX; ++xi)
+		for (int xi = 0; xi < SplitVector.X; ++xi)
 		{
 			Vertices.Emplace(0, 0, 0);
 		}
@@ -20,16 +20,16 @@ AWaterSurface::AWaterSurface()
 
 	IsLands.Init(false, Vertices.Num());
 
-	for (int yi = 0; yi < MaxY - 1; yi++)
+	for (int yi = 0; yi < SplitVector.Y - 1; yi++)
 	{
-		for (int xi = 0; xi < MaxX - 1; xi++)
+		for (int xi = 0; xi < SplitVector.X - 1; xi++)
 		{
-			Triangles.Emplace((MaxY * (yi + 0)) + xi);
-			Triangles.Emplace((MaxY * (yi + 1)) + xi);
-			Triangles.Emplace((MaxY * (yi + 0)) + xi + 1);
-			Triangles.Emplace((MaxY * (yi + 0)) + xi + 1);
-			Triangles.Emplace((MaxY * (yi + 1)) + xi);
-			Triangles.Emplace((MaxY * (yi + 1)) + xi + 1);
+			Triangles.Emplace((SplitVector.Y * (yi + 0)) + xi);
+			Triangles.Emplace((SplitVector.Y * (yi + 1)) + xi);
+			Triangles.Emplace((SplitVector.Y * (yi + 0)) + xi + 1);
+			Triangles.Emplace((SplitVector.Y * (yi + 0)) + xi + 1);
+			Triangles.Emplace((SplitVector.Y * (yi + 1)) + xi);
+			Triangles.Emplace((SplitVector.Y * (yi + 1)) + xi + 1);
 		}
 	}
 	CreateMesh();
@@ -39,33 +39,31 @@ void AWaterSurface::BeginPlay()
 {
 	Super::BeginPlay();
 
-	int X_Size = (StartPoint->GetActorLocation().X - EndPoint->GetActorLocation().X) / SplitNumber;
-	int Y_Size = (StartPoint->GetActorLocation().Y - EndPoint->GetActorLocation().Y) / SplitNumber;
+	X_Size = (-StartPoint->GetActorLocation().X + EndPoint->GetActorLocation().X) / SplitVector.X;
+	Y_Size = (-StartPoint->GetActorLocation().Y + EndPoint->GetActorLocation().Y) / SplitVector.Y;
 
-	UE_LOG(LogTemp, Log, TEXT("MyIntValue=%d"), X_Size);
-
-	for (int yi = 0; yi < MaxY; ++yi)
+	for (int yi = 0; yi < SplitVector.Y; ++yi)
 	{
-		for (int xi = 0; xi < MaxX; ++xi)
+		for (int xi = 0; xi < SplitVector.X; ++xi)
 		{
-			Vertices[CalcIndex(xi, yi)].X = PolygonSize * xi;
-			Vertices[CalcIndex(xi, yi)].Y = PolygonSize * yi;
+			Vertices[CalcIndex(xi, yi)].X = X_Size * xi;
+			Vertices[CalcIndex(xi, yi)].Y = Y_Size * yi;
 		}
 	}
 
 	UpdateMesh();
 
 	// ”g‰‰ŽZ—pƒŠƒXƒg‚Ì‰Šú‰»
-	CurrentHeights.Init(0.0f, MaxX * MaxY);
-	PrevHeights.Init(0.0f, MaxX * MaxY);
-	NewHeights.Init(0.0f, MaxX * MaxY);
+	CurrentHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
+	PrevHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
+	NewHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
 
-	int cx1 = MaxX / 3;
-	int cy1 = MaxY / 3;
+	int cx1 = SplitVector.X / 3;
+	int cy1 = SplitVector.Y / 3;
 
-	SetLand(0, 0, MaxX, cy1);
-	SetLand(cx1 * 2, cy1, MaxX, cy1 * 2);
-	SetLand(cx1, cy1 * 2, MaxX, MaxY);
+	SetLand(0, 0, SplitVector.X, cy1);
+	SetLand(cx1 * 2, cy1, SplitVector.X, cy1 * 2);
+	SetLand(cx1, cy1 * 2, SplitVector.X, SplitVector.Y);
 }
 
 void AWaterSurface::Tick(float DeltaTime)
@@ -73,9 +71,9 @@ void AWaterSurface::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	float c = (DeltaTime * 10.0f) * (DeltaTime * 10.0f);
-	for (int xi = 1; xi < MaxX - 1; ++xi)
+	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
 	{
-		for (int yi = 1; yi < MaxY - 1; ++yi)
+		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
 		{
 			int32 index = CalcIndex(xi, yi);
 
@@ -94,9 +92,9 @@ void AWaterSurface::Tick(float DeltaTime)
 		}
 	}
 
-	for (int xi = 1; xi < MaxX - 1; ++xi)
+	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
 	{
-		for (int yi = 1; yi < MaxY - 1; ++yi)
+		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
 		{
 			int32 index = CalcIndex(xi, yi);
 			PrevHeights[index] = CurrentHeights[index];
@@ -104,9 +102,9 @@ void AWaterSurface::Tick(float DeltaTime)
 		}
 	}
 
-	for (int yi = 0; yi < MaxY; ++yi)
+	for (int yi = 0; yi < SplitVector.X; ++yi)
 	{
-		for (int xi = 0; xi < MaxX; ++xi)
+		for (int xi = 0; xi < SplitVector.Y; ++xi)
 		{
 			if(!IsLands[CalcIndex(xi,yi)])
 				Vertices[CalcIndex(xi,yi)].Z += CurrentHeights[CalcIndex(xi,yi)];
@@ -126,9 +124,9 @@ void AWaterSurface::CreateWave(int32 x, int32 y)
 
 	FVector2D wv = FVector2D(x, y);
 
-	for (int xi = 1; xi < MaxX - 1; ++xi)
+	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
 	{
-		for (int yi = 1; yi < MaxY - 1; ++yi)
+		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
 		{
 			int index = CalcIndex(xi, yi);
 			float value = 0.0f;
@@ -147,7 +145,7 @@ void AWaterSurface::CreateWave(int32 x, int32 y)
 
 int32 AWaterSurface::CalcIndex(int32 x, int32 y)
 {
-	return x + (y * MaxX);
+	return x + (y * SplitVector.X);
 }
 
 void AWaterSurface::SetLand(int32 sx, int32 sy, int32 ex, int32 ey)
@@ -164,8 +162,8 @@ void AWaterSurface::SetLand(int32 sx, int32 sy, int32 ex, int32 ey)
 
 void AWaterSurface::AddPawer(FVector worldPos)
 {
-	int32 WaveX = worldPos.X / PolygonSize;
-	int32 WaveY = worldPos.Y / PolygonSize;
+	int32 WaveX = worldPos.X / X_Size;
+	int32 WaveY = worldPos.Y / Y_Size;
 
 	CreateWave(WaveX, WaveY);
 }
