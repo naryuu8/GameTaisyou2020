@@ -6,6 +6,8 @@
 #include "../ProceduralMesh/ProceduralMeshActor.h"
 #include "WaterSurface.generated.h"
 
+class ACircleLandPoint;
+
 UCLASS()
 class WAVE_API AWaterSurface : public AProceduralMeshActor
 {
@@ -16,16 +18,30 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	void CreateWave(int32 x, int32 y);
+	void SetCircleLand(FVector CirclePostion, float Radius);
 	void SetLand(int32 sx, int32 sy, int32 ex, int32 ey);
 	void AddPawer(FVector worldPos);
 
 private:
 	int32 CalcIndex(int32 x, int32 y);
+	FVector2D LocationToVertices(FVector Location);
 
 private:
-	const int PolygonSize = 30;
-	const int MaxX = 100;
-	const int MaxY = 100;
+	float X_Size;
+	float Y_Size;
+
+	UPROPERTY(EditAnywhere)
+		FVector2D SplitVector = FVector2D(100,100);
+	UPROPERTY(EditAnywhere)
+		AActor* StartPoint;
+	UPROPERTY(EditAnywhere)
+		AActor* EndPoint;
+	UPROPERTY(EditAnywhere)
+		TArray<ACircleLandPoint*> CircleLandPoints;
+	UPROPERTY(EditAnywhere)
+		TArray<AActor*> LandStartPoints;
+	UPROPERTY(EditAnywhere)
+		TArray<AActor*> LandEndPoints;
 
 	TArray<bool> IsLands;
 

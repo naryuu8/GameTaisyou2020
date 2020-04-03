@@ -5,31 +5,32 @@
 // https://www.nicovideo.jp/watch/sm9470923
 
 #include "WaterSurface.h"
+#include "CircleLandPoint.h"
 
 AWaterSurface::AWaterSurface()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	for (int yi = 0; yi < MaxY; ++yi)
+	for (int yi = 0; yi < SplitVector.Y; ++yi)
 	{
-		for (int xi = 0; xi < MaxX; ++xi)
+		for (int xi = 0; xi < SplitVector.X; ++xi)
 		{
-			Vertices.Emplace(PolygonSize * xi, PolygonSize * yi, 0);
+			Vertices.Emplace(0, 0, 0);
 		}
 	}
 
 	IsLands.Init(false, Vertices.Num());
 
-	for (int yi = 0; yi < MaxY - 1; yi++)
+	for (int yi = 0; yi < SplitVector.Y - 1; yi++)
 	{
-		for (int xi = 0; xi < MaxX - 1; xi++)
+		for (int xi = 0; xi < SplitVector.X - 1; xi++)
 		{
-			Triangles.Emplace((MaxY * (yi + 0)) + xi);
-			Triangles.Emplace((MaxY * (yi + 1)) + xi);
-			Triangles.Emplace((MaxY * (yi + 0)) + xi + 1);
-			Triangles.Emplace((MaxY * (yi + 0)) + xi + 1);
-			Triangles.Emplace((MaxY * (yi + 1)) + xi);
-			Triangles.Emplace((MaxY * (yi + 1)) + xi + 1);
+			Triangles.Emplace((SplitVector.Y * (yi + 0)) + xi);
+			Triangles.Emplace((SplitVector.Y * (yi + 1)) + xi);
+			Triangles.Emplace((SplitVector.Y * (yi + 0)) + xi + 1);
+			Triangles.Emplace((SplitVector.Y * (yi + 0)) + xi + 1);
+			Triangles.Emplace((SplitVector.Y * (yi + 1)) + xi);
+			Triangles.Emplace((SplitVector.Y * (yi + 1)) + xi + 1);
 		}
 	}
 	CreateMesh();
@@ -39,17 +40,36 @@ void AWaterSurface::BeginPlay()
 {
 	Super::BeginPlay();
 
+	X_Size = (-StartPoint->GetActorLocation().X + EndPoint->GetActorLocation().X) / SplitVector.X;
+	Y_Size = (-StartPoint->GetActorLocation().Y + EndPoint->GetActorLocation().Y) / SplitVector.Y;
+
+	for (int yi = 0; yi < SplitVector.Y; ++yi)
+	{
+		for (int xi = 0; xi < SplitVector.X; ++xi)
+		{
+			Vertices[CalcIndex(xi, yi)].X = X_Size * xi;
+			Vertices[CalcIndex(xi, yi)].Y = Y_Size * yi;
+		}
+	}
+
+	UpdateMesh();
+
 	// ”g‰‰ŽZ—pƒŠƒXƒg‚Ì‰Šú‰»
-	CurrentHeights.Init(0.0f, MaxX * MaxY);
-	PrevHeights.Init(0.0f, MaxX * MaxY);
-	NewHeights.Init(0.0f, MaxX * MaxY);
+	CurrentHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
+	PrevHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
+	NewHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
 
-	int cx1 = MaxX / 3;
-	int cy1 = MaxY / 3;
+	for (int i = 0; i < CircleLandPoints.Num(); i++)
+	{
+		SetCircleLand(CircleLandPoints[i]->GetActorLocation(), CircleLandPoints[i]->GetRadius());
+	}
 
-	SetLand(0, 0, MaxX, cy1);
-	SetLand(cx1 * 2, cy1, MaxX, cy1 * 2);
-	SetLand(cx1, cy1 * 2, MaxX, MaxY);
+	for (int i = 0; i < LandStartPoints.Num(); i++)
+	{
+		FVector2D startPos = LocationToVertices(LandStartPoints[i]->GetActorLocation());
+		FVector2D endPos = LocationToVertices(LandEndPoints[i]->GetActorLocation());
+		SetLand(startPos.X, startPos.Y, endPos.X, endPos.Y);
+	}
 }
 
 void AWaterSurface::Tick(float DeltaTime)
@@ -57,9 +77,9 @@ void AWaterSurface::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	float c = (DeltaTime * 10.0f) * (DeltaTime * 10.0f);
-	for (int xi = 1; xi < MaxX - 1; ++xi)
+	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
 	{
-		for (int yi = 1; yi < MaxY - 1; ++yi)
+		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
 		{
 			int32 index = CalcIndex(xi, yi);
 
@@ -78,9 +98,9 @@ void AWaterSurface::Tick(float DeltaTime)
 		}
 	}
 
-	for (int xi = 1; xi < MaxX - 1; ++xi)
+	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
 	{
-		for (int yi = 1; yi < MaxY - 1; ++yi)
+		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
 		{
 			int32 index = CalcIndex(xi, yi);
 			PrevHeights[index] = CurrentHeights[index];
@@ -88,9 +108,9 @@ void AWaterSurface::Tick(float DeltaTime)
 		}
 	}
 
-	for (int yi = 0; yi < MaxY; ++yi)
+	for (int yi = 0; yi < SplitVector.X; ++yi)
 	{
-		for (int xi = 0; xi < MaxX; ++xi)
+		for (int xi = 0; xi < SplitVector.Y; ++xi)
 		{
 			if(!IsLands[CalcIndex(xi,yi)])
 				Vertices[CalcIndex(xi,yi)].Z += CurrentHeights[CalcIndex(xi,yi)];
@@ -110,9 +130,9 @@ void AWaterSurface::CreateWave(int32 x, int32 y)
 
 	FVector2D wv = FVector2D(x, y);
 
-	for (int xi = 1; xi < MaxX - 1; ++xi)
+	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
 	{
-		for (int yi = 1; yi < MaxY - 1; ++yi)
+		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
 		{
 			int index = CalcIndex(xi, yi);
 			float value = 0.0f;
@@ -129,9 +149,35 @@ void AWaterSurface::CreateWave(int32 x, int32 y)
 	}
 }
 
+FVector2D AWaterSurface::LocationToVertices(FVector Location)
+{
+	int xi = (Location.X - GetActorLocation().X) / X_Size;
+	int yi = (Location.Y - GetActorLocation().Y) / Y_Size;
+	return FVector2D(xi, yi);
+}
+
 int32 AWaterSurface::CalcIndex(int32 x, int32 y)
 {
-	return x + (y * MaxX);
+	return x + (y * SplitVector.X);
+}
+
+void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius)
+{
+	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
+	{
+		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
+		{
+			float xp = Vertices[CalcIndex(xi, yi)].X;
+			float yp = Vertices[CalcIndex(xi, yi)].Y;
+			float xc = CirclePostion.X;
+			float yc = CirclePostion.Y;
+			if ((xp - xc)*(xp - xc) + (yp - yc)*(yp - yc) <= Radius * Radius)
+			{
+				IsLands[CalcIndex(xi, yi)] = true;
+				Vertices[CalcIndex(xi, yi)].Z = 10.0f;
+			}
+		}
+	}
 }
 
 void AWaterSurface::SetLand(int32 sx, int32 sy, int32 ex, int32 ey)
@@ -148,8 +194,8 @@ void AWaterSurface::SetLand(int32 sx, int32 sy, int32 ex, int32 ey)
 
 void AWaterSurface::AddPawer(FVector worldPos)
 {
-	int32 WaveX = worldPos.X / PolygonSize;
-	int32 WaveY = worldPos.Y / PolygonSize;
+	int32 WaveX = worldPos.X / X_Size;
+	int32 WaveY = worldPos.Y / Y_Size;
 
 	CreateWave(WaveX, WaveY);
 }
