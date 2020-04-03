@@ -24,6 +24,7 @@ public:
 
 private:
 	int32 CalcIndex(int32 x, int32 y);
+	FVector2D LocationToVertices(FVector Location);
 
 private:
 	float X_Size;
@@ -37,6 +38,10 @@ private:
 		AActor* EndPoint;
 	UPROPERTY(EditAnywhere)
 		TArray<ACircleLandPoint*> CircleLandPoints;
+	UPROPERTY(EditAnywhere)
+		TArray<AActor*> LandStartPoints;
+	UPROPERTY(EditAnywhere)
+		TArray<AActor*> LandEndPoints;
 
 	TArray<bool> IsLands;
 

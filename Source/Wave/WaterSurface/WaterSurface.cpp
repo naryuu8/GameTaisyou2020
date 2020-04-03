@@ -63,6 +63,13 @@ void AWaterSurface::BeginPlay()
 	{
 		SetCircleLand(CircleLandPoints[i]->GetActorLocation(), CircleLandPoints[i]->GetRadius());
 	}
+
+	for (int i = 0; i < LandStartPoints.Num(); i++)
+	{
+		FVector2D startPos = LocationToVertices(LandStartPoints[i]->GetActorLocation());
+		FVector2D endPos = LocationToVertices(LandEndPoints[i]->GetActorLocation());
+		SetLand(startPos.X, startPos.Y, endPos.X, endPos.Y);
+	}
 }
 
 void AWaterSurface::Tick(float DeltaTime)
@@ -140,6 +147,13 @@ void AWaterSurface::CreateWave(int32 x, int32 y)
 			NewHeights[index] += value;
 		}
 	}
+}
+
+FVector2D AWaterSurface::LocationToVertices(FVector Location)
+{
+	int xi = (Location.X - GetActorLocation().X) / X_Size;
+	int yi = (Location.Y - GetActorLocation().Y) / Y_Size;
+	return FVector2D(xi, yi);
 }
 
 int32 AWaterSurface::CalcIndex(int32 x, int32 y)
