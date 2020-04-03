@@ -14,7 +14,7 @@ AWaterSurface::AWaterSurface()
 	{
 		for (int xi = 0; xi < MaxX; ++xi)
 		{
-			Vertices.Emplace(PolygonSize * xi, PolygonSize * yi, 0);
+			Vertices.Emplace(0, 0, 0);
 		}
 	}
 
@@ -38,6 +38,22 @@ AWaterSurface::AWaterSurface()
 void AWaterSurface::BeginPlay()
 {
 	Super::BeginPlay();
+
+	int X_Size = (StartPoint->GetActorLocation().X - EndPoint->GetActorLocation().X) / SplitNumber;
+	int Y_Size = (StartPoint->GetActorLocation().Y - EndPoint->GetActorLocation().Y) / SplitNumber;
+
+	UE_LOG(LogTemp, Log, TEXT("MyIntValue=%d"), X_Size);
+
+	for (int yi = 0; yi < MaxY; ++yi)
+	{
+		for (int xi = 0; xi < MaxX; ++xi)
+		{
+			Vertices[CalcIndex(xi, yi)].X = PolygonSize * xi;
+			Vertices[CalcIndex(xi, yi)].Y = PolygonSize * yi;
+		}
+	}
+
+	UpdateMesh();
 
 	// ”g‰‰ŽZ—pƒŠƒXƒg‚Ì‰Šú‰»
 	CurrentHeights.Init(0.0f, MaxX * MaxY);
