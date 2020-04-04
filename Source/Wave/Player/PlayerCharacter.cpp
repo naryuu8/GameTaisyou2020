@@ -143,10 +143,9 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 void APlayerCharacter::TriggerHammerAttack(void)
 {
 	//if (IsPlayAttackAnime)return;
-	//AnimInst->HummerChergeEvent()
+	//AnimInst->HummerChergeEvent();
 	//IsAttackHold = true;
 	
-//	AnimInst
 }
 
 void  APlayerCharacter::ReleaseHammerAttack(void)
