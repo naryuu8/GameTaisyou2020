@@ -20,8 +20,7 @@ public:
 	void CreateWave(int32 x, int32 y);
 	void SetCircleLand(FVector CirclePostion, float Radius);
 	void SetLand(int32 sx, int32 sy, int32 ex, int32 ey);
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-	void AddPawer(FVector worldPos);
+	void AddPower(FVector worldPos);
 
 private:
 	int32 CalcIndex(int32 x, int32 y);

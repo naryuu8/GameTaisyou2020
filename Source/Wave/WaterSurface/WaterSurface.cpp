@@ -200,7 +200,7 @@ void AWaterSurface::SetLand(int32 sx, int32 sy, int32 ex, int32 ey)
 	}
 }
 
-void AWaterSurface::AddPawer(FVector worldPos)
+void AWaterSurface::AddPower(FVector worldPos)
 {
 	int32 WaveX = worldPos.X / X_Size;
 	int32 WaveY = worldPos.Y / Y_Size;
