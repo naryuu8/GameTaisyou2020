@@ -22,12 +22,13 @@ class APlayerCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* FollowCamera;
 
-	/** Follow camera */
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	//	class USkeletalMesh* Skeltal;
+
 public:
 	APlayerCharacter();
 //	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaTime) override;
+
 	//関連付けるスキンメッシュ
 	//virtual void Tick(float DeltaTime) override;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
