@@ -54,16 +54,16 @@ APlayerCharacter::APlayerCharacter()
 	//AnimInst->GetIsAttackAnime();
 }
 
-void APlayerCharacter::BeginPlay()
-{
-	auto* cl = this->GetMesh()->GetAnimClass();
-	AnimInst = Cast<UPlayerAnimInstance>(this->GetMesh()->GetAnimClass());
-	IsAttackHold = false;
-
-	IsPlayAttackAnime = false;
-
-	HammerPower = 0.0f;
-}
+//void APlayerCharacter::BeginPlay()
+//{
+//	/*auto* cl = this->GetMesh()->GetAnimClass();
+//	AnimInst = Cast<UPlayerAnimInstance>(this->GetMesh()->GetAnimClass());*/
+//	IsAttackHold = false;
+//
+//	IsPlayAttackAnime = false;
+//
+//	HammerPower = 0.0f;
+//}
 //////////////////////////////////////////////////////////////////////////
 // Input
 
