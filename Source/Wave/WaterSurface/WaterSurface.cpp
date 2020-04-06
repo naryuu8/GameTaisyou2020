@@ -16,8 +16,7 @@ AWaterSurface::AWaterSurface()
 		for (int xi = 0; xi < SplitVector.X; ++xi)
 		{
 			Vertices.Emplace(0, 0, 0);
-			UV0.Emplace(xi / SplitVector.X, yi / SplitVector.Y);
-			VertexColors.Emplace(0.0f, 0.0f, 100.0f, 100.0f);
+			UV0.Emplace((xi / SplitVector.X) * 0.5f , (yi / SplitVector.Y));
 		}
 	}
 
@@ -54,8 +53,6 @@ void AWaterSurface::BeginPlay()
 		}
 	}
 
-	UpdateMesh();
-
 	// ”g‰‰ŽZ—pƒŠƒXƒg‚Ì‰Šú‰»
 	CurrentHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
 	PrevHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
@@ -72,6 +69,13 @@ void AWaterSurface::BeginPlay()
 		FVector2D endPos = LocationToVertices(LandEndPoints[i]->GetActorLocation());
 		SetLand(startPos.X, startPos.Y, endPos.X, endPos.Y);
 	}
+
+	if (Material)
+	{
+		Mesh->SetMaterial(0, Material);
+	}
+
+	UpdateMesh();
 }
 
 void AWaterSurface::Tick(float DeltaTime)
@@ -119,7 +123,6 @@ void AWaterSurface::Tick(float DeltaTime)
 		}
 	}
 
-	Mesh->SetMaterial(0, Material);
 	UpdateMesh();
 }
 
@@ -178,6 +181,7 @@ void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius)
 			{
 				IsLands[CalcIndex(xi, yi)] = true;
 				Vertices[CalcIndex(xi, yi)].Z = 10.0f;
+				UV0[CalcIndex(xi, yi)] = FVector2D((xi / SplitVector.X) * 0.5f + 0.5f, (yi / SplitVector.Y));
 			}
 		}
 	}
@@ -191,6 +195,7 @@ void AWaterSurface::SetLand(int32 sx, int32 sy, int32 ex, int32 ey)
 		{
 			IsLands[CalcIndex(xi, yi)] = true;
 			Vertices[CalcIndex(xi, yi)].Z = 10.0f;
+			UV0[CalcIndex(xi, yi)] = FVector2D((xi / SplitVector.X) * 0.5f + 0.5f, (yi / SplitVector.Y));
 		}
 	}
 }
