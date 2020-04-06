@@ -27,6 +27,8 @@ class APlayerCharacter : public ACharacter
 	//	class USkeletalMesh* Skeltal;
 public:
 	APlayerCharacter();
+	virtual void BeginPlay() override;
+	//関連付けるスキンメッシュ
 	//virtual void Tick(float DeltaTime) override;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseTurnRate;

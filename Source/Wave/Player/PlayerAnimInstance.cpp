@@ -50,13 +50,14 @@ void UPlayerAnimInstance::HummerChergeEvent()
 	//
 
 	//////例外エラーが出るので今は封印
-	////const FName AnimMontageAssetPath(TEXT("/Game/Main/Player/HummerAttackMontage"));
+	const FName AnimMontageAssetPath(TEXT("AnimMontage'/Game/Main/Player/HummerAttackMontage.HummerAttackMontage'"));
 
-	////UAnimMontage* AnimMontage = Cast<UAnimMontage>(StaticLoadObject(UObject::StaticClass(), nullptr, *AnimMontageAssetPath.ToString()));
-	//this->Montage_Play(AnimMontage, 0.4f, EMontagePlayReturnType::MontageLength,0.0f,true);
-	//this->Montage_JumpToSection("Charge");
-	//IsAttackAnime = true;
-	//this->Montage_Pause(AnimMontage);
+	UAnimMontage* AnimMontage = Cast<UAnimMontage>(StaticLoadObject(UObject::StaticClass(), nullptr, *AnimMontageAssetPath.ToString()));
+//	UAnimMontage* AnimMontage = LoadObject<UAnimMontage>(NULL, TEXT("/Game/Main/Player/HummerAttackMontage.HummerAttackMontage"), NULL, LOAD_None, NULL);
+	Montage_Play(AnimMontage, 0.4f);
+	Montage_JumpToSection("Charge", AnimMontage);
+	IsAttackAnime = true;
+	Montage_Pause(AnimMontage);
 }
 
 void UPlayerAnimInstance::HummerAttackEvent()

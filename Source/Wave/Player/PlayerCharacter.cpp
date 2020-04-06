@@ -44,17 +44,26 @@ APlayerCharacter::APlayerCharacter()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 
+
+
+	////プレイヤーアニメをキャスト（現在はC++でアニメを再生出来ないのでやり方だけ書いておく）
+	//const FName AnimMontageAssetPath(TEXT("/Game/Main/Player/PlayerAnimeBP.PlayerAnimeBP_C"));
+	
+	//AnimInst = Cast<UPlayerAnimInstance>(StaticLoadObject(UObject::StaticClass(), nullptr, *AnimMontageAssetPath.ToString()));
+
+	//AnimInst->GetIsAttackAnime();
+}
+
+void APlayerCharacter::BeginPlay()
+{
+	auto* cl = this->GetMesh()->GetAnimClass();
+	AnimInst = Cast<UPlayerAnimInstance>(this->GetMesh()->GetAnimClass());
 	IsAttackHold = false;
 
 	IsPlayAttackAnime = false;
 
 	HammerPower = 0.0f;
-
-	//プレイヤーアニメをキャスト（現在はC++でアニメを再生出来ないのでやり方だけ書いておく）
-	AnimInst = Cast<UPlayerAnimInstance>(this->GetMesh()->GetAnimInstance());
-	//AnimInst->GetIsAttackAnime();
 }
-
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -143,6 +152,7 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 void APlayerCharacter::TriggerHammerAttack(void)
 {
 	//if (IsPlayAttackAnime)return;
+
 	//AnimInst->HummerChergeEvent();
 	//IsAttackHold = true;
 	
