@@ -25,20 +25,19 @@ class APlayerCharacter : public ACharacter
 
 public:
 	APlayerCharacter();
-//	virtual void BeginPlay() override;
 
+	//virtual void BeginPlay() override;
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void BeginPlay_C();
 	virtual void Tick(float DeltaTime) override;
 
-	//関連付けるスキンメッシュ
-	//virtual void Tick(float DeltaTime) override;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseTurnRate;
 
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseLookUpRate;
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		void WaterAttack();
+	
 protected:
 
 	/** Called for forwards/backward input */
@@ -77,6 +76,8 @@ protected:
 	float HammerPower;
 private:
 	UPlayerAnimInstance* AnimInst;
+	//水面に波をたてる
+	void WaterAttack();
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

@@ -3,6 +3,7 @@
 
 #include "PlayerAnimInstance.h"
 #include "GameFramework/Actor.h"
+#include "Math/Vector.h"
 #include "UObject/ConstructorHelpers.h"
 
 UPlayerAnimInstance::UPlayerAnimInstance(const FObjectInitializer& ObjectInitializer)
@@ -15,8 +16,7 @@ void UPlayerAnimInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
 	Speed = 0.0f;
-	IsAttackAnime = false;
-	
+	IsAttackAnime = false;	
 }
 
 void UPlayerAnimInstance::NativeInitializeAnimation()
@@ -28,7 +28,13 @@ void UPlayerAnimInstance::NativeInitializeAnimation()
 void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
-	
+	//実行中であればアニメーション参照先の移動スピードを受け取る
+	if (TryGetPawnOwner())
+	{
+		FVector vec_speed = TryGetPawnOwner()->GetVelocity();
+		//FVectorの長さを取得
+		vec_speed.FVector::ToDirectionAndLength(vec_speed, Speed);
+	}
 }
 
 void UPlayerAnimInstance::NativePostEvaluateAnimation()
@@ -46,9 +52,11 @@ void UPlayerAnimInstance::NativeUninitializeAnimation()
 void UPlayerAnimInstance::HummerChergeEvent()
 {
 	//アニメモンタージュを参照
-	const FName AnimMontageAssetPath(TEXT("AnimMontage'/Game/Main/Player/HummerAttackMontage.HummerAttackMontage'"));
-
-	UAnimMontage* AnimMontage = Cast<UAnimMontage>(StaticLoadObject(UObject::StaticClass(), nullptr, *AnimMontageAssetPath.ToString()));
+	if (!AnimMontage)
+	{
+		const FName AnimMontageAssetPath(TEXT("AnimMontage'/Game/Main/Player/HummerAttackMontage.HummerAttackMontage'"));
+		AnimMontage = Cast<UAnimMontage>(StaticLoadObject(UObject::StaticClass(), nullptr, *AnimMontageAssetPath.ToString()));
+	}
 	Montage_Play(AnimMontage, 0.4f);
 	Montage_JumpToSection("Charge", AnimMontage);
 	IsAttackAnime = true;
@@ -57,8 +65,6 @@ void UPlayerAnimInstance::HummerChergeEvent()
 
 void UPlayerAnimInstance::HummerAttackEvent()
 {
-	const FName AnimMontageAssetPath(TEXT("AnimMontage'/Game/Main/Player/HummerAttackMontage.HummerAttackMontage'"));
-	UAnimMontage* AnimMontage = Cast<UAnimMontage>(StaticLoadObject(UObject::StaticClass(), nullptr, *AnimMontageAssetPath.ToString()));
 	Montage_Play(AnimMontage,0.4f);
 	Montage_JumpToSection("Attack", AnimMontage);
 }

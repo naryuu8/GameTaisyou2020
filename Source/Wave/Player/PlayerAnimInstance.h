@@ -18,13 +18,9 @@ protected:
 		float Speed;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		bool IsAttackAnime;
-	//カスタムイベント作成（BPで呼ぶので定義だけしておく）
-	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
-		void HummerCherge();
-	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
-		void HummerAttack();
 
-
+private:
+	UAnimMontage* AnimMontage;
 public:
 	// コンストラクタ
 	UPlayerAnimInstance(const FObjectInitializer& ObjectInitializer);
