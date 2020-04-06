@@ -42,6 +42,8 @@ private:
 		TArray<AActor*> LandStartPoints;
 	UPROPERTY(EditAnywhere)
 		TArray<AActor*> LandEndPoints;
+	UPROPERTY(EditAnywhere)
+		UMaterial *Material;
 
 	TArray<bool> IsLands;
 

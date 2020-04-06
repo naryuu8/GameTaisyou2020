@@ -16,6 +16,8 @@ AWaterSurface::AWaterSurface()
 		for (int xi = 0; xi < SplitVector.X; ++xi)
 		{
 			Vertices.Emplace(0, 0, 0);
+			UV0.Emplace(xi / SplitVector.X, yi / SplitVector.Y);
+			VertexColors.Emplace(0.0f, 0.0f, 100.0f, 100.0f);
 		}
 	}
 
@@ -117,6 +119,7 @@ void AWaterSurface::Tick(float DeltaTime)
 		}
 	}
 
+	Mesh->SetMaterial(0, Material);
 	UpdateMesh();
 }
 
