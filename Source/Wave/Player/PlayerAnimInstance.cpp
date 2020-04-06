@@ -45,15 +45,10 @@ void UPlayerAnimInstance::NativeUninitializeAnimation()
 
 void UPlayerAnimInstance::HummerChergeEvent()
 {
-	//const FName AnimMontageAssetPath(TEXT("AnimMontage'/Game/Main/Player/HummerAttackMontage.HummerAttackMontage'"));
-	//auto AnimMontage = Cast<UAnimMontage>(StaticLoadObject(UObject::StaticClass(), nullptr, TEXT("AnimMontage'/Game/Main/Player/HummerAttackMontage.HummerAttackMontage'")));
-	//
-
-	//////例外エラーが出るので今は封印
+	//アニメモンタージュを参照
 	const FName AnimMontageAssetPath(TEXT("AnimMontage'/Game/Main/Player/HummerAttackMontage.HummerAttackMontage'"));
 
 	UAnimMontage* AnimMontage = Cast<UAnimMontage>(StaticLoadObject(UObject::StaticClass(), nullptr, *AnimMontageAssetPath.ToString()));
-//	UAnimMontage* AnimMontage = LoadObject<UAnimMontage>(NULL, TEXT("/Game/Main/Player/HummerAttackMontage.HummerAttackMontage"), NULL, LOAD_None, NULL);
 	Montage_Play(AnimMontage, 0.4f);
 	Montage_JumpToSection("Charge", AnimMontage);
 	IsAttackAnime = true;
@@ -62,8 +57,8 @@ void UPlayerAnimInstance::HummerChergeEvent()
 
 void UPlayerAnimInstance::HummerAttackEvent()
 {
-	//const FName AnimMontageAssetPath(TEXT("/Game/Main/Player/HummerAttackMontage"));
-	//UAnimMontage* AnimMontage = Cast<UAnimMontage>(StaticLoadObject(UObject::StaticClass(), nullptr, *AnimMontageAssetPath.ToString()));
-	//Montage_Play(AnimMontage,0.4f);
-	//Montage_JumpToSection("Attack");
+	const FName AnimMontageAssetPath(TEXT("AnimMontage'/Game/Main/Player/HummerAttackMontage.HummerAttackMontage'"));
+	UAnimMontage* AnimMontage = Cast<UAnimMontage>(StaticLoadObject(UObject::StaticClass(), nullptr, *AnimMontageAssetPath.ToString()));
+	Montage_Play(AnimMontage,0.4f);
+	Montage_JumpToSection("Attack", AnimMontage);
 }

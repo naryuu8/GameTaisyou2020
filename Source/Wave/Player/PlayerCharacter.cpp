@@ -54,10 +54,25 @@ APlayerCharacter::APlayerCharacter()
 	//AnimInst->GetIsAttackAnime();
 }
 
+void APlayerCharacter::Tick(float DeltaTime)
+{
+	if (!AnimInst)
+	{
+		AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	}
+	//アタックアニメが再生中か確認
+	IsPlayAttackAnime = AnimInst->GetIsAttackAnime();
+	if (IsAttackHold)
+	{//ハンマーを溜めていたら力を足す
+		HammerPower += 0.1f;
+	}
+
+}
+
 //void APlayerCharacter::BeginPlay()
 //{
 //	/*auto* cl = this->GetMesh()->GetAnimClass();
-//	AnimInst = Cast<UPlayerAnimInstance>(this->GetMesh()->GetAnimClass());*/
+	
 //	IsAttackHold = false;
 //
 //	IsPlayAttackAnime = false;
@@ -151,27 +166,32 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 
 void APlayerCharacter::TriggerHammerAttack(void)
 {
-	//if (IsPlayAttackAnime)return;
-
-	//AnimInst->HummerChergeEvent();
-	//IsAttackHold = true;
+	if (IsPlayAttackAnime)return;
+	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimInst->HummerChergeEvent();
+	IsAttackHold = true;
 	
 }
 
 void APlayerCharacter::ReleaseHammerAttack(void)
 {
-//	IsAttackHold = false;
-	//TArray<AActor*> FoundActors;
-	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
+	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimInst->HummerAttackEvent();
+	
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
 
-	//for (auto Actor : FoundActors)
-	//{
-	//	AWaterSurface* water = Cast<AWaterSurface>(Actor);
-	//	if (water)
-	//	{
-	//		water->AddPower(GetActorLocation());
-	//	}
-	//}
+	for (auto Actor : FoundActors)
+	{
+		AWaterSurface* water = Cast<AWaterSurface>(Actor);
+		if (water)
+		{
+			water->AddPower(GetActorLocation());
+		}
+	}
+	IsAttackHold = false;
+	HammerPower = 0.0f;
+	UE_LOG(LogTemp, Error, TEXT("Call"));
 }
 
 void APlayerCharacter::WaterAttack()
