@@ -148,7 +148,7 @@ void APlayerCharacter::TriggerHammerAttack(void)
 	
 }
 
-void  APlayerCharacter::ReleaseHammerAttack(void)
+void APlayerCharacter::ReleaseHammerAttack(void)
 {
 //	IsAttackHold = false;
 	//TArray<AActor*> FoundActors;
@@ -159,7 +159,22 @@ void  APlayerCharacter::ReleaseHammerAttack(void)
 	//	AWaterSurface* water = Cast<AWaterSurface>(Actor);
 	//	if (water)
 	//	{
-	//		water->AddPawer(GetActorLocation());
+	//		water->AddPower(GetActorLocation());
 	//	}
 	//}
+}
+
+void APlayerCharacter::WaterAttack()
+{
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
+
+	for (auto Actor : FoundActors)
+	{
+		AWaterSurface* water = Cast<AWaterSurface>(Actor);
+		if (water)
+		{
+			water->AddPower(GetActorLocation());
+		}
+	}
 }
