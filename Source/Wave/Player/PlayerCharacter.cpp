@@ -30,6 +30,7 @@ APlayerCharacter::APlayerCharacter()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
+	//コンポーネントを作成
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -44,14 +45,23 @@ APlayerCharacter::APlayerCharacter()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 
+}
+
+//void APlayerCharacter::BeginPlay()
+//{
+//
+//
+//}
 
 
-	////プレイヤーアニメをキャスト（現在はC++でアニメを再生出来ないのでやり方だけ書いておく）
-	//const FName AnimMontageAssetPath(TEXT("/Game/Main/Player/PlayerAnimeBP.PlayerAnimeBP_C"));
-	
-	//AnimInst = Cast<UPlayerAnimInstance>(StaticLoadObject(UObject::StaticClass(), nullptr, *AnimMontageAssetPath.ToString()));
+void APlayerCharacter::BeginPlay_C()
+{
+	//現在のBegibPlayはモデルの都合上こちらで書けないので関数で呼ぶ
+	IsAttackHold = false;
 
-	//AnimInst->GetIsAttackAnime();
+	IsPlayAttackAnime = false;
+
+	HammerPower = 0.0f;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -69,17 +79,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 }
 
-//void APlayerCharacter::BeginPlay()
-//{
-//	/*auto* cl = this->GetMesh()->GetAnimClass();
-	
-//	IsAttackHold = false;
-//
-//	IsPlayAttackAnime = false;
-//
-//	HammerPower = 0.0f;
-//}
-//////////////////////////////////////////////////////////////////////////
+
 // Input
 
 void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -104,8 +104,6 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	PlayerInputComponent->BindAxis("TurnRate", this, &APlayerCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &APlayerCharacter::LookUpAtRate);
-
-
 
 }
 
@@ -177,21 +175,9 @@ void APlayerCharacter::ReleaseHammerAttack(void)
 {
 	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInst->HummerAttackEvent();
-	
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
-
-	for (auto Actor : FoundActors)
-	{
-		AWaterSurface* water = Cast<AWaterSurface>(Actor);
-		if (water)
-		{
-			water->AddPower(GetActorLocation());
-		}
-	}
+	WaterAttack();
 	IsAttackHold = false;
 	HammerPower = 0.0f;
-	UE_LOG(LogTemp, Error, TEXT("Call"));
 }
 
 void APlayerCharacter::WaterAttack()
