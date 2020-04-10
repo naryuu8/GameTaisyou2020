@@ -7,5 +7,6 @@
 
 void ACircleLand::DebugDraw()
 {
+	// デバッグ用のサークルを描画(高さや太さは決め打ち）
 	UKismetSystemLibrary::DrawDebugCylinder(this, GetActorLocation(), GetActorLocation() - FVector(0,0,10), Radius, 64, LAND_TYPE_COLORS[GetLandTypeNumber()], 0.0f, 3.0f);
 }

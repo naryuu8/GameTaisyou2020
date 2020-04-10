@@ -6,9 +6,6 @@
 #include "../WaterSurface/LandPoint.h"
 #include "CircleLand.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class WAVE_API ACircleLand : public ALandPoint
 {
@@ -17,6 +14,9 @@ class WAVE_API ACircleLand : public ALandPoint
 public:
 	virtual void DebugDraw() override;
 
+	float GetRadius() { return Radius; }
+
+private:
 	UPROPERTY(EditAnywhere)
-		float Radius = 1.0f;
+		float Radius = 100.0f;
 };

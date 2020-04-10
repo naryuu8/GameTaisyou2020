@@ -5,6 +5,8 @@
 // https://www.nicovideo.jp/watch/sm9470923
 
 #include "WaterSurface.h"
+#include "Kismet/GameplayStatics.h"
+#include "CircleLand.h"
 
 AWaterSurface::AWaterSurface()
 {
@@ -57,6 +59,18 @@ void AWaterSurface::BeginPlay()
 	PrevHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
 	NewHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
 
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACircleLand::StaticClass(), FoundActors);
+
+	for (auto Actor : FoundActors)
+	{
+		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
+		if (CircleLand)
+		{
+			SetCircleLand(CircleLand->GetActorLocation(), CircleLand->GetRadius());
+		}
+	}
+
 	//for (int i = 0; i < CircleLandPoints.Num(); i++)
 	//{
 	//	SetCircleLand(CircleLandPoints[i]->GetActorLocation(), CircleLandPoints[i]->GetRadius());
@@ -69,10 +83,10 @@ void AWaterSurface::BeginPlay()
 	//	SetLand(startPos.X, startPos.Y, endPos.X, endPos.Y);
 	//}
 
-	//if (Material)
-	//{
-	//	Mesh->SetMaterial(0, Material);
-	//}
+	if (Material)
+	{
+		Mesh->SetMaterial(0, Material);
+	}
 
 	UpdateMesh();
 }
@@ -179,7 +193,7 @@ void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius)
 			if ((xp - xc)*(xp - xc) + (yp - yc)*(yp - yc) <= Radius * Radius)
 			{
 				IsLands[CalcIndex(xi, yi)] = true;
-				Vertices[CalcIndex(xi, yi)].Z = 10.0f;
+				Vertices[CalcIndex(xi, yi)].Z = CirclePostion.Z;
 				UV0[CalcIndex(xi, yi)] = FVector2D((xi / SplitVector.X) * 0.5f + 0.5f, (yi / SplitVector.Y));
 			}
 		}
