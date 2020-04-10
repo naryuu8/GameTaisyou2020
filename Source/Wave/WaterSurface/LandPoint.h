@@ -7,20 +7,17 @@
 #include "LandPoint.generated.h"
 
 UENUM()
-enum ELandType
+enum class ELandType
 {
 	Grass,
-	Num
+	Num	UMETA(Hidden)
 };
 
-namespace
+static const FColor LAND_TYPE_COLORS[] =
 {
-	const FColor LAND_TYPE_COLORS[] =
-	{
-		FColor::Green,
-		FColor::Transparent
-	};
-}
+	FColor::Green,
+	FColor::Transparent
+};
 
 UCLASS()
 class WAVE_API ALandPoint : public AActor
@@ -35,11 +32,15 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual bool ShouldTickIfViewportsOnly() const override;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void DrawDebug() {};
+	virtual void DebugDraw() {};
+
+	int GetLandTypeNumber() { return static_cast<int>(LandType.GetValue()); }
 	
 private:
 	UPROPERTY(EditAnywhere)

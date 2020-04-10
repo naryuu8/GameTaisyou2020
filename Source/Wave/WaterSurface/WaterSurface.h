@@ -37,13 +37,13 @@ private:
 	UPROPERTY(EditAnywhere)
 		AActor* EndPoint;
 	UPROPERTY(EditAnywhere)
-		TArray<ACircleLandPoint*> CircleLandPoints;
-	UPROPERTY(EditAnywhere)
-		TArray<AActor*> LandStartPoints;
-	UPROPERTY(EditAnywhere)
-		TArray<AActor*> LandEndPoints;
-	UPROPERTY(EditAnywhere)
 		UMaterial *Material;
+	//UPROPERTY(EditAnywhere)
+	//	TArray<ACircleLandPoint*> CircleLandPoints;
+	//UPROPERTY(EditAnywhere)
+	//	TArray<AActor*> LandStartPoints;
+	//UPROPERTY(EditAnywhere)
+	//	TArray<AActor*> LandEndPoints;
 
 	TArray<bool> IsLands;
 

@@ -5,7 +5,6 @@
 // https://www.nicovideo.jp/watch/sm9470923
 
 #include "WaterSurface.h"
-#include "CircleLandPoint.h"
 
 AWaterSurface::AWaterSurface()
 {
@@ -58,22 +57,22 @@ void AWaterSurface::BeginPlay()
 	PrevHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
 	NewHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
 
-	for (int i = 0; i < CircleLandPoints.Num(); i++)
-	{
-		SetCircleLand(CircleLandPoints[i]->GetActorLocation(), CircleLandPoints[i]->GetRadius());
-	}
+	//for (int i = 0; i < CircleLandPoints.Num(); i++)
+	//{
+	//	SetCircleLand(CircleLandPoints[i]->GetActorLocation(), CircleLandPoints[i]->GetRadius());
+	//}
 
-	for (int i = 0; i < LandStartPoints.Num(); i++)
-	{
-		FVector2D startPos = LocationToVertices(LandStartPoints[i]->GetActorLocation());
-		FVector2D endPos = LocationToVertices(LandEndPoints[i]->GetActorLocation());
-		SetLand(startPos.X, startPos.Y, endPos.X, endPos.Y);
-	}
+	//for (int i = 0; i < LandStartPoints.Num(); i++)
+	//{
+	//	FVector2D startPos = LocationToVertices(LandStartPoints[i]->GetActorLocation());
+	//	FVector2D endPos = LocationToVertices(LandEndPoints[i]->GetActorLocation());
+	//	SetLand(startPos.X, startPos.Y, endPos.X, endPos.Y);
+	//}
 
-	if (Material)
-	{
-		Mesh->SetMaterial(0, Material);
-	}
+	//if (Material)
+	//{
+	//	Mesh->SetMaterial(0, Material);
+	//}
 
 	UpdateMesh();
 }
