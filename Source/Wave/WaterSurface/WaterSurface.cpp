@@ -129,7 +129,7 @@ void AWaterSurface::Tick(float DeltaTime)
 	{
 		for (int xi = 0; xi < SplitVector.Y; ++xi)
 		{
-		//	if(!IsLands[CalcIndex(xi,yi)])
+			if(!IsLands[CalcIndex(xi,yi)])
 				Vertices[CalcIndex(xi,yi)].Z += CurrentHeights[CalcIndex(xi,yi)];
 		}
 	}
