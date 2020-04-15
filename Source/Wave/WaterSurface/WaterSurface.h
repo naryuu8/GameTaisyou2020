@@ -19,6 +19,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void CreateWave(int32 x, int32 y);
 	void SetCircleLand(FVector CirclePostion, float Radius);
+	void SetSquareLand(FVector SquareLocation, float XLength, float YLength);
 	void SetLand(int32 sx, int32 sy, int32 ex, int32 ey);
 	void AddPower(FVector worldPos);
 
