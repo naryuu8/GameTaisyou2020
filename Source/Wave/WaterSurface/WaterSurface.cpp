@@ -5,7 +5,9 @@
 // https://www.nicovideo.jp/watch/sm9470923
 
 #include "WaterSurface.h"
-#include "CircleLandPoint.h"
+#include "Kismet/GameplayStatics.h"
+#include "CircleLand.h"
+#include "SquareLand.h"
 
 AWaterSurface::AWaterSurface()
 {
@@ -58,16 +60,25 @@ void AWaterSurface::BeginPlay()
 	PrevHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
 	NewHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
 
-	for (int i = 0; i < CircleLandPoints.Num(); i++)
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALandPoint::StaticClass(), FoundActors);
+
+	for (auto Actor : FoundActors)
 	{
-		SetCircleLand(CircleLandPoints[i]->GetActorLocation(), CircleLandPoints[i]->GetRadius());
+		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
+		if (CircleLand)
+		{
+			SetCircleLand(CircleLand->GetActorLocation(), CircleLand->GetRadius());
+		}
 	}
 
-	for (int i = 0; i < LandStartPoints.Num(); i++)
+	for (auto Actor : FoundActors)
 	{
-		FVector2D startPos = LocationToVertices(LandStartPoints[i]->GetActorLocation());
-		FVector2D endPos = LocationToVertices(LandEndPoints[i]->GetActorLocation());
-		SetLand(startPos.X, startPos.Y, endPos.X, endPos.Y);
+		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
+		if (SquareLand)
+		{
+			SetSquareLand(SquareLand->GetActorLocation(), SquareLand->GetXLength(), SquareLand->GetYLength());
+		}
 	}
 
 	if (Material)
@@ -180,9 +191,32 @@ void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius)
 			if ((xp - xc)*(xp - xc) + (yp - yc)*(yp - yc) <= Radius * Radius)
 			{
 				IsLands[CalcIndex(xi, yi)] = true;
-				Vertices[CalcIndex(xi, yi)].Z = 10.0f;
+				Vertices[CalcIndex(xi, yi)].Z = CirclePostion.Z;
 				UV0[CalcIndex(xi, yi)] = FVector2D((xi / SplitVector.X) * 0.5f + 0.5f, (yi / SplitVector.Y));
 			}
+		}
+	}
+}
+
+void AWaterSurface::SetSquareLand(FVector SquareLocation, float XLength, float YLength)
+{
+	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
+	{
+		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
+		{
+			float xp = Vertices[CalcIndex(xi, yi)].X;
+			float yp = Vertices[CalcIndex(xi, yi)].Y;
+			float xs = SquareLocation.X;
+			float ys = SquareLocation.Y;
+
+			if (xp > xs + XLength * 0.5f) continue;
+			if (xp < xs - XLength * 0.5f) continue;
+			if (yp > ys + YLength * 0.5f) continue;
+			if (yp < ys - YLength * 0.5f) continue;
+
+			IsLands[CalcIndex(xi, yi)] = true;
+			Vertices[CalcIndex(xi, yi)].Z = SquareLocation.Z;
+			UV0[CalcIndex(xi, yi)] = FVector2D((xi / SplitVector.X) * 0.5f + 0.5f, (yi / SplitVector.Y));
 		}
 	}
 }
