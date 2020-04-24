@@ -175,12 +175,27 @@ void APlayerCharacter::ReleaseHammerAttack(void)
 {
 	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInst->HummerAttackEvent();
-	WaterAttack();
+//	WaterAttack();
 	IsAttackHold = false;
 	HammerPower = 0.0f;
 }
 
 void APlayerCharacter::WaterAttack()
+{
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
+	
+	for (auto Actor : FoundActors)
+	{
+		AWaterSurface* water = Cast<AWaterSurface>(Actor);
+		if (water)
+		{
+			water->AddPower(GetActorLocation());
+		}
+	}
+}
+
+void APlayerCharacter::WaterAttack2(FVector position)
 {
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
@@ -190,7 +205,7 @@ void APlayerCharacter::WaterAttack()
 		AWaterSurface* water = Cast<AWaterSurface>(Actor);
 		if (water)
 		{
-			water->AddPower(GetActorLocation());
+			water->AddPower(position);
 		}
 	}
 }

@@ -54,10 +54,7 @@ protected:
 	void TurnAtRate(float Rate);
 
 	void LookUpAtRate(float Rate);
-	//キーを押したときのハンマー攻撃
-	void TriggerHammerAttack(void);
-	//キーを離したときのハンマー攻撃
-	void ReleaseHammerAttack(void);
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -74,6 +71,14 @@ protected:
 	//ハンマーパワー変数
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 	float HammerPower;
+
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+	void TriggerHammerAttack();
+	//キーを離したときのハンマー攻撃
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+	void ReleaseHammerAttack();
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+	void WaterAttack2(FVector position);
 private:
 	UPlayerAnimInstance* AnimInst;
 	//水面に波をたてる
