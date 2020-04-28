@@ -36,7 +36,7 @@ void AWaveSpawner::Tick(float DeltaTime)
 			AWaterSurface* water = Cast<AWaterSurface>(Actor);
 			if (water)
 			{
-				water->AddPower(GetActorLocation());
+				water->AddPower(GetActorLocation(),100.0f);
 			}
 		}
 		FrameCounter = 0;

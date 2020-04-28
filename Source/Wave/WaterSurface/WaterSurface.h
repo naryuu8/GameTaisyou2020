@@ -17,13 +17,17 @@ public:
 	AWaterSurface();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	void CreateWave(int32 x, int32 y);
+	void AddPower(FVector worldPos, float pawer);
+	FVector GetWavePower(FVector worldPos);
+	float GetWaveSpeed() { return WaveSpeed; }
+	bool IsLand(FVector worldPos);
+
+private:
+	void CreateWave(int32 x, int32 y, float pawer);
 	void SetCircleLand(FVector CirclePostion, float Radius);
 	void SetSquareLand(FVector SquareLocation, float XLength, float YLength);
 	void SetLand(int32 sx, int32 sy, int32 ex, int32 ey);
-	void AddPower(FVector worldPos);
 
-private:
 	int32 CalcIndex(int32 x, int32 y);
 	FVector2D LocationToVertices(FVector Location);
 
@@ -39,10 +43,10 @@ private:
 		AActor* EndPoint;
 	UPROPERTY(EditAnywhere)
 		UMaterialInterface *Material;
-	//UPROPERTY(EditAnywhere)
-	//	TArray<AActor*> LandStartPoints;
-	//UPROPERTY(EditAnywhere)
-	//	TArray<AActor*> LandEndPoints;
+	UPROPERTY(EditAnywhere)
+		float Decay = 0.1f;
+	UPROPERTY(EditAnywhere)
+		float WaveSpeed = 1.0f;
 
 	TArray<bool> IsLands;
 

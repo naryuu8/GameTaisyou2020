@@ -93,7 +93,10 @@ void AWaterSurface::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	float c = (DeltaTime * 10.0f) * (DeltaTime * 10.0f);
+	float DeltaSpeed = WaveSpeed / 60;
+
+	float c = 2.0f;
+	float mul = DeltaSpeed * DeltaSpeed * c * c / (SplitVector.X * SplitVector.Y) * (SplitVector.X * SplitVector.Y);
 	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
 	{
 		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
@@ -108,10 +111,9 @@ void AWaterSurface::Tick(float DeltaTime)
 			float u_pre = PrevHeights[index];
 			float u = CurrentHeights[index];
 
-			float k = 0.1f;
-			float damp = -k * DeltaTime * (u - u_pre);
+			float damp = Decay * DeltaSpeed * (u - u_pre);
 
-			NewHeights[index] = (2.0f * u) + (c * (uL + uR + uT + uB - (4.0f * u))) - u_pre + damp;
+			NewHeights[index] = u + u - u_pre + (mul * (uL + uR + uT + uB - (4.0f * u))) - damp;
 		}
 	}
 
@@ -130,19 +132,19 @@ void AWaterSurface::Tick(float DeltaTime)
 		for (int xi = 0; xi < SplitVector.Y; ++xi)
 		{
 			if(!IsLands[CalcIndex(xi,yi)])
-				Vertices[CalcIndex(xi,yi)].Z += CurrentHeights[CalcIndex(xi,yi)];
+				Vertices[CalcIndex(xi,yi)].Z = CurrentHeights[CalcIndex(xi,yi)];
 		}
 	}
 
 	UpdateMesh();
 }
 
-void AWaterSurface::CreateWave(int32 x, int32 y)
+void AWaterSurface::CreateWave(int32 x, int32 y, float power)
 {
 	// ƒKƒEƒX‰‰ŽZ
-	auto gauss = [](float x, float sigma)
+	auto gauss = [](float distance, float sigma)
 	{
-		return 1.0f / sqrt(PI * 2) * sigma * exp(-x * x / (2.0f * sigma * sigma));
+		return 1.0f / sqrt(PI * 2) * sigma * exp(-distance * distance / (2.0f * sigma * sigma));
 	};
 
 	FVector2D wv = FVector2D(x, y);
@@ -157,7 +159,7 @@ void AWaterSurface::CreateWave(int32 x, int32 y)
 			FVector2D v = FVector2D(xi, yi);
 
 			float norm = FVector2D::Distance(v, wv);
-			value += gauss(norm, 1.0f) * 100.0f;
+			value += gauss(norm, 3.0f) * power;
 
 			CurrentHeights[index] += value;
 			PrevHeights[index] += value;
@@ -234,10 +236,44 @@ void AWaterSurface::SetLand(int32 sx, int32 sy, int32 ex, int32 ey)
 	}
 }
 
-void AWaterSurface::AddPower(FVector worldPos)
+void AWaterSurface::AddPower(FVector worldPos, float power = 100.0f)
 {
 	int32 WaveX = worldPos.X / X_Size;
 	int32 WaveY = worldPos.Y / Y_Size;
 
-	CreateWave(WaveX, WaveY);
+	//if (WaveX <= 0) return;
+	//if (WaveX > SplitVector.X) return;
+	//if (WaveY <= 0) return;
+	//if (WaveY > SplitVector.Y) return;
+
+	CreateWave(WaveX, WaveY, power);
+}
+
+FVector AWaterSurface::GetWavePower(FVector worldPos)
+{
+	int32 WaveX = worldPos.X / X_Size;
+	int32 WaveY = worldPos.Y / Y_Size;
+
+	//if (WaveX <= 0) return FVector::ZeroVector;
+	//if (WaveX > SplitVector.X) return FVector::ZeroVector;
+	//if (WaveY <= 0) return FVector::ZeroVector;
+	//if (WaveY > SplitVector.Y) return FVector::ZeroVector;
+	
+	float uL = CurrentHeights[CalcIndex(WaveX - 1, WaveY)];
+	float uR = CurrentHeights[CalcIndex(WaveX + 1, WaveY)];
+	float uT = CurrentHeights[CalcIndex(WaveX, WaveY - 1)];
+	float uB = CurrentHeights[CalcIndex(WaveX, WaveY + 1)];
+
+	float x = uL - uR;
+	float y = uT - uB;
+
+	return FVector(x, y, 0);
+}
+
+bool AWaterSurface::IsLand(FVector worldPos)
+{
+	int32 WaveX = worldPos.X / X_Size;
+	int32 WaveY = worldPos.Y / Y_Size;
+
+	return (IsLands[CalcIndex(WaveX, WaveY)]);
 }

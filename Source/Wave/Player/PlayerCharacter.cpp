@@ -190,7 +190,7 @@ void APlayerCharacter::WaterAttack()
 		AWaterSurface* water = Cast<AWaterSurface>(Actor);
 		if (water)
 		{
-			water->AddPower(GetActorLocation());
+			water->AddPower(GetActorLocation(), HammerPower * 100.0f);
 		}
 	}
 }
