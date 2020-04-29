@@ -22,7 +22,7 @@ AWaterSurface::AWaterSurface()
 		}
 	}
 
-	IsLands.Init(false, Vertices.Num());
+	IsLand.Init(false, Vertices.Num());
 
 	for (int yi = 0; yi < SplitVector.Y - 1; yi++)
 	{
@@ -131,7 +131,7 @@ void AWaterSurface::Tick(float DeltaTime)
 	{
 		for (int xi = 0; xi < SplitVector.Y; ++xi)
 		{
-			if(!IsLands[CalcIndex(xi,yi)])
+			if(!IsLand[CalcIndex(xi,yi)])
 				Vertices[CalcIndex(xi,yi)].Z = CurrentHeights[CalcIndex(xi,yi)];
 		}
 	}
@@ -192,7 +192,7 @@ void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius)
 			float yc = CirclePostion.Y;
 			if ((xp - xc)*(xp - xc) + (yp - yc)*(yp - yc) <= Radius * Radius)
 			{
-				IsLands[CalcIndex(xi, yi)] = true;
+				IsLand[CalcIndex(xi, yi)] = true;
 				Vertices[CalcIndex(xi, yi)].Z = CirclePostion.Z;
 				UV0[CalcIndex(xi, yi)] = FVector2D((xi / SplitVector.X) * 0.5f + 0.5f, (yi / SplitVector.Y));
 			}
@@ -216,7 +216,7 @@ void AWaterSurface::SetSquareLand(FVector SquareLocation, float XLength, float Y
 			if (yp > ys + YLength * 0.5f) continue;
 			if (yp < ys - YLength * 0.5f) continue;
 
-			IsLands[CalcIndex(xi, yi)] = true;
+			IsLand[CalcIndex(xi, yi)] = true;
 			Vertices[CalcIndex(xi, yi)].Z = SquareLocation.Z;
 			UV0[CalcIndex(xi, yi)] = FVector2D((xi / SplitVector.X) * 0.5f + 0.5f, (yi / SplitVector.Y));
 		}
@@ -229,7 +229,7 @@ void AWaterSurface::SetLand(int32 sx, int32 sy, int32 ex, int32 ey)
 	{
 		for (int yi = sy; yi < ey; ++yi)
 		{
-			IsLands[CalcIndex(xi, yi)] = true;
+			IsLand[CalcIndex(xi, yi)] = true;
 			Vertices[CalcIndex(xi, yi)].Z = 10.0f;
 			UV0[CalcIndex(xi, yi)] = FVector2D((xi / SplitVector.X) * 0.5f + 0.5f, (yi / SplitVector.Y));
 		}
@@ -270,10 +270,37 @@ FVector AWaterSurface::GetWavePower(FVector worldPos)
 	return FVector(x, y, 0);
 }
 
-bool AWaterSurface::IsLand(FVector worldPos)
+FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
 {
-	int32 WaveX = worldPos.X / X_Size;
-	int32 WaveY = worldPos.Y / Y_Size;
+	if (IsLand[CalcIndex(worldPos.X / X_Size, worldPos.Y / Y_Size)]) return worldPos;
 
-	return (IsLands[CalcIndex(WaveX, WaveY)]);
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALandPoint::StaticClass(), FoundActors);
+
+	for (auto Actor : FoundActors)
+	{
+		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
+		if (!CircleLand) continue;
+
+		float distance = FVector::Distance(worldPos, CircleLand->GetActorLocation());
+		float judgDistance = circleRadius + CircleLand->GetRadius();
+		float landingDistance = judgDistance - distance;
+		if (landingDistance <= 0) continue;
+
+		FVector outDirection = worldPos - CircleLand->GetActorLocation();
+		outDirection.Z = 0;
+		outDirection.Normalize();
+
+		worldPos = worldPos + outDirection * landingDistance;
+
+		if (IsLand[CalcIndex(worldPos.X / X_Size, worldPos.Y / Y_Size)]) return worldPos;
+	}
+
+	for (auto Actor : FoundActors)
+	{
+		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
+		if (!SquareLand) continue;
+	}
+
+	return worldPos;
 }

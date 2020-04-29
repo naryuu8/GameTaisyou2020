@@ -20,7 +20,7 @@ public:
 	void AddPower(FVector worldPos, float pawer);
 	FVector GetWavePower(FVector worldPos);
 	float GetWaveSpeed() { return WaveSpeed; }
-	bool IsLand(FVector worldPos);
+	FVector GetOutLandPos(FVector worldPos, float circleRadius);
 
 private:
 	void CreateWave(int32 x, int32 y, float pawer);
@@ -48,7 +48,7 @@ private:
 	UPROPERTY(EditAnywhere)
 		float WaveSpeed = 1.0f;
 
-	TArray<bool> IsLands;
+	TArray<bool> IsLand;
 
 	TArray<float> CurrentHeights;
 	TArray<float> PrevHeights;

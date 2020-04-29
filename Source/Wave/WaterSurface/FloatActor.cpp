@@ -28,9 +28,5 @@ void AFloatActor::Tick(float DeltaTime)
 
 	FVector MovedLocation = GetActorLocation() + WaterSurface->GetWavePower(GetActorLocation()) * WaterSurface->GetWaveSpeed();
 
-	if (!WaterSurface->IsLand(MovedLocation))
-		SetActorLocation(MovedLocation);
-	else
-		SetActorLocation(GetActorLocation() - WaterSurface->GetWavePower(GetActorLocation()) * WaterSurface->GetWaveSpeed());
+	SetActorLocation(WaterSurface->GetOutLandPos(MovedLocation, 100.0f));
 }
-
