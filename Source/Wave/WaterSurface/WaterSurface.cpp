@@ -300,6 +300,26 @@ FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
 	{
 		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
 		if (!SquareLand) continue;
+
+		FVector vec = FVector::ZeroVector;
+		OBB2D obb = SquareLand->GetOBB();
+		for (int i = 0; i < 2; i++)
+		{
+			float length = obb.GetLength(i);
+			if (length <= 0) continue;
+			float dot = FVector::DotProduct(worldPos - obb.GetPosition(), obb.GetDirecton(i)) / length;
+			dot = fabs(dot);
+			if (dot > 1)
+				vec += (1 - dot) * length * obb.GetDirecton(i);
+		}
+
+		if (vec.Size() >= circleRadius) continue;
+
+		worldPos = worldPos + vec;
+		UE_LOG(LogTemp, Log, TEXT("X=%f"), vec.X);
+		UE_LOG(LogTemp, Log, TEXT("Y=%f"), vec.Y);
+
+		if (IsLand[CalcIndex(worldPos.X / X_Size, worldPos.Y / Y_Size)]) return worldPos;
 	}
 
 	return worldPos;
