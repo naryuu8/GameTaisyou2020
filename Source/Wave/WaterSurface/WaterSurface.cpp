@@ -22,7 +22,7 @@ AWaterSurface::AWaterSurface()
 		}
 	}
 
-	IsLand.Init(false, Vertices.Num());
+	IsLands.Init(false, Vertices.Num());
 
 	for (int yi = 0; yi < SplitVector.Y - 1; yi++)
 	{
@@ -131,7 +131,7 @@ void AWaterSurface::Tick(float DeltaTime)
 	{
 		for (int xi = 0; xi < SplitVector.Y; ++xi)
 		{
-			if(!IsLand[CalcIndex(xi,yi)])
+			if(!IsLands[CalcIndex(xi,yi)])
 				Vertices[CalcIndex(xi,yi)].Z = CurrentHeights[CalcIndex(xi,yi)];
 		}
 	}
@@ -192,7 +192,7 @@ void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius)
 			float yc = CirclePostion.Y;
 			if ((xp - xc)*(xp - xc) + (yp - yc)*(yp - yc) <= Radius * Radius)
 			{
-				IsLand[CalcIndex(xi, yi)] = true;
+				IsLands[CalcIndex(xi, yi)] = true;
 				Vertices[CalcIndex(xi, yi)].Z = CirclePostion.Z;
 				UV0[CalcIndex(xi, yi)] = FVector2D((xi / SplitVector.X) * 0.5f + 0.5f, (yi / SplitVector.Y));
 			}
@@ -216,7 +216,7 @@ void AWaterSurface::SetSquareLand(FVector SquareLocation, float XLength, float Y
 			if (yp > ys + YLength * 0.5f) continue;
 			if (yp < ys - YLength * 0.5f) continue;
 
-			IsLand[CalcIndex(xi, yi)] = true;
+			IsLands[CalcIndex(xi, yi)] = true;
 			Vertices[CalcIndex(xi, yi)].Z = SquareLocation.Z;
 			UV0[CalcIndex(xi, yi)] = FVector2D((xi / SplitVector.X) * 0.5f + 0.5f, (yi / SplitVector.Y));
 		}
@@ -229,7 +229,7 @@ void AWaterSurface::SetLand(int32 sx, int32 sy, int32 ex, int32 ey)
 	{
 		for (int yi = sy; yi < ey; ++yi)
 		{
-			IsLand[CalcIndex(xi, yi)] = true;
+			IsLands[CalcIndex(xi, yi)] = true;
 			Vertices[CalcIndex(xi, yi)].Z = 10.0f;
 			UV0[CalcIndex(xi, yi)] = FVector2D((xi / SplitVector.X) * 0.5f + 0.5f, (yi / SplitVector.Y));
 		}
@@ -246,18 +246,20 @@ void AWaterSurface::AddPower(FVector worldPos, float power = 100.0f)
 	//if (WaveY <= 0) return;
 	//if (WaveY > SplitVector.Y) return;
 
-	CreateWave(WaveX, WaveY, power);
+	CreateWave(WaveX, WaveY, -power);
 }
 
 FVector AWaterSurface::GetWavePower(FVector worldPos)
 {
+	if (!IsInWater(worldPos)) return FVector::ZeroVector;
+
 	int32 WaveX = worldPos.X / X_Size;
 	int32 WaveY = worldPos.Y / Y_Size;
 
-	//if (WaveX <= 0) return FVector::ZeroVector;
-	//if (WaveX > SplitVector.X) return FVector::ZeroVector;
-	//if (WaveY <= 0) return FVector::ZeroVector;
-	//if (WaveY > SplitVector.Y) return FVector::ZeroVector;
+	if (WaveX <= 1) return FVector::ZeroVector;
+	if (WaveY <= 1) return FVector::ZeroVector;
+	if (WaveX >= SplitVector.X - 2) return FVector::ZeroVector;
+	if (WaveY >= SplitVector.Y - 2) return FVector::ZeroVector;
 	
 	float uL = CurrentHeights[CalcIndex(WaveX - 1, WaveY)];
 	float uR = CurrentHeights[CalcIndex(WaveX + 1, WaveY)];
@@ -272,7 +274,7 @@ FVector AWaterSurface::GetWavePower(FVector worldPos)
 
 FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
 {
-	if (IsLand[CalcIndex(worldPos.X / X_Size, worldPos.Y / Y_Size)]) return worldPos;
+	if (!IsInWater(worldPos)) return worldPos;
 
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALandPoint::StaticClass(), FoundActors);
@@ -293,7 +295,7 @@ FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
 
 		worldPos = worldPos + outDirection * landingDistance;
 
-		if (IsLand[CalcIndex(worldPos.X / X_Size, worldPos.Y / Y_Size)]) return worldPos;
+		if (!IsInWater(worldPos)) return worldPos;
 	}
 
 	for (auto Actor : FoundActors)
@@ -319,8 +321,21 @@ FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
 		UE_LOG(LogTemp, Log, TEXT("X=%f"), vec.X);
 		UE_LOG(LogTemp, Log, TEXT("Y=%f"), vec.Y);
 
-		if (IsLand[CalcIndex(worldPos.X / X_Size, worldPos.Y / Y_Size)]) return worldPos;
+		if (!IsInWater(worldPos)) return worldPos;
 	}
 
 	return worldPos;
+}
+
+bool AWaterSurface::IsInWater(FVector worldPos)
+{
+	int32 WaveX = worldPos.X / X_Size;
+	int32 WaveY = worldPos.Y / Y_Size;
+
+	int index = CalcIndex(WaveX, WaveY);
+
+	if (index <= 0) return false;
+	if (index >= IsLands.Num()) return false;
+
+	return true;
 }

@@ -21,6 +21,7 @@ public:
 	FVector GetWavePower(FVector worldPos);
 	float GetWaveSpeed() { return WaveSpeed; }
 	FVector GetOutLandPos(FVector worldPos, float circleRadius);
+	bool IsInWater(FVector worldPos);
 
 private:
 	void CreateWave(int32 x, int32 y, float pawer);
@@ -48,7 +49,7 @@ private:
 	UPROPERTY(EditAnywhere)
 		float WaveSpeed = 1.0f;
 
-	TArray<bool> IsLand;
+	TArray<bool> IsLands;
 
 	TArray<float> CurrentHeights;
 	TArray<float> PrevHeights;
