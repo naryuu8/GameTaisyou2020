@@ -256,10 +256,10 @@ FVector AWaterSurface::GetWavePower(FVector worldPos)
 	int32 WaveX = worldPos.X / X_Size;
 	int32 WaveY = worldPos.Y / Y_Size;
 
-	if (WaveX <= 1) return FVector::ZeroVector;
-	if (WaveY <= 1) return FVector::ZeroVector;
-	if (WaveX >= SplitVector.X - 2) return FVector::ZeroVector;
-	if (WaveY >= SplitVector.Y - 2) return FVector::ZeroVector;
+	if (WaveX <= 2) return FVector::ZeroVector;
+	if (WaveY <= 2) return FVector::ZeroVector;
+	if (WaveX >= SplitVector.X - 3) return FVector::ZeroVector;
+	if (WaveY >= SplitVector.Y - 3) return FVector::ZeroVector;
 	
 	float uL = CurrentHeights[CalcIndex(WaveX - 1, WaveY)];
 	float uR = CurrentHeights[CalcIndex(WaveX + 1, WaveY)];
