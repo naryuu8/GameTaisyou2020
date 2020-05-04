@@ -5,10 +5,13 @@
 #include "CoreMinimal.h"
 
 // 足りない関数を補足するクラス
+//----------------------------------------------------
+// 共通する関数で追加したいものがあればご自由にどうぞ
+//----------------------------------------------------
 
 class WAVE_API MyFunc
 {
 public:
 	// クオータニオンをAxisとAngleから生成する
-	static FQuat SetAxisAngle(const FVector & axis, float angle);
+	static FQuat FromAxisAngleToQuaternion(const FVector & axis, float angle);
 };

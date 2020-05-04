@@ -6,23 +6,26 @@
 //入力クラスへのインスタンス
 static AInputManager* InputManagerInstance = nullptr;
 
-// Sets default values
 AInputManager::AInputManager()
 {
-	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.TickGroup = TG_LastDemotable;	// 更新グループを一番最後に登録する
 }
 
-// Called when the game starts or when spawned
+AInputManager::~AInputManager()
+{
+	InputManagerInstance = nullptr;
+}
+
 void AInputManager::BeginPlay()
 {
 	Super::BeginPlay();
 	InputManagerInstance = this;
 }
 
-AInputManager * AInputManager::GetInstance()
+const AInputManager * AInputManager::GetInstance()
 {
-	check(InputManagerInstance);
+	//check(InputManagerInstance);
 	return InputManagerInstance;
 }
 
@@ -31,7 +34,6 @@ void AInputManager::Tick(float DeltaTime)
 	State.Attack.Refresh();
 }
 
-// Called to bind functionality to input
 void AInputManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);

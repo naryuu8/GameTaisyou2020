@@ -10,7 +10,7 @@
 #include "../WaterSurface/WaterSurface.h"
 #include "Kismet/GameplayStatics.h"
 
-#include "../Camera/GameCamera.h"
+#include "../Camera/GameCameraActor.h"
 #include "../InputManager.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -74,11 +74,12 @@ void APlayerCharacter::Tick(float DeltaTime)
 		AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	}
 
-	const InputState * input = AInputManager::GetInstance()->GetState();
-	if (input)
+	const AInputManager * inputManager = AInputManager::GetInstance();
+	if (inputManager)
 	{
+		const InputState * input = inputManager->GetState();
 		if (input->Attack.IsPress) TriggerHammerAttack();
-		if (input->Attack.IsRelease) ReleaseHammerAttack();
+		else if (input->Attack.IsRelease) ReleaseHammerAttack();
 
 		MoveForward(input->LeftStick.Vertical);
 		MoveRight(input->LeftStick.Horizontal);
@@ -139,6 +140,7 @@ void APlayerCharacter::MoveForward(float Value)
 	if ((FollowCamera != NULL) && (Value != 0.0f))
 	{
 		FVector Direction = FollowCamera->GetActorForwardVector();
+		if (FMath::Abs(Direction.Z) > 0.9f){ Direction = FollowCamera->GetActorUpVector(); } // ƒJƒƒ‰‚ª^ã‚É‚ ‚é‚É‚à‘Î‰
 		Direction.Z = 0.0f; Direction.Normalize();
 		AddMovementInput(Direction, Value);
 	}

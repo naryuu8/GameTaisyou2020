@@ -61,10 +61,11 @@ class WAVE_API AInputManager : public APawn
 {
 	GENERATED_BODY()
 
-		InputState State;
+	InputState State;
 public:
 	// Sets default values for this pawn's properties
 	AInputManager();
+	~AInputManager();
 
 protected:
 	// Called when the game starts or when spawned
@@ -72,9 +73,9 @@ protected:
 
 public:
 	// インスタンスを取得する
-	static AInputManager* GetInstance();
+	static const AInputManager* GetInstance();
 
-	const InputState * GetState() { return &State; };
+	const InputState * GetState() const { return &State; };
 
 private:
 

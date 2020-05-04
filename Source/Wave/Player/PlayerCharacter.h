@@ -23,7 +23,7 @@ class APlayerCharacter : public ACharacter
 		//class UCameraComponent* FollowCamera;
 
 		UPROPERTY(EditAnywhere, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		class AGameCamera* FollowCamera;
+		class AGameCameraActor* FollowCamera;
 
 public:
 	APlayerCharacter();

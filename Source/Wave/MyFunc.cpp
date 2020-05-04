@@ -4,7 +4,7 @@
 #include "MyFunc.h"
 
 // Ž²( axis ) ‰ñ“]Šp“x( angle( ƒ‰ƒWƒAƒ“Šp ) )
-FQuat MyFunc::SetAxisAngle(const FVector & axis, float angle)
+FQuat MyFunc::FromAxisAngleToQuaternion(const FVector & axis, float angle)
 {
 	FQuat q;
 	float t = FMath::Sin(angle / 2);
