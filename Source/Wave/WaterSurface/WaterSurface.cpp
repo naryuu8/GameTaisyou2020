@@ -18,6 +18,7 @@ AWaterSurface::AWaterSurface()
 		for (int xi = 0; xi < SplitVector.X; ++xi)
 		{
 			Vertices.Emplace(0, 0, 0);
+			VertexColors.Emplace(WaterColor);
 			UV0.Emplace((xi / SplitVector.X) * 0.5f , (yi / SplitVector.Y));
 		}
 	}
@@ -133,6 +134,11 @@ void AWaterSurface::Tick(float DeltaTime)
 		{
 			if(!IsLands[CalcIndex(xi,yi)])
 				Vertices[CalcIndex(xi,yi)].Z = CurrentHeights[CalcIndex(xi,yi)];
+
+			if (Vertices[CalcIndex(xi, yi)].Z > MaxWaveHight)
+				Vertices[CalcIndex(xi, yi)].Z = MaxWaveHight;
+
+			VertexColors[CalcIndex(xi, yi)] = FLinearColor::LerpUsingHSV(WaterColor, WaveColor, Vertices[CalcIndex(xi, yi)].Z / MaxWaveHight);
 		}
 	}
 
@@ -246,7 +252,7 @@ void AWaterSurface::AddPower(FVector worldPos, float power = 100.0f)
 	//if (WaveY <= 0) return;
 	//if (WaveY > SplitVector.Y) return;
 
-	CreateWave(WaveX, WaveY, -power);
+	CreateWave(WaveX, WaveY, power);
 }
 
 FVector AWaterSurface::GetWavePower(FVector worldPos)
@@ -274,7 +280,8 @@ FVector AWaterSurface::GetWavePower(FVector worldPos)
 
 FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
 {
-	if (!IsInWater(worldPos)) return worldPos;
+	if (!IsLand(worldPos)) return worldPos;
+	UE_LOG(LogTemp, Log, TEXT("In Land"));	
 
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALandPoint::StaticClass(), FoundActors);
@@ -295,7 +302,7 @@ FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
 
 		worldPos = worldPos + outDirection * landingDistance;
 
-		if (!IsInWater(worldPos)) return worldPos;
+		if (!IsLand(worldPos)) return worldPos;
 	}
 
 	for (auto Actor : FoundActors)
@@ -303,7 +310,8 @@ FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
 		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
 		if (!SquareLand) continue;
 
-		FVector vec = FVector::ZeroVector;
+		FVector judgVec = FVector::ZeroVector;
+		FVector moveVec = FVector::ZeroVector;
 		OBB2D obb = SquareLand->GetOBB();
 		for (int i = 0; i < 2; i++)
 		{
@@ -312,19 +320,71 @@ FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
 			float dot = FVector::DotProduct(worldPos - obb.GetPosition(), obb.GetDirecton(i)) / length;
 			dot = fabs(dot);
 			if (dot > 1)
-				vec += (1 - dot) * length * obb.GetDirecton(i);
+				judgVec += (1 - dot) * obb.GetDirecton(i) * length;
+
+			if ((dot - 1) * length <= circleRadius)
+				moveVec += obb.GetDirecton(i) * (((dot - 1) * length) - circleRadius);
+
 		}
 
-		if (vec.Size() >= circleRadius) continue;
+		if (judgVec.Size() >= circleRadius) continue;
 
-		worldPos = worldPos + vec;
-		UE_LOG(LogTemp, Log, TEXT("X=%f"), vec.X);
-		UE_LOG(LogTemp, Log, TEXT("Y=%f"), vec.Y);
+		moveVec.Y = 0;
+		worldPos = worldPos + moveVec;
 
-		if (!IsInWater(worldPos)) return worldPos;
+		if (!IsLand(worldPos)) return worldPos;
 	}
 
 	return worldPos;
+}
+
+FVector AWaterSurface::AdjustMoveInWater(FVector actorPos, FVector moveVec, float circleRadius)
+{
+	FVector movedPos = actorPos + moveVec;
+	if (!IsLand(movedPos)) return movedPos;
+	UE_LOG(LogTemp, Log, TEXT("In Land"));
+
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALandPoint::StaticClass(), FoundActors);
+
+	for (auto Actor : FoundActors)
+	{
+		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
+		if (!CircleLand) continue;
+		UE_LOG(LogTemp, Log, TEXT("Calc CircleLand"));
+
+		float distance = FVector::Distance(movedPos, CircleLand->GetActorLocation());
+		float judgDistance = circleRadius + CircleLand->GetRadius();
+		float landingDistance = judgDistance - distance;
+		if (landingDistance <= 0) continue;
+
+		FVector outDirection = movedPos - CircleLand->GetActorLocation();
+		outDirection.Z = 0;
+		outDirection.Normalize();
+
+		movedPos = movedPos + outDirection * landingDistance;
+
+		if (!IsLand(movedPos)) return movedPos;
+	}
+
+	for (auto Actor : FoundActors)
+	{
+		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
+		if (!SquareLand) continue;
+
+		float XDistance = fabs(SquareLand->GetActorLocation().X - movedPos.X);
+		float YDistance = fabs(SquareLand->GetActorLocation().Y - movedPos.Y);
+		float JudgXDistance = circleRadius + SquareLand->GetXLength() * 0.5f;
+		float JudgYDistance = circleRadius + SquareLand->GetYLength() * 0.5f;
+		if (JudgXDistance > XDistance)
+			movedPos.X = actorPos.X;
+		if (JudgYDistance > YDistance)
+			movedPos.Y = actorPos.Y;
+
+		if (!IsLand(movedPos)) return movedPos;
+	}
+
+	return actorPos;
 }
 
 bool AWaterSurface::IsInWater(FVector worldPos)
@@ -335,7 +395,19 @@ bool AWaterSurface::IsInWater(FVector worldPos)
 	int index = CalcIndex(WaveX, WaveY);
 
 	if (index <= 0) return false;
-	if (index >= IsLands.Num()) return false;
+	if (index >= Vertices.Num()) return false;
 
 	return true;
+}
+
+bool AWaterSurface::IsLand(FVector worldPos)
+{
+	if (!IsInWater(worldPos)) return false;
+
+	int32 WaveX = worldPos.X / X_Size;
+	int32 WaveY = worldPos.Y / Y_Size;
+
+	int index = CalcIndex(WaveX, WaveY);
+
+	return IsLands[index];
 }
