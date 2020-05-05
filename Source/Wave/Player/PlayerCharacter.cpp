@@ -206,18 +206,3 @@ void APlayerCharacter::WaterAttack()
 		}
 	}
 }
-
-void APlayerCharacter::WaterAttack2(FVector position)
-{
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
-
-	for (auto Actor : FoundActors)
-	{
-		AWaterSurface* water = Cast<AWaterSurface>(Actor);
-		if (water)
-		{
-			water->AddPower(position);
-		}
-	}
-}
