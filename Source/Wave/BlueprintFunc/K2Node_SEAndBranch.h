@@ -4,14 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "K2Node.h"
-#include "EdGraph/EdGraphNodeUtils.h"
 #include "K2Node_SEAndBranch.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
-class WAVE_API UK2Node_SEAndBranch : public UK2Node
+class UK2Node_SEAndBranch : public UK2Node
 {
 	GENERATED_BODY()
 public:
