@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "Goal.generated.h"
 
 UCLASS()
@@ -24,7 +24,7 @@ protected:
 		USceneComponent* Scene;
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite)
-		UBoxComponent* BoxComp;
+		USphereComponent* SphereComp;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		bool isGoal;
 	//OnComponentBeginOverlap

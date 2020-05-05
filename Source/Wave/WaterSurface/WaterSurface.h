@@ -20,6 +20,9 @@ public:
 	void AddPower(FVector worldPos, float pawer);
 	FVector GetWavePower(FVector worldPos);
 	float GetWaveSpeed() { return WaveSpeed; }
+	FVector GetOutLandPos(FVector worldPos, float circleRadius);
+	FVector AdjustMoveInWater(FVector worldPos, FVector moveVec, float circleRadius);
+	bool IsInWater(FVector worldPos);
 	bool IsLand(FVector worldPos);
 
 private:
@@ -47,6 +50,12 @@ private:
 		float Decay = 0.1f;
 	UPROPERTY(EditAnywhere)
 		float WaveSpeed = 1.0f;
+	UPROPERTY(EditAnywhere)
+		float MaxWaveHight = 100.0f;
+	UPROPERTY(EditAnywhere)
+		FLinearColor WaterColor = FLinearColor::Blue;
+	UPROPERTY(EditAnywhere)
+		FLinearColor WaveColor = FLinearColor::White;
 
 	TArray<bool> IsLands;
 

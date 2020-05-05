@@ -15,3 +15,12 @@ void ASquareLand::DebugDraw()
 	UKismetSystemLibrary::DrawDebugLine(this, GetActorLocation() + FVector( XOffset,  YOffset, 0.0f), GetActorLocation() + FVector( XOffset, -YOffset, 0.0f), LAND_TYPE_COLORS[GetLandTypeNumber()], 0.0f, 3.0f);
 	UKismetSystemLibrary::DrawDebugLine(this, GetActorLocation() + FVector(-XOffset,  YOffset, 0.0f), GetActorLocation() + FVector(-XOffset, -YOffset, 0.0f), LAND_TYPE_COLORS[GetLandTypeNumber()], 0.0f, 3.0f);
 }
+
+// Called when the game starts or when spawned
+void ASquareLand::BeginPlay()
+{
+	Super::BeginPlay();
+	Obb.Position = GetActorLocation();
+	Obb.HorizontalVector = FVector::RightVector * XLength * 0.5f;
+	Obb.VerticalVector = FVector::ForwardVector * YLength * 0.5f;
+}

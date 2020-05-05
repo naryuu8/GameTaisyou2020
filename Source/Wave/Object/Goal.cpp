@@ -10,9 +10,9 @@ AGoal::AGoal()
 	PrimaryActorTick.bCanEverTick = true;
 	Scene = CreateDefaultSubobject <USceneComponent>(TEXT("Scene"));
 	RootComponent = Scene;
-	BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionComp"));
-	BoxComp->SetupAttachment(RootComponent);
-	BoxComp->OnComponentBeginOverlap.AddDynamic(this, &AGoal::OnOverlapBegin);
+	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("GoalCollision"));
+	SphereComp->SetupAttachment(RootComponent);
+	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &AGoal::OnOverlapBegin);
 
 }
 

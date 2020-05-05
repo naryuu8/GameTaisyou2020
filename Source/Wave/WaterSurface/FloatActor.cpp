@@ -25,12 +25,7 @@ void AFloatActor::BeginPlay()
 void AFloatActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	FVector MoveVec = WaterSurface->GetWavePower(GetActorLocation()) * WaterSurface->GetWaveSpeed();
 
-	FVector MovedLocation = GetActorLocation() + WaterSurface->GetWavePower(GetActorLocation()) * WaterSurface->GetWaveSpeed();
-
-	if (!WaterSurface->IsLand(MovedLocation))
-		SetActorLocation(MovedLocation);
-	else
-		SetActorLocation(GetActorLocation() - WaterSurface->GetWavePower(GetActorLocation()) * WaterSurface->GetWaveSpeed());
+	SetActorLocation(WaterSurface->AdjustMoveInWater(GetActorLocation(), MoveVec, 100.0f));
 }
-
