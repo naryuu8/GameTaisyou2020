@@ -15,6 +15,8 @@ class APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class AGameCameraActor* FollowCamera;
 public:
 	APlayerCharacter();
 
@@ -27,11 +29,10 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++Class")
 		float BaseTurnRate;
 
-	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++Class")
 		float BaseLookUpRate;
 
 protected:
@@ -71,12 +72,6 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float HammerPower;
 private:
-
-	UPROPERTY(EditAnywhere, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		class AGameCameraActor* FollowCamera;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = )
-		float BaseLookUpRate;
 
 	UPlayerAnimInstance* AnimInst;
 	int AttackCount = 0;
