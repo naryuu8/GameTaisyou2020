@@ -14,30 +14,27 @@ UCLASS(config = Game)
 class APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
-		/** Camera boom positioning the camera behind the character */
-		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		class USpringArmComponent* CameraBoom;
 
-	/** Follow camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		class UCameraComponent* FollowCamera;
-
-
+	UPROPERTY(EditAnywhere, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class AGameCameraActor* FollowCamera;
 public:
 	APlayerCharacter();
 
 	//virtual void BeginPlay() override;
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void BeginPlay_C();
+
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	int GetAttackCount() { return AttackCount; };
+
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++Class")
 		float BaseTurnRate;
 
-	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++Class")
 		float BaseLookUpRate;
-	
+
 protected:
 
 	/** Called for forwards/backward input */
@@ -54,7 +51,10 @@ protected:
 	void TurnAtRate(float Rate);
 
 	void LookUpAtRate(float Rate);
-
+	//キーを押したときのハンマー攻撃
+	void TriggerHammerAttack(void);
+	//キーを離したときのハンマー攻撃
+	void ReleaseHammerAttack(void);
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -64,28 +64,23 @@ protected:
 
 	//ハンマー攻撃でホールド中ならtrue
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
-	bool IsAttackHold;
+		bool IsAttackHold;
 	//攻撃アニメ再生中ならtrue
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
-	bool IsPlayAttackAnime;
+		bool IsPlayAttackAnime;
 	//ハンマーパワー変数
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
-	float HammerPower;
-
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-	void TriggerHammerAttack();
-	//キーを離したときのハンマー攻撃
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-	void ReleaseHammerAttack();
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-	void WaterAttack2(FVector position);
+		float HammerPower;
 private:
+
 	UPlayerAnimInstance* AnimInst;
+	int AttackCount = 0;
+
 	//水面に波をたてる
 	void WaterAttack();
 public:
 	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+//	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+//	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 };
