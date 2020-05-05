@@ -187,6 +187,9 @@ void APlayerCharacter::ReleaseHammerAttack(void)
 	WaterAttack();
 	IsAttackHold = false;
 	HammerPower = 0.0f;
+
+	// UŒ‚ƒJƒEƒ“ƒg‘‰Á
+	AttackCount++;
 }
 
 void APlayerCharacter::WaterAttack()

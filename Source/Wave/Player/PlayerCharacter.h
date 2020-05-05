@@ -14,16 +14,6 @@ UCLASS(config = Game)
 class APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
-		/** Camera boom positioning the camera behind the character */
-		//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		//class USpringArmComponent* CameraBoom;
-
-	/** Follow camera */
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		//class UCameraComponent* FollowCamera;
-
-		UPROPERTY(EditAnywhere, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		class AGameCameraActor* FollowCamera;
 
 public:
 	APlayerCharacter();
@@ -31,6 +21,10 @@ public:
 	//virtual void BeginPlay() override;
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void BeginPlay_C();
+
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	int GetAttackCount() { return AttackCount; };
+
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -77,7 +71,16 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float HammerPower;
 private:
+
+	UPROPERTY(EditAnywhere, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class AGameCameraActor* FollowCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = )
+		float BaseLookUpRate;
+
 	UPlayerAnimInstance* AnimInst;
+	int AttackCount = 0;
+
 	//êÖñ Ç…îgÇÇΩÇƒÇÈ
 	void WaterAttack();
 public:
