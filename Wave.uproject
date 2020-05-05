@@ -14,5 +14,11 @@
 				"BlueprintGraph"
 			]
 		}
+	],
+	"Plugins": [
+		{
+			"Name": "Niagara",
+			"Enabled": true
+		}
 	]
 }
