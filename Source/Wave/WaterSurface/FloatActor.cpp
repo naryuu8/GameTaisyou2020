@@ -18,14 +18,16 @@ void AFloatActor::BeginPlay()
 	Super::BeginPlay();
 	
 	WaterSurface = Cast<AWaterSurface>((UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass())));
-	
 }
 
 // Called every frame
 void AFloatActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	FVector MoveVec = WaterSurface->GetWavePower(GetActorLocation()) * WaterSurface->GetWaveSpeed();
+	FVector WavePower = WaterSurface->GetWavePower(GetActorLocation());
+	FVector MoveVec = WavePower * FloatSpeed;
+
+	if (MoveVec.Size() < MinFloatWavePower) return;
 
 	SetActorLocation(WaterSurface->AdjustMoveInWater(GetActorLocation(), MoveVec, 100.0f));
 }

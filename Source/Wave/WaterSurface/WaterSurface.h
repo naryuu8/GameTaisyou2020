@@ -47,9 +47,9 @@ private:
 	UPROPERTY(EditAnywhere)
 		UMaterialInterface *Material;
 	UPROPERTY(EditAnywhere)
-		float Decay = 0.1f;
+		float Decay = 0.3f;
 	UPROPERTY(EditAnywhere)
-		float WaveSpeed = 1.0f;
+		float WaveSpeed = 10.0f;
 	UPROPERTY(EditAnywhere)
 		float MaxWaveHight = 100.0f;
 	UPROPERTY(EditAnywhere)
