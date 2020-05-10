@@ -29,9 +29,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void BeginPlay_C();
 
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		FORCEINLINE	int GetAttackCount() { return AttackCount; };
-
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++Class")
@@ -79,7 +76,6 @@ protected:
 private:
 
 	UPlayerAnimInstance* AnimInst;
-	int AttackCount = 0;
 
 	//êÖñ Ç…îgÇÇΩÇƒÇÈ
 	void WaterAttack();
