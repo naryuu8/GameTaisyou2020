@@ -5,11 +5,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Animation/AnimInstance.h"
-#include "PlayerAnimInstance.h"
 //generated.hは一番最後にかかないといけない
 #include "PlayerCharacter.generated.h"
-
+class UPauseUI;
+class UPlayerAnimInstance;
 UCLASS(config = Game)
 class APlayerCharacter : public ACharacter
 {
@@ -17,6 +16,12 @@ class APlayerCharacter : public ACharacter
 
 	UPROPERTY(EditAnywhere, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class AGameCameraActor* FollowCamera;
+private:
+	// ポーズUI　エディタで指定する
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UPauseUI> UIClass;
+	UPauseUI* PauseUI;
+	void PauseInput();
 public:
 	APlayerCharacter();
 
@@ -78,6 +83,8 @@ private:
 
 	//水面に波をたてる
 	void WaterAttack();
+	//ハンマー残り回数をマイナス
+	void MinusHammerCount();
 public:
 	/** Returns CameraBoom subobject **/
 //	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

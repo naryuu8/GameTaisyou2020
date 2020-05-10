@@ -53,6 +53,14 @@ struct InputState
 	InputDirection RightStick;
 	// プレイヤーアタック
 	InputActionState Attack;
+	//ポーズボタン
+	InputActionState Pause;
+	//ステージ選択画面やポーズ画面の上入力情報
+	InputActionState Up;
+	//ステージ選択画面やポーズ画面の下入力情報
+	InputActionState Down;
+	//決定ボタン
+	InputActionState Select;
 };
 
 //@brief 入力管理クラス
@@ -95,4 +103,17 @@ private:
 	// ハンマーでたたく入力情報受け取り
 	void InputAttackPress() { State.Attack.Press(); };
 	void InputAttackRelease() { State.Attack.Release(); };
+
+	//ポーズボタン入力情報受け取り
+	void InputPausePress() { State.Pause.Press(); };
+	void InputPauseRelease() { State.Pause.Release(); };
+	//ステージ選択画面やポーズ画面の上入力情報受け取り
+	void InputUpPress() { State.Up.Press(); };
+	void InputUpRelease() { State.Up.Release(); };
+	//ステージ選択画面やポーズ画面の下入力情報受け取り
+	void InputDownPress() { State.Down.Press(); };
+	void InputDownRelease() { State.Down.Release(); };
+	//決定ボタン入力情報受け取り
+	void InputSelectPress() { State.Select.Press(); };
+	void InputSelectRelease() { State.Select.Release(); };
 };

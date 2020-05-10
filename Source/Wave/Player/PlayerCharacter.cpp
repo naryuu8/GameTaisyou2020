@@ -9,10 +9,12 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "../WaterSurface/WaterSurface.h"
 #include "Kismet/GameplayStatics.h"
-
+#include "../Object/Goal.h"
 #include "../Camera/GameCameraActor.h"
 #include "../InputManager.h"
-
+#include "../UI/PauseUI.h"
+#include "Animation/AnimInstance.h"
+#include "PlayerAnimInstance.h"
 //////////////////////////////////////////////////////////////////////////
 // APlayerCharacter
 
@@ -47,7 +49,8 @@ APlayerCharacter::APlayerCharacter()
 
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
-
+	//ポーズ中でもTickが来るようにする
+	SetTickableWhenPaused(true);
 }
 
 //void APlayerCharacter::BeginPlay()
@@ -69,11 +72,15 @@ void APlayerCharacter::BeginPlay_C()
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
+	PauseInput();
+	if (UGameplayStatics::IsGamePaused(GetWorld()))
+	{//ポーズ中はポーズの入力しか受け付けない
+		return;
+	}
 	if (!AnimInst)
 	{
 		AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	}
-
 	const AInputManager * inputManager = AInputManager::GetInstance();
 	if (inputManager)
 	{
@@ -171,6 +178,73 @@ void APlayerCharacter::ReleaseHammerAttack(void)
 
 	// 攻撃カウント増加
 	AttackCount++;
+
+	MinusHammerCount();
+}
+
+void APlayerCharacter::MinusHammerCount()
+{
+	AGoal* goal;
+	goal = Cast<AGoal>(UGameplayStatics::GetActorOfClass(GetWorld(), AGoal::StaticClass()));
+	if (goal)
+	{
+		goal->MinusHammerCount();
+	}
+}
+
+void APlayerCharacter::PauseInput()
+{
+	const AInputManager * inputManager = AInputManager::GetInstance();
+	if (!inputManager)return;
+	const InputState * input = inputManager->GetState();
+	if (input->Pause.IsPress)
+	{//ポーズ中でなければポーズ画面を開き、ポーズ中だったらポーズ画面を閉じる
+		if (!UGameplayStatics::IsGamePaused(GetWorld()))
+		{
+			if (UIClass != nullptr)
+			{//初めてポーズ画面を開くときはUIを生成する
+				if (!PauseUI)
+				{
+					PauseUI = CreateWidget<UPauseUI>(GetWorld(), UIClass);
+					PauseUI->AddToViewport();
+				}
+				else if (PauseUI)
+				{
+					if (PauseUI->GetIsPlayAnimation())return;
+					PauseUI->AddToViewport();
+				}
+				//生成してもnullptrだったらエラー文表示
+				if(PauseUI == nullptr)
+				{
+					UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"Widget cannot create");
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"UIClass is nullptr");
+			}
+		}
+		else if (UGameplayStatics::IsGamePaused(GetWorld()))
+		{
+			if (!PauseUI)return;
+			if (PauseUI->GetIsPlayAnimation())return;
+			PauseUI->EndPlayAnimation();
+		}
+	}
+	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
+	if (!PauseUI)return;
+	if (input->Up.IsPress)
+	{
+		PauseUI->BackSelectState();
+	}
+	if (input->Down.IsPress)
+	{
+		PauseUI->NextSelectState();
+	}
+	if (input->Select.IsPress)
+	{
+		PauseUI->SelectStateAction();
+	}
 }
 
 void APlayerCharacter::WaterAttack()
