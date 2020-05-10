@@ -23,7 +23,6 @@ APlayerCharacter::APlayerCharacter()
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
-
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
@@ -34,18 +33,6 @@ APlayerCharacter::APlayerCharacter()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
-
-	//コンポーネントを作成
-	// Create a camera boom (pulls in towards the player if there is a collision)
-	//CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	//CameraBoom->SetupAttachment(RootComponent);
-	//CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
-	//CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
-
-	//// Create a follow camera
-	//FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	//FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	//FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
@@ -58,7 +45,6 @@ APlayerCharacter::APlayerCharacter()
 //
 //
 //}
-
 
 void APlayerCharacter::BeginPlay_C()
 {
@@ -100,9 +86,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 	}
 
 }
-
-
-// Input
 
 void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
@@ -165,7 +148,6 @@ void APlayerCharacter::TriggerHammerAttack(void)
 	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInst->HummerChergeEvent();
 	IsAttackHold = true;
-
 }
 
 void APlayerCharacter::ReleaseHammerAttack(void)
@@ -175,9 +157,6 @@ void APlayerCharacter::ReleaseHammerAttack(void)
 	WaterAttack();
 	IsAttackHold = false;
 	HammerPower = 0.0f;
-
-	// 攻撃カウント増加
-	AttackCount++;
 
 	MinusHammerCount();
 }
