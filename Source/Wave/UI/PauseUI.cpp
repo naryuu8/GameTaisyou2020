@@ -57,8 +57,8 @@ void UPauseUI::SelectStateAction()
 		case static_cast<int>(PauseState::GAMEBACK):
 			EndPlayAnimation();
 			break;
-		case static_cast<int>(PauseState::RESTART):
-
+		case static_cast<int>(PauseState::RESTART) :
+				TestStampPlayAnimation();
 			break;
 		case static_cast<int>(PauseState::SCORE):
 

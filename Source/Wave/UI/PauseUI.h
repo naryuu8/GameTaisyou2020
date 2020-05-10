@@ -42,6 +42,9 @@ public:
 		void InitPlayAnimation();
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void EndPlayAnimation();
+	//スタンプテスト用イベント
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void TestStampPlayAnimation();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsPlayAnimation() const{ return IsPlayAnimation; };
 };
