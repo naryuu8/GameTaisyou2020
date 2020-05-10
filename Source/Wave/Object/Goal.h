@@ -6,11 +6,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
-#include "Blueprint/UserWidget.h"
-#include "../UI/HammerCountUI.h"
-#include "../UI/PauseUI.h"
 #include "Goal.generated.h"
-
+class UHammerCountUI;
 UCLASS()
 class WAVE_API AGoal : public AActor
 {

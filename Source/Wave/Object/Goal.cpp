@@ -4,6 +4,8 @@
 #include "Goal.h"
 #include "UObject/ConstructorHelpers.h"
 #include "UObject/UObjectGlobals.h"
+#include "Blueprint/UserWidget.h"
+#include "../UI/HammerCountUI.h"
 // Sets default values
 AGoal::AGoal()
 {
@@ -50,12 +52,12 @@ void AGoal::CreateHammerCountUI()
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("TitleManager : %s"), L"Widget cannot create");
+			UE_LOG(LogTemp, Error, TEXT("HammerCountUI : %s"), L"Widget cannot create");
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("TitleManager : %s"), L"UIClass is nullptr");
+		UE_LOG(LogTemp, Error, TEXT("HammerCountUI : %s"), L"UIClass is nullptr");
 	}
 }
 

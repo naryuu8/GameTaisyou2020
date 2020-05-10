@@ -3,19 +3,18 @@
 
 #include "PauseUI.h"
 #include "Kismet/GameplayStatics.h"
-#define MAX_PAUSENUMBER (3)
 
 void UPauseUI::NativeConstruct()
 {
 	IsPlayAnimation = false;
 	InitPlayAnimation();
-	SelectNumber = 0;
+	SelectNumber = static_cast<int>(PauseState::GAMEBACK);
 	UGameplayStatics::SetGamePaused(GetWorld(),true);
 }
 
-FSlateColor UPauseUI::SelectTextColor(const int number)
+FSlateColor UPauseUI::SelectTextColor(const PauseState state)
 {
-	if (SelectNumber == number)
+	if (SelectNumber == static_cast<int>(state))
 	{
 		return FSlateColor(FLinearColor(1.0f, 0.0f, 0.0f, 1.0f));
 	}
@@ -31,22 +30,41 @@ ESlateVisibility UPauseUI::GetPauseTextVisibility()
 	return ESlateVisibility::Visible;
 }
 
-void UPauseUI::AddSelectNumber()
+void UPauseUI::NextSelectState()
 {
 	if (IsPlayAnimation)return;
 	SelectNumber++;
-	if (SelectNumber > MAX_PAUSENUMBER)
+	if (SelectNumber > static_cast<int>(PauseState::STAGESELECT))
 	{
-		SelectNumber = 0;
+		SelectNumber = static_cast<int>(PauseState::GAMEBACK);
 	}
 }
 
-void UPauseUI::MinusSelectNumber()
+void UPauseUI::BackSelectState()
 {
 	if (IsPlayAnimation)return;
 	SelectNumber--;
 	if (SelectNumber < 0)
 	{
-		SelectNumber = MAX_PAUSENUMBER;
+		SelectNumber = static_cast<int>(PauseState::STAGESELECT);
+	}
+}
+
+void UPauseUI::SelectStateAction()
+{
+	switch (SelectNumber)
+	{
+		case static_cast<int>(PauseState::GAMEBACK):
+			EndPlayAnimation();
+			break;
+		case static_cast<int>(PauseState::RESTART):
+
+			break;
+		case static_cast<int>(PauseState::SCORE):
+
+			break;
+		case static_cast<int>(PauseState::STAGESELECT):
+
+			break;
 	}
 }
