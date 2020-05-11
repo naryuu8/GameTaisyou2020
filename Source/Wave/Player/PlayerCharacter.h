@@ -5,17 +5,22 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Niagara/Classes/NiagaraSystem.h"	// エフェクト用
 //generated.hは一番最後にかかないといけない
 #include "PlayerCharacter.generated.h"
 class UPauseUI;
 class UPlayerAnimInstance;
+
+
 UCLASS(config = Game)
 class APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, Category = Camera, meta = (AllowPrivateAccess = "true"))
+protected:
+	UPROPERTY(EditAnywhere, Category = Camera)
 		class AGameCameraActor* FollowCamera;
+	
 private:
 	// ポーズUI　エディタで指定する
 	UPROPERTY(EditAnywhere)
@@ -31,11 +36,20 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	// ハンマーの先端のトランスフォーム
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++Class")
+		USceneComponent* HummerTipPoint = nullptr;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++Class")
 		float BaseTurnRate;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++Class")
 		float BaseLookUpRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+		UNiagaraSystem* AttackEffect = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+		float AttackEffectScale = 1.0f;
 
 protected:
 
@@ -57,6 +71,8 @@ protected:
 	void TriggerHammerAttack(void);
 	//キーを離したときのハンマー攻撃
 	void ReleaseHammerAttack(void);
+
+	void HummerAttackEnd();
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -78,7 +94,7 @@ private:
 	UPlayerAnimInstance* AnimInst;
 
 	//水面に波をたてる
-	void WaterAttack();
+	void WaterAttack(FVector Point, float Power);
 	//ハンマー残り回数をマイナス
 	void MinusHammerCount();
 public:

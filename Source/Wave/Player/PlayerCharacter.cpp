@@ -15,6 +15,7 @@
 #include "../UI/PauseUI.h"
 #include "Animation/AnimInstance.h"
 #include "PlayerAnimInstance.h"
+#include "Niagara/Public/NiagaraFunctionLibrary.h"
 //////////////////////////////////////////////////////////////////////////
 // APlayerCharacter
 
@@ -50,10 +51,15 @@ void APlayerCharacter::BeginPlay_C()
 {
 	//現在のBegibPlayはモデルの都合上こちらで書けないので関数で呼ぶ
 	IsAttackHold = false;
-
 	IsPlayAttackAnime = false;
-
 	HammerPower = 0.0f;
+
+	if (!AnimInst)
+	{
+		AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+		// ハンマーで叩いた時に呼ばれる関数を登録
+		AnimInst->AttackEndCallBack.BindUObject(this, &APlayerCharacter::HummerAttackEnd);
+	}
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -67,6 +73,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 	{
 		AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	}
+	//アタックアニメが再生中か確認
+	IsPlayAttackAnime = AnimInst->GetIsAttackAnime();
+
 	const AInputManager * inputManager = AInputManager::GetInstance();
 	if (inputManager)
 	{
@@ -78,8 +87,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 		MoveRight(input->LeftStick.Horizontal);
 	}
 
-	//アタックアニメが再生中か確認
-	IsPlayAttackAnime = AnimInst->GetIsAttackAnime();
 	if (IsAttackHold)
 	{//ハンマーを溜めていたら力を足す
 		HammerPower += 0.1f;
@@ -152,13 +159,26 @@ void APlayerCharacter::TriggerHammerAttack(void)
 
 void APlayerCharacter::ReleaseHammerAttack(void)
 {
+	if (!IsAttackHold) return;
 	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInst->HummerAttackEvent();
-	WaterAttack();
 	IsAttackHold = false;
-	HammerPower = 0.0f;
+}
 
+void APlayerCharacter::HummerAttackEnd()
+{
+	if (AttackEffect && AttackEffect->IsValid() && HummerTipPoint)
+	{
+		// ハンマーの先端を取得
+		FVector AttackPoint = HummerTipPoint->GetComponentLocation();
+		// 波を起こす
+		WaterAttack(AttackPoint, HammerPower);
+		// エフェクトを生成
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, AttackEffect, AttackPoint, GetActorRotation(), FVector::OneVector * AttackEffectScale, true);
+	}
+	// ハンマーの叩けるカウントを減らす
 	MinusHammerCount();
+	HammerPower = 0.0f;
 }
 
 void APlayerCharacter::MinusHammerCount()
@@ -226,7 +246,7 @@ void APlayerCharacter::PauseInput()
 	}
 }
 
-void APlayerCharacter::WaterAttack()
+void APlayerCharacter::WaterAttack(FVector Point, float Power)
 {
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
@@ -236,7 +256,7 @@ void APlayerCharacter::WaterAttack()
 		AWaterSurface* water = Cast<AWaterSurface>(Actor);
 		if (water)
 		{
-			water->AddPower(GetActorLocation(), HammerPower * 100.0f);
+			water->AddPower(Point, Power * 100.0f);
 		}
 	}
 }
