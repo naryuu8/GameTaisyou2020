@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
+//複数のboolに対応するBranchノード（ブループリント専用）
+//参考サイト:[UE4]複数のConditionをもつBranchノードを作る
+//https://historia.co.jp/archives/10529/
 #include "CoreMinimal.h"
 #include "K2Node.h"
 #include "K2Node_SEAndBranch.generated.h"
