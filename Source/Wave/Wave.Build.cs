@@ -20,7 +20,6 @@ public class Wave : ModuleRules
             "ProceduralMeshComponent",
             "Slate",
             "EditorStyle",
-            "Niagara",
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] {

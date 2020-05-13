@@ -68,11 +68,3 @@ void UPlayerAnimInstance::HummerAttackEvent()
 	Montage_Play(AnimMontage,0.4f);
 	Montage_JumpToSection("Attack", AnimMontage);
 }
-
-void UPlayerAnimInstance::AttackAnimEnd()
-{
-	IsAttackAnime = false;
-
-	if(AttackEndCallBack.IsBound())
-		AttackEndCallBack.Execute();
-}

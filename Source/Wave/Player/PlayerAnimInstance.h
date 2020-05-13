@@ -6,8 +6,9 @@
 #include "Animation/AnimInstance.h"
 #include "PlayerAnimInstance.generated.h"
 
-DECLARE_DELEGATE(AttackEndDelegate);
-
+/**
+ * 
+ */
 UCLASS()
 class WAVE_API UPlayerAnimInstance : public UAnimInstance
 {
@@ -15,7 +16,7 @@ class WAVE_API UPlayerAnimInstance : public UAnimInstance
 protected:
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float Speed;
-	UPROPERTY(BlueprintReadOnly, Category = "C++Class")
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		bool IsAttackAnime;
 
 private:
@@ -23,9 +24,6 @@ private:
 public:
 	// コンストラクタ
 	UPlayerAnimInstance(const FObjectInitializer& ObjectInitializer);
-
-	// アタック終了時にハンマーの先端部分を引数に取得
-	AttackEndDelegate AttackEndCallBack;
 
 	// アニメーションの初期化時
 	virtual void NativeInitializeAnimation() override;
@@ -45,7 +43,4 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 	FORCEINLINE bool GetIsAttackAnime() const { return IsAttackAnime; }
 
-	// ブループリント側でアタック終了時にハンマーの先端部分を引数に入れる
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-	void AttackAnimEnd();
 };
