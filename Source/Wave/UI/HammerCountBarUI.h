@@ -22,8 +22,5 @@ public:
 	//現在のHPを受け取りゲージを減らす
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void UpdateBar(const float HammerHP);
-	//現在の溜めている力に応じて消費するゲージ量を表示
-	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
-		void NowUpdateBar(const float Power);
 	void SetMaxHammerHP(const float hp) { MaxHammerHP = hp; }
 };
