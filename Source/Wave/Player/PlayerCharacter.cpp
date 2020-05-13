@@ -17,6 +17,7 @@
 #include "Animation/AnimInstance.h"
 #include "PlayerAnimInstance.h"
 #include "Niagara/Public/NiagaraFunctionLibrary.h"
+#include "../GlobalGameInstance.h"
 //////////////////////////////////////////////////////////////////////////
 // APlayerCharacter
 
@@ -77,6 +78,7 @@ void APlayerCharacter::BeginPlay_C()
 	{
 		UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"HammerCountBarUIClass is nullptr");
 	}
+	
 }
 
 void APlayerCharacter::Tick(float DeltaTime)

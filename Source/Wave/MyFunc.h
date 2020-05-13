@@ -16,4 +16,8 @@ public:
 	static FQuat FromAxisAngleToQuaternion(const FVector & axis, float angle);
 	//ファイルパスで指定したテクスチャ情報を返す
 	static UTexture2D* LoadTexture2DFromAssetPath(const FName AssetPath);
+	//ゲーム上にデバッグ文字表示
+	//引数1 文字色 FColor::Green等で指定可能
+	//引数2 メッセージ
+	void DisplayDebugMessage(const FColor DisplayColor,FString message);
 };
