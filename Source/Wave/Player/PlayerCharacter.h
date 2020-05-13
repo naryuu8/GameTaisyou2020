@@ -10,7 +10,7 @@
 #include "PlayerCharacter.generated.h"
 class UPauseUI;
 class UPlayerAnimInstance;
-
+class UHammerCountBarUI;
 
 UCLASS(config = Game)
 class APlayerCharacter : public ACharacter
@@ -24,8 +24,18 @@ protected:
 private:
 	// ポーズUI　エディタで指定する
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<UPauseUI> UIClass;
-	UPauseUI* PauseUI;
+		TSubclassOf<UPauseUI> PauseUIClass;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UHammerCountBarUI> HammerCountBarUIClass;
+	UPauseUI* PauseUI = nullptr;
+	UHammerCountBarUI* HammerCountBarUI = nullptr;
+	//ゲージで表示する用のプレイヤーのハンマーMAXHP
+	UPROPERTY(EditAnywhere, Category = "Instanced")
+		float MaxHammerHP = 100.0f;
+	//1フレーム毎に溜めるハンマーパワー
+	UPROPERTY(EditAnywhere, Category = "Instanced")
+		float ChargePower = 0.1f;
+	float HammerHP;
 	void PauseInput();
 public:
 	APlayerCharacter();
@@ -97,6 +107,8 @@ private:
 	void WaterAttack(FVector Point, float Power);
 	//ハンマー残り回数をマイナス
 	void MinusHammerCount();
+	//ハンマー消費ゲージをマイナス
+	void MinusHammerGauge(const float Power);
 public:
 	/** Returns CameraBoom subobject **/
 //	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

@@ -20,6 +20,8 @@ protected:
 	virtual void BeginPlay() override;
 	UPROPERTY(EditAnywhere, Category = "Instanced")
 		float WaveTime;
+	UPROPERTY(EditAnywhere, Category = "Instanced")
+		float WavePower = 0.1f;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

@@ -13,6 +13,7 @@
 #include "../Camera/GameCameraActor.h"
 #include "../InputManager.h"
 #include "../UI/PauseUI.h"
+#include "../UI/HammerCountBarUI.h"
 #include "Animation/AnimInstance.h"
 #include "PlayerAnimInstance.h"
 #include "Niagara/Public/NiagaraFunctionLibrary.h"
@@ -53,12 +54,28 @@ void APlayerCharacter::BeginPlay_C()
 	IsAttackHold = false;
 	IsPlayAttackAnime = false;
 	HammerPower = 0.0f;
-
+	HammerHP = MaxHammerHP;
 	if (!AnimInst)
 	{
 		AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 		// ハンマーで叩いた時に呼ばれる関数を登録
 		AnimInst->AttackEndCallBack.BindUObject(this, &APlayerCharacter::HummerAttackEnd);
+	}
+	//BarUI生成
+	if (HammerCountBarUIClass != nullptr)
+	{
+		HammerCountBarUI = CreateWidget<UHammerCountBarUI>(GetWorld(), HammerCountBarUIClass);
+		HammerCountBarUI->AddToViewport();
+		HammerCountBarUI->SetMaxHammerHP(MaxHammerHP);
+		//生成してもnullptrだったらエラー文表示
+		if (HammerCountBarUI == nullptr)
+		{
+			UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"HammerCountBarUIClass is nullptr");
 	}
 }
 
@@ -68,10 +85,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 	if (UGameplayStatics::IsGamePaused(GetWorld()))
 	{//ポーズ中はポーズの入力しか受け付けない
 		return;
-	}
-	if (!AnimInst)
-	{
-		AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	}
 	//アタックアニメが再生中か確認
 	IsPlayAttackAnime = AnimInst->GetIsAttackAnime();
@@ -89,7 +102,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	if (IsAttackHold)
 	{//ハンマーを溜めていたら力を足す
-		HammerPower += 0.1f;
+		HammerPower += ChargePower;
+		MinusHammerGauge(HammerPower);
 	}
 
 }
@@ -191,6 +205,17 @@ void APlayerCharacter::MinusHammerCount()
 	}
 }
 
+void APlayerCharacter::MinusHammerGauge(const float Power)
+{
+	if (!HammerCountBarUI)return;
+	HammerHP -= ChargePower;
+	if (HammerHP < 0.0f)
+	{
+		HammerHP = 0.0f;
+	}
+	HammerCountBarUI->UpdateBar(HammerHP);
+}
+
 void APlayerCharacter::PauseInput()
 {
 	const AInputManager * inputManager = AInputManager::GetInstance();
@@ -200,11 +225,11 @@ void APlayerCharacter::PauseInput()
 	{//ポーズ中でなければポーズ画面を開き、ポーズ中だったらポーズ画面を閉じる
 		if (!UGameplayStatics::IsGamePaused(GetWorld()))
 		{
-			if (UIClass != nullptr)
+			if (PauseUIClass != nullptr)
 			{//初めてポーズ画面を開くときはUIを生成する
 				if (!PauseUI)
 				{
-					PauseUI = CreateWidget<UPauseUI>(GetWorld(), UIClass);
+					PauseUI = CreateWidget<UPauseUI>(GetWorld(), PauseUIClass);
 					PauseUI->AddToViewport();
 				}
 				else if (PauseUI)
@@ -220,7 +245,7 @@ void APlayerCharacter::PauseInput()
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"UIClass is nullptr");
+				UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"PauseUIClass is nullptr");
 			}
 		}
 		else if (UGameplayStatics::IsGamePaused(GetWorld()))
