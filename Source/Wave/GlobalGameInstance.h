@@ -16,8 +16,13 @@ UCLASS()
 class WAVE_API UGlobalGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
+private:
+		int StageNumber;
 public:
 	static UGlobalGameInstance* GetInstance();
-	UPROPERTY(BlueprintReadWrite, Category = "GlobalC++Class")
-		int StageNumber;
+	//アニメーション再生中はポーズテキストを表示しない
+	UFUNCTION(BlueprintCallable, Category = "GlobalC++Class")
+		void SetStageNumber(const int number) { StageNumber = number; };
+	UFUNCTION(BlueprintCallable, Category = "GlobalC++Class")
+		FORCEINLINE int GetStageNumber() const { return StageNumber; }
 };

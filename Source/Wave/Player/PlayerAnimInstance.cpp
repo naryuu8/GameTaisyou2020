@@ -16,7 +16,7 @@ void UPlayerAnimInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
 	Speed = 0.0f;
-	IsAttackAnime = false;	
+	IsAttackAnime = false;
 }
 
 void UPlayerAnimInstance::NativeInitializeAnimation()
@@ -65,6 +65,14 @@ void UPlayerAnimInstance::HummerChergeEvent()
 
 void UPlayerAnimInstance::HummerAttackEvent()
 {
-	Montage_Play(AnimMontage,0.4f);
+	Montage_Play(AnimMontage, 0.4f);
 	Montage_JumpToSection("Attack", AnimMontage);
+}
+
+void UPlayerAnimInstance::AttackAnimEnd()
+{
+	IsAttackAnime = false;
+
+	if (AttackEndCallBack.IsBound())
+		AttackEndCallBack.Execute();
 }
