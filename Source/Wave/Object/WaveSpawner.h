@@ -21,7 +21,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Instanced")
 		float WaveTime;
 	UPROPERTY(EditAnywhere, Category = "Instanced")
-		float WavePower = 0.1f;
+		float WavePower = 1.0f;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

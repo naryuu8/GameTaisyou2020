@@ -43,9 +43,9 @@ public:
 	void HummerAttackEvent();
 
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
-	FORCEINLINE bool GetIsAttackAnime() const { return IsAttackAnime; }
+		FORCEINLINE bool GetIsAttackAnime() const { return IsAttackAnime; }
 
 	// ブループリント側でアタック終了時にハンマーの先端部分を引数に入れる
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
-	void AttackAnimEnd();
+		void AttackAnimEnd();
 };
