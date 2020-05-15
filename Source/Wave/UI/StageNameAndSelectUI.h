@@ -13,12 +13,9 @@ UCLASS()
 class WAVE_API UStageNameAndSelectUI : public UUserWidget
 {
 	GENERATED_BODY()
-		int StageNumber;
 public:
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		FString UIStageName;
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		UTexture2D* GetTexture2D(const FName AssetPath);
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		FORCEINLINE int GetStageNumber() const { return StageNumber; }
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		void SetStageNumber(const int number)  { StageNumber = number; }
 };
