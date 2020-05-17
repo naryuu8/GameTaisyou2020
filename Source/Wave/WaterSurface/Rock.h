@@ -4,19 +4,24 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "FloatActor.generated.h"
-
+#include "Rock.generated.h"
 class AWaterSurface;
 
 UCLASS()
-class WAVE_API AFloatActor : public AActor
+class WAVE_API ARock : public AActor
 {
 	GENERATED_BODY()
+private:
+	AWaterSurface* Water;
 	
 public:	
 	// Sets default values for this actor's properties
-	AFloatActor();
+	ARock(); 
 
+	UPROPERTY(EditAnywhere)
+		float Magnification = 1.0f;
+
+	bool IsWave;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -25,12 +30,4 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
-		float MinFloatWavePower = 1.0f;
-
-	UPROPERTY(EditAnywhere)
-		float FloatSpeed = 0.1f;
-
-protected:
-	AWaterSurface* WaterSurface;
 };

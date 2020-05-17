@@ -11,6 +11,8 @@
 class UPauseUI;
 class UPlayerAnimInstance;
 class UHammerCountBarUI;
+class AWaterSurface;
+class ARaft;
 
 UCLASS(config = Game)
 class APlayerCharacter : public ACharacter
@@ -37,6 +39,13 @@ private:
 		float ChargePower = 0.1f;
 	float HammerHP;
 	void PauseInput();
+
+	FVector PrevPos;
+
+	AWaterSurface* Water;
+
+	ARaft* CurrentRaft;
+	bool IsRaftRiding;
 public:
 	APlayerCharacter();
 
@@ -109,6 +118,8 @@ private:
 	void MinusHammerCount();
 	//ハンマー消費ゲージをマイナス
 	void MinusHammerGauge(const float Power);
+
+	bool IsRide;
 public:
 	/** Returns CameraBoom subobject **/
 //	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
