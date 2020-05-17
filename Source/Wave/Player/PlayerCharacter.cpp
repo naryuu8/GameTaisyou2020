@@ -8,6 +8,7 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "../WaterSurface/WaterSurface.h"
+#include "../WaterSurface/Raft.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Object/Goal.h"
 #include "../Camera/GameCameraActor.h"
@@ -78,7 +79,23 @@ void APlayerCharacter::BeginPlay_C()
 	{
 		UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"HammerCountBarUIClass is nullptr");
 	}
-	
+
+	PrevPos = FVector::ZeroVector;
+
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
+	for (auto Actor : FoundActors)
+	{
+		AWaterSurface* water = Cast<AWaterSurface>(Actor);
+		if (water)
+		{
+			Water = water;
+		}
+	}
+
+	IsRaftRiding = false;
+
+	IsRide = true;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -98,8 +115,81 @@ void APlayerCharacter::Tick(float DeltaTime)
 		if (input->Attack.IsPress) TriggerHammerAttack();
 		else if (input->Attack.IsRelease) ReleaseHammerAttack();
 
-		MoveForward(input->LeftStick.Vertical);
-		MoveRight(input->LeftStick.Horizontal);
+		FVector movedPos = GetActorLocation();
+		if (input->Select.IsPress && IsRide)
+		{
+			IsRide = false;
+
+			if (!IsRaftRiding)
+			{
+				UE_LOG(LogTemp, Log, TEXT("Charenge Ride"));
+				TArray<AActor*> FoundActors;
+				UGameplayStatics::GetAllActorsOfClass(GetWorld(), ARaft::StaticClass(), FoundActors);
+				for (auto Actor : FoundActors)
+				{
+					ARaft* raft = Cast<ARaft>(Actor);
+					if (!raft) continue;
+					UE_LOG(LogTemp, Log, TEXT("Found Raft"));
+					if (!raft->IsRide(movedPos)) continue;
+
+					UE_LOG(LogTemp, Log, TEXT("Ride"));
+					CurrentRaft = raft;
+					IsRaftRiding = true;
+					FVector RidePos = CurrentRaft->GetActorLocation();
+					RidePos.Z = CurrentRaft->GetRiderZ();
+					movedPos = RidePos;
+					PrevPos = RidePos;
+				}
+			}
+			else
+			{
+				FVector GetOffPos = CurrentRaft->GetGetOffPos();
+				if (GetOffPos != FVector::ZeroVector)
+				{
+					UE_LOG(LogTemp, Log, TEXT("Get Off"));
+					GetOffPos.Z = CurrentRaft->GetRiderZ();
+					SetActorLocation(GetOffPos);
+					movedPos = GetOffPos;
+					IsRaftRiding = false;
+				}
+			}
+		}
+
+		if (input->Select.IsRelease)
+		{
+			IsRide = true;
+		}
+
+		if (IsRaftRiding)
+		{
+			movedPos = CurrentRaft->GetMoveVec() + movedPos;
+			SetActorLocation(movedPos);
+			if (!CurrentRaft->IsOnRaft(GetActorLocation()))
+			{
+				FVector moveVec = movedPos - PrevPos;
+				SetActorLocation(CurrentRaft->AdjustMoveOnRaft(PrevPos, moveVec));
+			}
+			else
+			{
+				MoveForward(input->LeftStick.Vertical);
+				MoveRight(input->LeftStick.Horizontal);
+			}
+		}
+		else if (!Water->IsLand(movedPos))
+		{
+			if (PrevPos != FVector::ZeroVector)
+			{
+				FVector moveVec = movedPos - PrevPos;
+				moveVec.Z = 0;
+				SetActorLocation(Water->AdjustMoveInLand(PrevPos, moveVec, 100.0f));
+			}
+		}
+		else
+		{
+			MoveForward(input->LeftStick.Vertical);
+			MoveRight(input->LeftStick.Horizontal);
+		}
+		PrevPos = movedPos;
 	}
 
 	if (IsAttackHold)

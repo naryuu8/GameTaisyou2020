@@ -22,14 +22,15 @@ public:
 	float GetWaveSpeed() { return WaveSpeed; }
 	FVector GetOutLandPos(FVector worldPos, float circleRadius);
 	FVector AdjustMoveInWater(FVector worldPos, FVector moveVec, float circleRadius);
+	FVector AdjustMoveInLand(FVector worldPos, FVector moveVec, float circleRadius);
 	bool IsInWater(FVector worldPos);
 	bool IsLand(FVector worldPos);
+	FVector GetGetOffPos(FVector WorldPos, float Radius);
 
 private:
 	void CreateWave(int32 x, int32 y, float pawer);
 	void SetCircleLand(FVector CirclePostion, float Radius);
 	void SetSquareLand(FVector SquareLocation, float XLength, float YLength);
-	void SetLand(int32 sx, int32 sy, int32 ex, int32 ey);
 
 	int32 CalcIndex(int32 x, int32 y);
 	FVector2D LocationToVertices(FVector Location);
