@@ -26,6 +26,7 @@ public:
 	UFadeUI(const FObjectInitializer& ObjectInitializer);
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 	FORCEINLINE FLinearColor GetFadeColor() const { return FadeColor; }
+	FORCEINLINE bool GetFadeIsEnable() const { return IsEnable; }
 	//フェード状態にする
 	//第一引数 フェード色
 	//第二引数 trueでフェードイン、falseでフェードアウト

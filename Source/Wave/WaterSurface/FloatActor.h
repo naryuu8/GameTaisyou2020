@@ -31,6 +31,6 @@ public:
 	UPROPERTY(EditAnywhere)
 		float FloatSpeed = 0.1f;
 
-private:
+protected:
 	AWaterSurface* WaterSurface;
 };
