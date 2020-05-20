@@ -19,11 +19,14 @@ private:
 	FLinearColor FadeColor;
 	bool IsFadeIn;
 	bool IsEnable;//Fade中ならtrue
-	float FadeSpeed;
+	bool IsSceneFade;//フェード終了時にシーン遷移するならtrue
+	float FadeSpeed;	
+	FName NextLevelName;// 次のレベルの名前
 public:
 	UFadeUI(const FObjectInitializer& ObjectInitializer);
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 	FORCEINLINE FLinearColor GetFadeColor() const { return FadeColor; }
+	FORCEINLINE bool GetFadeIsEnable() const { return IsEnable; }
 	//フェード状態にする
 	//第一引数 フェード色
 	//第二引数 trueでフェードイン、falseでフェードアウト
@@ -34,7 +37,30 @@ public:
 		FadeColor = fade_color;
 		IsFadeIn = fade_in;
 		IsEnable = true;
+		IsSceneFade = false;
 		FadeSpeed = fade_speed;
+		if (IsFadeIn)
+		{
+			FadeColor.A = 0.0f;
+		}
+		else
+		{
+			FadeColor.A = 1.0f;
+		}
+	}
+	//フェードインにする
+	//第一引数 フェード色
+	//第二引数 フェード速度
+	//第三引数 シーンの名前
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+	void SetFadeLevel(const FLinearColor fade_color, const float fade_speed, const FName levelname)
+	{
+		FadeColor = fade_color;
+		IsFadeIn = true;
+		IsEnable = true;
+		IsSceneFade = true;
+		FadeSpeed = fade_speed;
+		NextLevelName = levelname;
 		if (IsFadeIn)
 		{
 			FadeColor.A = 0.0f;

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "FadeUI.h"
+#include "Kismet/GameplayStatics.h"
 
 UFadeUI::UFadeUI(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer), IsEnable(false)
@@ -20,6 +20,10 @@ void UFadeUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 		if (FadeColor.A >= 1.0f)
 		{
 			IsEnable = false;
+			if (IsSceneFade)
+			{
+				UGameplayStatics::OpenLevel(this, NextLevelName, true);
+			}
 		}
 	}
 	else

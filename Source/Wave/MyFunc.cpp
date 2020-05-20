@@ -2,6 +2,8 @@
 
 
 #include "MyFunc.h"
+#include "Engine/Texture2D.h"
+#include "Engine/Engine.h"
 
 // Ž²( axis ) ‰ñ“]Šp“x( angle( ƒ‰ƒWƒAƒ“Šp ) )
 FQuat MyFunc::FromAxisAngleToQuaternion(const FVector & axis, float angle)
@@ -14,4 +16,17 @@ FQuat MyFunc::FromAxisAngleToQuaternion(const FVector & axis, float angle)
 	q.W = FMath::Cos(angle / 2);
 
 	return q;
+}
+
+UTexture2D* MyFunc::LoadTexture2DFromAssetPath(const FName AssetPath)
+{
+	return  LoadObject<UTexture2D>(NULL, *AssetPath.ToString(), NULL, LOAD_None, NULL);
+}
+
+void MyFunc::DisplayDebugMessage(const FColor DisplayColor,FString message)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, DisplayColor, message);
+	}
 }

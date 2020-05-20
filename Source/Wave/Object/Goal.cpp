@@ -2,6 +2,11 @@
 
 
 #include "Goal.h"
+#include "UObject/ConstructorHelpers.h"
+#include "UObject/UObjectGlobals.h"
+#include "Blueprint/UserWidget.h"
+#include "../UI/HammerCountUI.h"
+#include "../WaterSurface/FloatActor.h"
 
 // Sets default values
 AGoal::AGoal()
@@ -10,21 +15,33 @@ AGoal::AGoal()
 	PrimaryActorTick.bCanEverTick = true;
 	Scene = CreateDefaultSubobject <USceneComponent>(TEXT("Scene"));
 	RootComponent = Scene;
-	BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionComp"));
-	BoxComp->SetupAttachment(RootComponent);
-	BoxComp->OnComponentBeginOverlap.AddDynamic(this, &AGoal::OnOverlapBegin);
-
+	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("GoalCollision"));
+	SphereComp->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
 void AGoal::BeginPlay()
 {
 	Super::BeginPlay();
+	isGoal = false;
+	SphereComp->OnComponentBeginOverlap.AddUniqueDynamic(this, &AGoal::OnOverlapBegin);
 }
 
-void AGoal::OnOverlapBegin(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+void AGoal::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	isGoal = true;
+	if (isGoal) return;
+
+	// 衝突したアクターが荷物ならゴール済みにする
+	AFloatActor* OtherFloat = Cast<AFloatActor>(OtherActor);
+	if (OtherFloat)
+	{
+		isGoal = true;
+		// 衝突した荷物を削除
+		OtherFloat->Destroy();
+
+		// ここでドアが閉まるアニメーション開始
+		PlayAnimationDoorClose();
+	}
 }
 
 // Called every frame

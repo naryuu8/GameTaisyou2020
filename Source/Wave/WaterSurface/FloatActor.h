@@ -26,8 +26,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere)
-		FVector2D SplitVector = FVector2D(100, 100);
+		float MinFloatWavePower = 1.0f;
 
-private:
+	UPROPERTY(EditAnywhere)
+		float FloatSpeed = 0.1f;
+
+protected:
 	AWaterSurface* WaterSurface;
 };

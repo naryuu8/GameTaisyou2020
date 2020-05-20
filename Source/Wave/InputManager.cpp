@@ -2,7 +2,7 @@
 
 #include "InputManager.h"
 #include "Components/InputComponent.h"
-
+#include "Kismet/GameplayStatics.h"
 //入力クラスへのインスタンス
 static AInputManager* InputManagerInstance = nullptr;
 
@@ -10,6 +10,7 @@ AInputManager::AInputManager()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.TickGroup = TG_LastDemotable;	// 更新グループを一番最後に登録する
+	SetTickableWhenPaused(true);//ポーズ中でもTickが来るようにする
 }
 
 AInputManager::~AInputManager()
@@ -31,7 +32,19 @@ const AInputManager * AInputManager::GetInstance()
 
 void AInputManager::Tick(float DeltaTime)
 {
+	//ポーズ中ならポーズボタン入力情報のみ更新
+	if (UGameplayStatics::IsGamePaused(GetWorld()))
+	{	
+		State.Pause.Refresh();
+		State.Up.Refresh();
+		State.Down.Refresh();
+		State.Select.Refresh();
+		return;
+	}
+	State.Right.Refresh();
+	State.Left.Refresh();
 	State.Attack.Refresh();
+
 }
 
 void AInputManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -46,5 +59,21 @@ void AInputManager::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AInputManager::InputAttackPress);
 	PlayerInputComponent->BindAction("Attack", IE_Released, this, &AInputManager::InputAttackRelease);
+
+	//ポーズインプット
+	//ポーズ中でもインプットが反応するようにbExecuteWhenPausedをtrueにする
+	PlayerInputComponent->BindAction("Pause", IE_Pressed, this, &AInputManager::InputPausePress).bExecuteWhenPaused = true;
+	PlayerInputComponent->BindAction("Pause", IE_Released, this, &AInputManager::InputPauseRelease).bExecuteWhenPaused = true;
+	PlayerInputComponent->BindAction("Up", IE_Pressed, this, &AInputManager::InputUpPress).bExecuteWhenPaused = true;
+	PlayerInputComponent->BindAction("Up", IE_Released, this, &AInputManager::InputUpRelease).bExecuteWhenPaused = true;
+	PlayerInputComponent->BindAction("Down", IE_Pressed, this, &AInputManager::InputDownPress).bExecuteWhenPaused = true;
+	PlayerInputComponent->BindAction("Down", IE_Released, this, &AInputManager::InputDownRelease).bExecuteWhenPaused = true;
+	PlayerInputComponent->BindAction("Right", IE_Pressed, this, &AInputManager::InputRightPress).bExecuteWhenPaused = true;
+	PlayerInputComponent->BindAction("Right", IE_Released, this, &AInputManager::InputRightRelease).bExecuteWhenPaused = true;
+	PlayerInputComponent->BindAction("Left", IE_Pressed, this, &AInputManager::InputLeftPress).bExecuteWhenPaused = true;
+	PlayerInputComponent->BindAction("Left", IE_Released, this, &AInputManager::InputLeftRelease).bExecuteWhenPaused = true;
+	//決定ボタンインプット
+	PlayerInputComponent->BindAction("Select", IE_Pressed, this, &AInputManager::InputSelectPress).bExecuteWhenPaused = true;
+	PlayerInputComponent->BindAction("Select", IE_Released, this, &AInputManager::InputSelectRelease).bExecuteWhenPaused = true;
 }
 

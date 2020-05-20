@@ -8,11 +8,17 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "../WaterSurface/WaterSurface.h"
+#include "../WaterSurface/Raft.h"
 #include "Kismet/GameplayStatics.h"
-
+#include "../Object/GameController.h"
 #include "../Camera/GameCameraActor.h"
 #include "../InputManager.h"
-
+#include "../UI/PauseUI.h"
+#include "../UI/HammerCountBarUI.h"
+#include "Animation/AnimInstance.h"
+#include "PlayerAnimInstance.h"
+#include "Niagara/Public/NiagaraFunctionLibrary.h"
+#include "../GlobalGameInstance.h"
 //////////////////////////////////////////////////////////////////////////
 // APlayerCharacter
 
@@ -20,7 +26,6 @@ APlayerCharacter::APlayerCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-
 
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
@@ -33,21 +38,10 @@ APlayerCharacter::APlayerCharacter()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-	//コンポーネントを作成
-	// Create a camera boom (pulls in towards the player if there is a collision)
-	//CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	//CameraBoom->SetupAttachment(RootComponent);
-	//CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
-	//CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
-
-	//// Create a follow camera
-	//FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	//FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	//FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
-
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
-
+	//ポーズ中でもTickが来るようにする
+	SetTickableWhenPaused(true);
 }
 
 //void APlayerCharacter::BeginPlay()
@@ -56,23 +50,63 @@ APlayerCharacter::APlayerCharacter()
 //
 //}
 
-
 void APlayerCharacter::BeginPlay_C()
 {
 	//現在のBegibPlayはモデルの都合上こちらで書けないので関数で呼ぶ
 	IsAttackHold = false;
-
 	IsPlayAttackAnime = false;
-
 	HammerPower = 0.0f;
+	HammerHP = MaxHammerHP;
+	if (!AnimInst)
+	{
+		AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+		// ハンマーで叩いた時に呼ばれる関数を登録
+		AnimInst->AttackEndCallBack.BindUObject(this, &APlayerCharacter::HummerAttackEnd);
+	}
+	//BarUI生成
+	if (HammerCountBarUIClass != nullptr)
+	{
+		HammerCountBarUI = CreateWidget<UHammerCountBarUI>(GetWorld(), HammerCountBarUIClass);
+		HammerCountBarUI->AddToViewport();
+		HammerCountBarUI->SetMaxHammerHP(MaxHammerHP);
+		//生成してもnullptrだったらエラー文表示
+		if (HammerCountBarUI == nullptr)
+		{
+			UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"HammerCountBarUIClass is nullptr");
+	}
+
+	PrevPos = FVector::ZeroVector;
+
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
+	for (auto Actor : FoundActors)
+	{
+		AWaterSurface* water = Cast<AWaterSurface>(Actor);
+		if (water)
+		{
+			Water = water;
+		}
+	}
+
+	IsRaftRiding = false;
+
+	IsRide = true;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
-	if (!AnimInst)
-	{
-		AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	PauseInput();
+	if (UGameplayStatics::IsGamePaused(GetWorld()))
+	{//ポーズ中はポーズの入力しか受け付けない
+		return;
 	}
+	//アタックアニメが再生中か確認
+	IsPlayAttackAnime = AnimInst->GetIsAttackAnime();
 
 	const AInputManager * inputManager = AInputManager::GetInstance();
 	if (inputManager)
@@ -81,45 +115,95 @@ void APlayerCharacter::Tick(float DeltaTime)
 		if (input->Attack.IsPress) TriggerHammerAttack();
 		else if (input->Attack.IsRelease) ReleaseHammerAttack();
 
-		MoveForward(input->LeftStick.Vertical);
-		MoveRight(input->LeftStick.Horizontal);
+		FVector movedPos = GetActorLocation();
+		if (input->Select.IsPress && IsRide)
+		{
+			IsRide = false;
+
+			if (!IsRaftRiding)
+			{
+				UE_LOG(LogTemp, Log, TEXT("Charenge Ride"));
+				TArray<AActor*> FoundActors;
+				UGameplayStatics::GetAllActorsOfClass(GetWorld(), ARaft::StaticClass(), FoundActors);
+				for (auto Actor : FoundActors)
+				{
+					ARaft* raft = Cast<ARaft>(Actor);
+					if (!raft) continue;
+					UE_LOG(LogTemp, Log, TEXT("Found Raft"));
+					if (!raft->IsRide(movedPos)) continue;
+
+					UE_LOG(LogTemp, Log, TEXT("Ride"));
+					CurrentRaft = raft;
+					IsRaftRiding = true;
+					FVector RidePos = CurrentRaft->GetActorLocation();
+					RidePos.Z = CurrentRaft->GetRiderZ();
+					movedPos = RidePos;
+					PrevPos = RidePos;
+				}
+			}
+			else
+			{
+				FVector GetOffPos = CurrentRaft->GetGetOffPos();
+				if (GetOffPos != FVector::ZeroVector)
+				{
+					UE_LOG(LogTemp, Log, TEXT("Get Off"));
+					GetOffPos.Z = CurrentRaft->GetRiderZ();
+					SetActorLocation(GetOffPos);
+					movedPos = GetOffPos;
+					IsRaftRiding = false;
+				}
+			}
+		}
+
+		if (input->Select.IsRelease)
+		{
+			IsRide = true;
+		}
+
+		if (IsRaftRiding)
+		{
+			movedPos = CurrentRaft->GetMoveVec() + movedPos;
+			SetActorLocation(movedPos);
+			if (!CurrentRaft->IsOnRaft(GetActorLocation()))
+			{
+				FVector moveVec = movedPos - PrevPos;
+				SetActorLocation(CurrentRaft->AdjustMoveOnRaft(PrevPos, moveVec));
+			}
+			else
+			{
+				MoveForward(input->LeftStick.Vertical);
+				MoveRight(input->LeftStick.Horizontal);
+			}
+		}
+		else if (!Water->IsLand(movedPos))
+		{
+			if (PrevPos != FVector::ZeroVector)
+			{
+				FVector moveVec = movedPos - PrevPos;
+				moveVec.Z = 0;
+				SetActorLocation(Water->AdjustMoveInLand(PrevPos, moveVec, 100.0f));
+			}
+		}
+		else
+		{
+			MoveForward(input->LeftStick.Vertical);
+			MoveRight(input->LeftStick.Horizontal);
+		}
+		PrevPos = movedPos;
 	}
 
-	//アタックアニメが再生中か確認
-	IsPlayAttackAnime = AnimInst->GetIsAttackAnime();
 	if (IsAttackHold)
 	{//ハンマーを溜めていたら力を足す
-		HammerPower += 0.1f;
+		HammerPower += ChargePower;
+		MinusHammerGauge(HammerPower);
 	}
 
 }
-
-
-// Input
 
 void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	//第一引数はプロジェクト設定のアクションマッピングと同じ名前のインプットが呼ばれる
-	//PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	//PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-
-	//ハンマーで叩くアクションのキー登録
-	/*PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::TriggerHammerAttack);
-	PlayerInputComponent->BindAction("Attack", IE_Released, this, &APlayerCharacter::ReleaseHammerAttack);
-
-	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);*/
-
-	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
-	// "turn" handles devices that provide an absolute delta, such as a mouse.
-	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
-	/*PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("TurnRate", this, &APlayerCharacter::TurnAtRate);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &APlayerCharacter::LookUpAtRate);*/
-
 }
 
 void APlayerCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
@@ -177,32 +261,119 @@ void APlayerCharacter::TriggerHammerAttack(void)
 	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInst->HummerChergeEvent();
 	IsAttackHold = true;
-
 }
 
 void APlayerCharacter::ReleaseHammerAttack(void)
 {
+	if (!IsAttackHold) return;
 	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInst->HummerAttackEvent();
-	WaterAttack();
 	IsAttackHold = false;
-	HammerPower = 0.0f;
-
-	// 攻撃カウント増加
-	AttackCount++;
 }
 
-void APlayerCharacter::WaterAttack()
+void APlayerCharacter::HummerAttackEnd()
+{
+	if (AttackEffect && AttackEffect->IsValid() && HummerTipPoint)
+	{
+		// ハンマーの先端を取得
+		FVector AttackPoint = HummerTipPoint->GetComponentLocation();
+		// 波を起こす
+		WaterAttack(AttackPoint, HammerPower);
+		// エフェクトを生成
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, AttackEffect, AttackPoint, GetActorRotation(), FVector::OneVector * AttackEffectScale, true);
+	}
+	// ハンマーの叩けるカウントを減らす
+	MinusHammerCount();
+	HammerPower = 0.0f;
+}
+
+void APlayerCharacter::MinusHammerCount()
+{
+	AGameController* game;
+	game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+	if (game)
+	{
+		game->MinusHammerCount();
+	}
+}
+
+void APlayerCharacter::MinusHammerGauge(const float Power)
+{
+	if (!HammerCountBarUI)return;
+	HammerHP -= ChargePower;
+	if (HammerHP < 0.0f)
+	{
+		HammerHP = 0.0f;
+	}
+	HammerCountBarUI->UpdateBar(HammerHP);
+}
+
+void APlayerCharacter::PauseInput()
+{
+	const AInputManager * inputManager = AInputManager::GetInstance();
+	if (!inputManager)return;
+	const InputState * input = inputManager->GetState();
+	if (input->Pause.IsPress)
+	{//ポーズ中でなければポーズ画面を開き、ポーズ中だったらポーズ画面を閉じる
+		if (!UGameplayStatics::IsGamePaused(GetWorld()))
+		{
+			if (PauseUIClass != nullptr)
+			{//初めてポーズ画面を開くときはUIを生成する
+				if (!PauseUI)
+				{
+					PauseUI = CreateWidget<UPauseUI>(GetWorld(), PauseUIClass);
+					PauseUI->AddToViewport();
+				}
+				else if (PauseUI)
+				{
+					if (PauseUI->GetIsPlayAnimation())return;
+					PauseUI->AddToViewport();
+				}
+				//生成してもnullptrだったらエラー文表示
+				if(PauseUI == nullptr)
+				{
+					UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"Widget cannot create");
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"PauseUIClass is nullptr");
+			}
+		}
+		else if (UGameplayStatics::IsGamePaused(GetWorld()))
+		{
+			if (!PauseUI)return;
+			if (PauseUI->GetIsPlayAnimation())return;
+			PauseUI->EndPlayAnimation();
+		}
+	}
+	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
+	if (!PauseUI)return;
+	if (input->Up.IsPress)
+	{
+		PauseUI->BackSelectState();
+	}
+	if (input->Down.IsPress)
+	{
+		PauseUI->NextSelectState();
+	}
+	if (input->Select.IsPress)
+	{
+		PauseUI->SelectStateAction();
+	}
+}
+
+void APlayerCharacter::WaterAttack(FVector Point, float Power)
 {
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
-
+	
 	for (auto Actor : FoundActors)
 	{
 		AWaterSurface* water = Cast<AWaterSurface>(Actor);
 		if (water)
 		{
-			water->AddPower(GetActorLocation(), HammerPower * 100.0f);
+			water->AddPower(Point, Power * 100.0f);
 		}
 	}
 }

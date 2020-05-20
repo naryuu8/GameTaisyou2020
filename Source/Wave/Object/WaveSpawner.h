@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
+// ˆê’èŽžŠÔ‚²‚Æ‚É”g‚ð‹N‚±‚·ƒNƒ‰ƒX
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "WaveSpawner.generated.h"
@@ -20,6 +20,8 @@ protected:
 	virtual void BeginPlay() override;
 	UPROPERTY(EditAnywhere, Category = "Instanced")
 		float WaveTime;
+	UPROPERTY(EditAnywhere, Category = "Instanced")
+		float WavePower = 1.0f;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

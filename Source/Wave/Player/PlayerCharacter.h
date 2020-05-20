@@ -5,16 +5,47 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Animation/AnimInstance.h"
-#include "PlayerAnimInstance.h"
+#include "Niagara/Classes/NiagaraSystem.h"	// エフェクト用
 //generated.hは一番最後にかかないといけない
 #include "PlayerCharacter.generated.h"
+class UPauseUI;
+class UPlayerAnimInstance;
+class UHammerCountBarUI;
+class AWaterSurface;
+class ARaft;
 
 UCLASS(config = Game)
 class APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+protected:
+	UPROPERTY(EditAnywhere, Category = Camera)
+		class AGameCameraActor* FollowCamera;
+	
+private:
+	// ポーズUI　エディタで指定する
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UPauseUI> PauseUIClass;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UHammerCountBarUI> HammerCountBarUIClass;
+	UPauseUI* PauseUI = nullptr;
+	UHammerCountBarUI* HammerCountBarUI = nullptr;
+	//ゲージで表示する用のプレイヤーのハンマーMAXHP
+	UPROPERTY(EditAnywhere, Category = "Instanced")
+		float MaxHammerHP = 100.0f;
+	//1フレーム毎に溜めるハンマーパワー
+	UPROPERTY(EditAnywhere, Category = "Instanced")
+		float ChargePower = 0.1f;
+	float HammerHP;
+	void PauseInput();
+
+	FVector PrevPos;
+
+	AWaterSurface* Water;
+
+	ARaft* CurrentRaft;
+	bool IsRaftRiding;
 public:
 	APlayerCharacter();
 
@@ -22,17 +53,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void BeginPlay_C();
 
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		FORCEINLINE	int GetAttackCount() { return AttackCount; };
-
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	// ハンマーの先端のトランスフォーム
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++Class")
+		USceneComponent* HummerTipPoint = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++Class")
 		float BaseTurnRate;
 
-	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++Class")
 		float BaseLookUpRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+		UNiagaraSystem* AttackEffect = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+		float AttackEffectScale = 1.0f;
 
 protected:
 
@@ -54,6 +90,8 @@ protected:
 	void TriggerHammerAttack(void);
 	//キーを離したときのハンマー攻撃
 	void ReleaseHammerAttack(void);
+
+	void HummerAttackEnd();
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -72,17 +110,16 @@ protected:
 		float HammerPower;
 private:
 
-	UPROPERTY(EditAnywhere, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		class AGameCameraActor* FollowCamera;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = )
-		float BaseLookUpRate;
-
 	UPlayerAnimInstance* AnimInst;
-	int AttackCount = 0;
 
 	//水面に波をたてる
-	void WaterAttack();
+	void WaterAttack(FVector Point, float Power);
+	//ハンマー残り回数をマイナス
+	void MinusHammerCount();
+	//ハンマー消費ゲージをマイナス
+	void MinusHammerGauge(const float Power);
+
+	bool IsRide;
 public:
 	/** Returns CameraBoom subobject **/
 //	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
