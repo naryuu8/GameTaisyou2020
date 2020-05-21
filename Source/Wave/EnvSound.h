@@ -17,9 +17,6 @@ public:
 	AEnvSound();
 	UPROPERTY(EditAnywhere)
 	USoundBase* soundBase;
-
-	UPROPERTY(EditAnywhere)
-	FTransform transform;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
