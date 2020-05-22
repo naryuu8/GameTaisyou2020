@@ -5,7 +5,7 @@
 #include "Goal.h"
 #include "Blueprint/UserWidget.h"
 #include "../UI/HammerCountUI.h"
-
+#include "../UI/StageClearUI.h"
 // Sets default values
 AGameController::AGameController()
 {
@@ -43,6 +43,7 @@ void AGameController::Tick(float DeltaTime)
 	if (GoalCount >= NormaGoalCount)
 	{
 		IsGameClear = true;
+		CreateStageClearUI();
 	}
 }
 
@@ -77,6 +78,26 @@ void AGameController::CreateHammerCountUI()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("HammerCountUI : %s"), L"UIClass is nullptr");
+	}
+}
+
+void AGameController::CreateStageClearUI()
+{
+	if (StageClearUIClass != nullptr)
+	{
+		StageClearUI = CreateWidget<UStageClearUI>(GetWorld(), StageClearUIClass);
+		if (HammerCountUI != nullptr)
+		{
+			StageClearUI->AddToViewport();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("StageClearUIClass : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("StageClearUIClass : %s"), L"UIClass is nullptr");
 	}
 }
 
