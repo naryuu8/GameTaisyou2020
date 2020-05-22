@@ -10,7 +10,7 @@
 #include "../WaterSurface/WaterSurface.h"
 #include "../WaterSurface/Raft.h"
 #include "Kismet/GameplayStatics.h"
-#include "../Object/Goal.h"
+#include "../Object/GameController.h"
 #include "../Camera/GameCameraActor.h"
 #include "../InputManager.h"
 #include "../UI/PauseUI.h"
@@ -291,11 +291,11 @@ void APlayerCharacter::HummerAttackEnd()
 
 void APlayerCharacter::MinusHammerCount()
 {
-	AGoal* goal;
-	goal = Cast<AGoal>(UGameplayStatics::GetActorOfClass(GetWorld(), AGoal::StaticClass()));
-	if (goal)
+	AGameController* game;
+	game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+	if (game)
 	{
-		goal->MinusHammerCount();
+		game->MinusHammerCount();
 	}
 }
 
