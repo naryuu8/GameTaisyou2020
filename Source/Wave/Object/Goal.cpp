@@ -33,10 +33,13 @@ void AGoal::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 
 	// 衝突したアクターが荷物ならゴール済みにする
 	AFloatActor* OtherFloat = Cast<AFloatActor>(OtherActor);
-	if (OtherFloat->ActorHasTag("Bom")) {
-		OtherFloat->Destroy();
-		BreakHome();
-		return;
+	if (OtherFloat)
+	{
+		if (OtherFloat->ActorHasTag("Bom")) {
+			OtherFloat->Destroy();
+			BreakHome();
+			return;
+		}
 	}
 
 	if (isGoal) return;

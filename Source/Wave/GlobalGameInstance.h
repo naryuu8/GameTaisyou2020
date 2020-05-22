@@ -20,7 +20,6 @@ private:
 		int StageNumber;
 public:
 	static UGlobalGameInstance* GetInstance();
-	//アニメーション再生中はポーズテキストを表示しない
 	UFUNCTION(BlueprintCallable, Category = "GlobalC++Class")
 		void SetStageNumber(const int number) { StageNumber = number; };
 	UFUNCTION(BlueprintCallable, Category = "GlobalC++Class")
