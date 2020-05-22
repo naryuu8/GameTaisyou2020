@@ -20,7 +20,7 @@ class APlayerCharacter : public ACharacter
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditAnywhere, Category = Camera)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Camera)
 		class AGameCameraActor* FollowCamera;
 	
 private:

@@ -22,6 +22,10 @@ public:
 	// Sets default values for this actor's properties
 	AGameCameraActor();
 
+	// イベント：カメラのバイブレーション
+	UFUNCTION(BlueprintCallable, Category = "C++Event", BlueprintImplementableEvent)
+		void EventCameraShake(float Scale);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

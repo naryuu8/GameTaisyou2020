@@ -30,31 +30,27 @@ void AGoal::BeginPlay()
 
 void AGoal::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-
-	// 衝突したアクターが荷物ならゴール済みにする
 	AFloatActor* OtherFloat = Cast<AFloatActor>(OtherActor);
-	if (OtherFloat)
+	// 荷物以外は判定しない
+	if (!OtherFloat) return;
+
+	// 衝突したアクターが爆弾の時爆発してゴール済みでもゴールしていないことにする
+	if (OtherFloat->ActorHasTag("Bom"))
 	{
-		if (OtherFloat->ActorHasTag("Bom")) {
-			OtherFloat->Destroy();
-			BreakHome();
-			return;
-		}
+		isGoal = false;
+		OtherFloat->Destroy();
+		BreakHome();
+		return;
 	}
 
 	if (isGoal) return;
-	
-	if (OtherFloat)
-	{
-		isGoal = true;
-		// 衝突した荷物を削除
-		OtherFloat->Destroy();
 
-		// ここでドアが閉まるアニメーション開始
-		PlayAnimationDoorClose();
-
-		
-	}
+	// 衝突したアクターが荷物ならゴール済みにする
+	isGoal = true;
+	// 衝突した荷物を削除
+	OtherFloat->Destroy();
+	// ここでドアが閉まるアニメーション開始
+	PlayAnimationDoorClose();
 }
 
 // Called every frame
