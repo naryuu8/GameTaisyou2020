@@ -17,6 +17,7 @@ AGoal::AGoal()
 	RootComponent = Scene;
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("GoalCollision"));
 	SphereComp->SetupAttachment(RootComponent);
+	
 }
 
 // Called when the game starts or when spawned
@@ -29,10 +30,17 @@ void AGoal::BeginPlay()
 
 void AGoal::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (isGoal) return;
 
 	// 衝突したアクターが荷物ならゴール済みにする
 	AFloatActor* OtherFloat = Cast<AFloatActor>(OtherActor);
+	if (OtherFloat->ActorHasTag("Bom")) {
+		OtherFloat->Destroy();
+		BreakHome();
+		return;
+	}
+
+	if (isGoal) return;
+	
 	if (OtherFloat)
 	{
 		isGoal = true;
@@ -41,6 +49,8 @@ void AGoal::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 
 		// ここでドアが閉まるアニメーション開始
 		PlayAnimationDoorClose();
+
+		
 	}
 }
 
