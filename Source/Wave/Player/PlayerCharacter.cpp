@@ -281,6 +281,8 @@ void APlayerCharacter::HummerAttackEnd()
 		WaterAttack(AttackPoint, HammerPower);
 		// エフェクトを生成
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, AttackEffect, AttackPoint, GetActorRotation(), FVector::OneVector * AttackEffectScale, true);
+		// カメラシェイク
+		if(FollowCamera) FollowCamera->EventCameraShake(HammerPower);
 	}
 	// ハンマーの叩けるカウントを減らす
 	MinusHammerCount();
