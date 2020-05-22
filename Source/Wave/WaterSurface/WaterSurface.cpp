@@ -328,9 +328,9 @@ FVector AWaterSurface::AdjustMoveInLand(FVector actorPos, FVector moveVec, float
 {
 	FVector movedPos = actorPos + moveVec;
 
-	for (int xi = 0; xi < SplitVector.X; ++xi)
+	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
 	{
-		for (int yi = 0; yi < SplitVector.Y; ++yi)
+		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
 		{
 			float xp = Vertices[CalcIndex(xi, yi)].X;
 			float yp = Vertices[CalcIndex(xi, yi)].Y;
