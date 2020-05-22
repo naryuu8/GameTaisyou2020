@@ -261,6 +261,7 @@ void APlayerCharacter::TriggerHammerAttack(void)
 	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInst->HummerChergeEvent();
 	IsAttackHold = true;
+	HammerCountBarUI->FirstEvent();
 }
 
 void APlayerCharacter::ReleaseHammerAttack(void)
@@ -269,6 +270,7 @@ void APlayerCharacter::ReleaseHammerAttack(void)
 	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInst->HummerAttackEvent();
 	IsAttackHold = false;
+	HammerCountBarUI->ReflectionGauge();
 }
 
 void APlayerCharacter::HummerAttackEnd()
@@ -281,6 +283,8 @@ void APlayerCharacter::HummerAttackEnd()
 		WaterAttack(AttackPoint, HammerPower);
 		// エフェクトを生成
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, AttackEffect, AttackPoint, GetActorRotation(), FVector::OneVector * AttackEffectScale, true);
+		// カメラシェイク
+		if(FollowCamera) FollowCamera->EventCameraShake(HammerPower);
 	}
 	// ハンマーの叩けるカウントを減らす
 	MinusHammerCount();
@@ -305,7 +309,7 @@ void APlayerCharacter::MinusHammerGauge(const float Power)
 	{
 		HammerHP = 0.0f;
 	}
-	HammerCountBarUI->UpdateBar(HammerHP);
+	HammerCountBarUI->UpdateGauge(HammerHP);
 }
 
 void APlayerCharacter::PauseInput()

@@ -26,7 +26,7 @@ public class Wave : ModuleRules
         PrivateDependencyModuleNames.AddRange(new string[] {
             "EditorStyle",
             "KismetCompiler",
-            "UnrealEd",
+            //"UnrealEd",
             "GraphEditor",
             "SlateCore",
             "Kismet",

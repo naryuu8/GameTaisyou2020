@@ -31,10 +31,11 @@ protected:
 	UFUNCTION()
 		void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	// ドアを閉めるアニメーションをブループリント側で作成
+	// イベント：ドアを閉めるアニメーションをブループリント側で作成
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void PlayAnimationDoorClose();
 
+	// イベント：家が破壊される
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void BreakHome();
 
