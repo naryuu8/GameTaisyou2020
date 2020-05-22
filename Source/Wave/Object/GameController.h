@@ -33,6 +33,8 @@ protected:
 private:
 	// ゲームクリアかどうか
 	bool IsGameClear;
+	//ゲームオーバーかどうか
+	bool IsGameOver;
 	// シーン上の全てのゴールのポインタを所持する
 	TArray<class AGoal*> GoalArray;
 
@@ -58,6 +60,8 @@ public:
 private:
 	// ゴール済みの個数を取得
 	int GetGoalCount();
+	// 爆発済みの家の個数を取得
+	int GetNotExplotionCount();
 	//ハンマーを叩ける回数が1以上ならUIを生成
 	void CreateHammerCountUI();
 	void CreateStageClearUI();
