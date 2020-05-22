@@ -23,14 +23,18 @@ private:
 	ATitleMemo* TitleMemo;
 	int MemoNum;//ÉXÉeÅ[ÉWëIëì`ï[ÇÃëçêîÇäiî[
 	bool IsSelectMap = false;
-	void TitleInput();
+	int MyStageNumber = 0;
+	void GetAllTitleMemo();
 public:	
 	// Sets default values for this actor's properties
 	ATitleCamera();
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Instanced")
-		int MyStageNumber = 0;
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		void GetAllTitleMemo();
+		int DefaultStageNumber = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Instanced")
+		float CameraSpeed = 0.1f;
+	void SelectInput();
+	void RightInput();
+	void LeftInput();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -42,4 +46,5 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE bool GetIsSelectMap() const { return IsSelectMap; }
 };
