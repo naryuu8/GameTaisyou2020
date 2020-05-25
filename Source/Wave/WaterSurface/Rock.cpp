@@ -43,7 +43,6 @@ void ARock::Tick(float DeltaTime)
 	{
 		Water->AddPower(GetActorLocation(), Power * Magnification);
 		IsWave = false;
-		UE_LOG(LogTemp, Log, TEXT("Rock = %f"), Power);
 	}
 	else if (Power < 0.1f)
 	{

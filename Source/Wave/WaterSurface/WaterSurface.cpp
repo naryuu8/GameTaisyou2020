@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "CircleLand.h"
 #include "SquareLand.h"
+#include "FlashFlood.h"
 
 AWaterSurface::AWaterSurface()
 {
@@ -122,6 +123,12 @@ void AWaterSurface::Tick(float DeltaTime)
 	{
 		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
 		{
+			if (IsLands[CalcIndex(xi, yi)])
+			{
+				if (abs(NewHeights[CalcIndex(xi, yi)]) > abs(CurrentHeights[CalcIndex(xi, yi)]))
+					continue;
+			}
+
 			int32 index = CalcIndex(xi, yi);
 			PrevHeights[index] = CurrentHeights[index];
 			CurrentHeights[index] = NewHeights[index];
@@ -246,13 +253,29 @@ FVector AWaterSurface::GetWavePower(FVector worldPos)
 {
 	if (!IsInWater(worldPos)) return FVector::ZeroVector;
 
+	FVector answerVec = FVector::ZeroVector;
+
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFlashFlood::StaticClass(), FoundActors);
+
+	for (auto Actor : FoundActors)
+	{
+		AFlashFlood* FlashFlood = Cast<AFlashFlood>(Actor);
+		if (FlashFlood)
+		{
+			FVector addVec = FlashFlood->GetFloatVec(worldPos);
+			addVec.Z = 0;
+			answerVec += addVec;
+		}
+	}
+
 	int32 WaveX = worldPos.X / X_Size;
 	int32 WaveY = worldPos.Y / Y_Size;
 
-	if (WaveX <= 2) return FVector::ZeroVector;
-	if (WaveY <= 2) return FVector::ZeroVector;
-	if (WaveX >= SplitVector.X - 3) return FVector::ZeroVector;
-	if (WaveY >= SplitVector.Y - 3) return FVector::ZeroVector;
+	if (WaveX <= 2) return answerVec;
+	if (WaveY <= 2) return answerVec;
+	if (WaveX >= SplitVector.X - 3) return answerVec;
+	if (WaveY >= SplitVector.Y - 3) return answerVec;
 	
 	float uL = CurrentHeights[CalcIndex(WaveX - 1, WaveY)];
 	float uR = CurrentHeights[CalcIndex(WaveX + 1, WaveY)];
@@ -262,7 +285,9 @@ FVector AWaterSurface::GetWavePower(FVector worldPos)
 	float x = uL - uR;
 	float y = uT - uB;
 
-	return FVector(x, y, 0);
+	answerVec += FVector(x, y, 0);
+
+	return answerVec;
 }
 
 FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
