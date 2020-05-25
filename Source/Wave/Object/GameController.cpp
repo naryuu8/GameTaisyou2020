@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "../UI/HammerCountUI.h"
 #include "../UI/StageClearUI.h"
+#include "../UI/GameOverUI.h"
+#include "../InputManager.h"
 // Sets default values
 AGameController::AGameController()
 {
@@ -30,6 +32,8 @@ void AGameController::BeginPlay()
 	}
 
 	CreateHammerCountUI();
+	//ポーズ中でもTickが来るようにする
+	SetTickableWhenPaused(true);
 }
 
 // Called every frame
@@ -39,11 +43,17 @@ void AGameController::Tick(float DeltaTime)
 
 	int GoalCount = GetGoalCount();
 	int NotExplotionCount = GetNotExplotionCount(); //壊れていない家の数Get
-	//どうやってもここからノルマ達成は不可
+	//どうやってもここからノルマ達成不可能の時ゲームオーバーにする
 	if (NotExplotionCount < NormaGoalCount)
 	{
 		IsGameOver = true;
-		//下記あとゲームオーバーUIオナシャス
+		CreateGameOverUI();
+		if (UGameplayStatics::IsGamePaused(GetWorld()))
+		{//ゲームオーバー画面はポーズ扱いにするのでインプットが終わり次第returnする
+			InputGameOverUI();
+			return;
+		}
+		
 	}
 
 	// ノルマ達成ならとりあえずゲームクリア
@@ -81,9 +91,9 @@ void AGameController::CreateHammerCountUI()
 {
 	//ハンマーカウントが0なら生成しない
 	if (HammerCount == 0)return;
-	if (UIClass != nullptr)
+	if (HammerCountUIClass != nullptr)
 	{
-		HammerCountUI = CreateWidget<UHammerCountUI>(GetWorld(), UIClass);
+		HammerCountUI = CreateWidget<UHammerCountUI>(GetWorld(), HammerCountUIClass);
 		if (HammerCountUI != nullptr)
 		{
 			HammerCountUI->AddToViewport();
@@ -102,6 +112,7 @@ void AGameController::CreateHammerCountUI()
 
 void AGameController::CreateStageClearUI()
 {
+	if (StageClearUI)return;
 	if (StageClearUIClass != nullptr)
 	{
 		StageClearUI = CreateWidget<UStageClearUI>(GetWorld(), StageClearUIClass);
@@ -126,4 +137,46 @@ void AGameController::MinusHammerCount()
 	if (!HammerCountUI)return;
 	HammerCountUI->MinusHammerCount();
 	HammerCountUI->MinusCountAnimation();
+}
+
+void AGameController::CreateGameOverUI()
+{
+	if (GameOverUI)return;
+	if (GameOverUIClass != nullptr)
+	{
+		GameOverUI = CreateWidget<UGameOverUI>(GetWorld(), GameOverUIClass);
+		if (GameOverUI != nullptr)
+		{
+			GameOverUI->AddToViewport();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("GameOverUIClass : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameOverUIClass : %s"), L"UIClass is nullptr");
+	}
+}
+
+void AGameController::InputGameOverUI()
+{
+	if (!GameOverUI)return;
+	if (GameOverUI->GetIsPlayAnimation())return;
+	const AInputManager * inputManager = AInputManager::GetInstance();
+	if (!inputManager)return;
+	const InputState * input = inputManager->GetState();
+	if (input->Up.IsPress)
+	{
+		GameOverUI->BackSelectState();
+	}
+	if (input->Down.IsPress)
+	{
+		GameOverUI->NextSelectState();
+	}
+	if (input->Select.IsPress)
+	{
+		GameOverUI->SelectStateAction();
+	}
 }

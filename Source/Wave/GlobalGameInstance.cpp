@@ -3,6 +3,7 @@
 
 #include "GlobalGameInstance.h"
 #include "Engine/Engine.h"
+#include "Kismet/GameplayStatics.h"
 
 UGlobalGameInstance* UGlobalGameInstance::GetInstance()
 {
@@ -15,4 +16,10 @@ UGlobalGameInstance* UGlobalGameInstance::GetInstance()
 	}
 
 	return instance;
+}
+
+void UGlobalGameInstance::StageSelectChenge()
+{
+	IsStageSelectMode = true;
+	UGameplayStatics::OpenLevel(this, TEXT("TitleMap"), true);
 }

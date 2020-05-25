@@ -25,11 +25,15 @@ public:
 		FORCEINLINE	int GetSelectNumber() const { return SelectNumber; };
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		bool IsPlayAnimation;//アニメーション再生中ならtrue
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	bool GetIsPlayAnimation() const { return IsPlayAnimation; }
 	//引数で一致する番号と同じセレクト番号になったら色を変える
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FSlateColor SelectTextColor(const GameOverState state);
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		ESlateVisibility GetGameOverTextVisibility();
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void SwitchGameOverStateAction();
 	void NextSelectState();
 	void BackSelectState();
 	//対応する選択ステートのアクションを実行する

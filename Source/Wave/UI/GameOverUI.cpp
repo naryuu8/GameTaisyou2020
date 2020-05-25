@@ -2,7 +2,8 @@
 
 
 #include "GameOverUI.h"
-
+#include "../GlobalGameInstance.h"
+#include "Kismet/GameplayStatics.h"
 FSlateColor UGameOverUI::SelectTextColor(const GameOverState state)
 {
 	if (SelectNumber == static_cast<int>(state))
@@ -23,7 +24,6 @@ ESlateVisibility UGameOverUI::GetGameOverTextVisibility()
 
 void UGameOverUI::NextSelectState()
 {
-	if (IsPlayAnimation)return;
 	SelectNumber++;
 	if (SelectNumber > static_cast<int>(GameOverState::STAGESELECT))
 	{
@@ -33,7 +33,6 @@ void UGameOverUI::NextSelectState()
 
 void UGameOverUI::BackSelectState()
 {
-	if (IsPlayAnimation)return;
 	SelectNumber--;
 	if (SelectNumber < 0)
 	{
@@ -43,13 +42,23 @@ void UGameOverUI::BackSelectState()
 
 void UGameOverUI::SelectStateAction()
 {
-	if (IsPlayAnimation)return;
+	EndPlayAnimation();
+}
+
+void UGameOverUI::SwitchGameOverStateAction()
+{
 	switch (SelectNumber)
 	{
 		case static_cast<int>(GameOverState::RESTART) :
-			EndPlayAnimation();
+			UGameplayStatics::OpenLevel(this, *UGameplayStatics::GetCurrentLevelName(GetWorld()) , true);
 				break;
-			case static_cast<int>(GameOverState::STAGESELECT) :
+		case static_cast<int>(GameOverState::STAGESELECT) :
+			UGlobalGameInstance * instance = UGlobalGameInstance::GetInstance();
+			if (instance)
+			{
+				instance->StageSelectChenge();
+			}
 				break;
 	}
+	UGameplayStatics::SetGamePaused(GetWorld(), false);
 }
