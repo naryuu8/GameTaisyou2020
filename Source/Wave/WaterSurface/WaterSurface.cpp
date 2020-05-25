@@ -122,6 +122,12 @@ void AWaterSurface::Tick(float DeltaTime)
 	{
 		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
 		{
+			if (IsLands[CalcIndex(xi, yi)])
+			{
+				if (abs(NewHeights[CalcIndex(xi, yi)]) > abs(CurrentHeights[CalcIndex(xi, yi)]))
+					continue;
+			}
+
 			int32 index = CalcIndex(xi, yi);
 			PrevHeights[index] = CurrentHeights[index];
 			CurrentHeights[index] = NewHeights[index];

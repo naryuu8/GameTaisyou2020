@@ -32,12 +32,14 @@ void AGoal::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 {
 	AFloatActor* OtherFloat = Cast<AFloatActor>(OtherActor);
 	// 荷物以外は判定しない
+	if (isExplotion) return; //すでに壊れているから
 	if (!OtherFloat) return;
 
 	// 衝突したアクターが爆弾の時爆発してゴール済みでもゴールしていないことにする
 	if (OtherFloat->ActorHasTag("Bom"))
 	{
 		isGoal = false;
+		isExplotion = true;
 		OtherFloat->Destroy();
 		BreakHome();
 		return;

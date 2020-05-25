@@ -38,6 +38,13 @@ void AGameController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	int GoalCount = GetGoalCount();
+	int NotExplotionCount = GetNotExplotionCount(); //壊れていない家の数Get
+	//どうやってもここからノルマ達成は不可
+	if (NotExplotionCount < NormaGoalCount)
+	{
+		IsGameOver = true;
+		//下記あとゲームオーバーUIオナシャス
+	}
 
 	// ノルマ達成ならとりあえずゲームクリア
 	if (GoalCount >= NormaGoalCount)
@@ -57,6 +64,18 @@ int AGameController::GetGoalCount()
 	}
 	return Count;
 }
+
+int AGameController::GetNotExplotionCount()
+{
+	int Count = 0;
+	for (auto Goal : GoalArray)
+	{
+		if (!Goal->GetIsExplotion())
+			Count++;
+	}
+	return Count;
+}
+
 
 void AGameController::CreateHammerCountUI()
 {
