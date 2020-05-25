@@ -8,6 +8,7 @@
 
 class UHammerCountUI;
 class UStageClearUI;
+class UGameOverUI;
 // ゲーム中のクリア条件などを管理するクラス
 
 UCLASS()
@@ -40,13 +41,15 @@ private:
 
 	// 表示するUI　エディタで指定する
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<UHammerCountUI> UIClass;
-	// 表示するUI　エディタで指定する
+		TSubclassOf<UHammerCountUI> HammerCountUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UStageClearUI> StageClearUIClass;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UGameOverUI> GameOverUIClass;
 	// ハンマーのカウントを表示するUI
 	UHammerCountUI* HammerCountUI;
 	UStageClearUI* StageClearUI;
+	UGameOverUI* GameOverUI;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -65,4 +68,6 @@ private:
 	//ハンマーを叩ける回数が1以上ならUIを生成
 	void CreateHammerCountUI();
 	void CreateStageClearUI();
+	void CreateGameOverUI();
+	void InputGameOverUI();
 };
