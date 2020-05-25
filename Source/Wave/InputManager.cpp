@@ -32,15 +32,12 @@ const AInputManager * AInputManager::GetInstance()
 
 void AInputManager::Tick(float DeltaTime)
 {
-	//ポーズ中ならポーズボタン入力情報のみ更新
-	if (UGameplayStatics::IsGamePaused(GetWorld()))
-	{	
-		State.Pause.Refresh();
-		State.Up.Refresh();
-		State.Down.Refresh();
-		State.Select.Refresh();
-		return;
-	}
+	State.Pause.Refresh();
+	State.Up.Refresh();
+	State.Down.Refresh();
+	State.Select.Refresh();
+//ポーズ中ならポーズボタン入力情報のみ更新
+	if (UGameplayStatics::IsGamePaused(GetWorld()))return;
 	State.Right.Refresh();
 	State.Left.Refresh();
 	State.Attack.Refresh();
