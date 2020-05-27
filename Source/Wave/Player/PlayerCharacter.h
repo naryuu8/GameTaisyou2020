@@ -39,7 +39,7 @@ private:
 		float ChargePower = 0.1f;
 	float HammerHP;
 	void PauseInput();
-
+	void CreateHammerCountBarUI();
 	FVector PrevPos;
 
 	AWaterSurface* Water;
@@ -114,13 +114,13 @@ private:
 
 	//水面に波をたてる
 	void WaterAttack(FVector Point, float Power);
-	//ハンマー残り回数をマイナス
-	void MinusHammerCount();
 	//ハンマー消費ゲージをマイナス
 	void MinusHammerGauge(const float Power);
 
 	bool IsRide;
 public:
+	//HPバーのノルマ位置をセット
+	void SetNormaPercent(const float percent);
 	/** Returns CameraBoom subobject **/
 //	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
