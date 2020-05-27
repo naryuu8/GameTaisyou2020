@@ -14,6 +14,7 @@ enum class ETitleState
 class ATitleCamera;
 class ATitlePlayer;
 class UTitleUI;
+class UFadeUI;
 UCLASS()
 class WAVE_API ATitleManager : public APawn
 {
@@ -28,6 +29,8 @@ private:
 		ATitleCamera* StageSelectCamera = nullptr;
 	UPROPERTY(EditAnywhere)
 		ATitlePlayer* TitlePlayer = nullptr;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UFadeUI> FadeUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UTitleUI> TitleUIClass = nullptr;
 	UPROPERTY(EditAnywhere, Category = "Instanced")

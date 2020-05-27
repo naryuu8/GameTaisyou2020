@@ -45,6 +45,7 @@ void ATitleCamera::Tick(float DeltaTime)
 	}
 }
 
+
 void ATitleCamera::GetAllTitleMemo()
 {
 	TArray<AActor*> FoundActors;
@@ -88,5 +89,25 @@ void ATitleCamera::LeftInput()
 	if (MyStageNumber < 0)
 	{
 		MyStageNumber = MemoNum - 1;
+	}
+}
+
+
+void ATitleCamera::SetCenterTitleMemo()
+{
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATitleMemo::StaticClass(), FoundActors);
+	MemoNum = FoundActors.Num();
+	for (auto Actor : FoundActors)
+	{
+		ATitleMemo* memo = Cast<ATitleMemo>(Actor);
+		if (memo)
+		{
+			if (MyStageNumber == memo->GetStageNumber())
+			{
+				TitleMemo = memo;
+				this->SetActorLocation(memo->GetActorLocation());
+			}
+		}
 	}
 }
