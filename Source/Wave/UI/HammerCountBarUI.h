@@ -39,5 +39,8 @@ public:
 	//毎フレーム減らすゲージ量を計算し返す
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		float DownGauge(const float DamageX,const float HpX);
+	//ノルマバーの位置をセット
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetNormaPercent(const float Percent);
 	void SetMaxHammerHP(const float hp) { MaxHammerHP = hp; }
 };
