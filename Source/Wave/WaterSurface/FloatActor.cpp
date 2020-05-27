@@ -24,6 +24,13 @@ void AFloatActor::BeginPlay()
 void AFloatActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if ((!WaterSurface->IsInWater(GetActorLocation())))
+	{
+		SetActorLocation(GetActorLocation() + FVector(0, 0, -1));
+		return;
+	}
+
 	FVector WavePower = WaterSurface->GetWavePower(GetActorLocation());
 	FVector MoveVec = WavePower * FloatSpeed;
 
