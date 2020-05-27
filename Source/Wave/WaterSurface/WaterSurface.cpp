@@ -190,7 +190,10 @@ FVector2D AWaterSurface::LocationToVertices(FVector Location)
 
 int32 AWaterSurface::CalcIndex(int32 x, int32 y)
 {
-	return x + (y * SplitVector.X);
+	int32 index = x + (y * SplitVector.X);
+	if (index < 0 ) return 0;
+	if (index > SplitVector.X * SplitVector.Y) return 0;
+	return index;
 }
 
 void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius)
@@ -271,16 +274,15 @@ FVector AWaterSurface::GetWavePower(FVector worldPos)
 
 	int32 WaveX = worldPos.X / X_Size;
 	int32 WaveY = worldPos.Y / Y_Size;
+	float uL, uR, uT, uB;
 
-	if (WaveX <= 2) return answerVec;
-	if (WaveY <= 2) return answerVec;
-	if (WaveX >= SplitVector.X - 3) return answerVec;
-	if (WaveY >= SplitVector.Y - 3) return answerVec;
-	
-	float uL = CurrentHeights[CalcIndex(WaveX - 1, WaveY)];
-	float uR = CurrentHeights[CalcIndex(WaveX + 1, WaveY)];
-	float uT = CurrentHeights[CalcIndex(WaveX, WaveY - 1)];
-	float uB = CurrentHeights[CalcIndex(WaveX, WaveY + 1)];
+	if (WaveX >= 0 && WaveX < SplitVector.X && WaveY >= 0 && WaveY < SplitVector.Y)
+	{
+		uL = CurrentHeights[CalcIndex(WaveX - 1, WaveY)];
+		uR = CurrentHeights[CalcIndex(WaveX + 1, WaveY)];
+		uT = CurrentHeights[CalcIndex(WaveX, WaveY - 1)];
+		uB = CurrentHeights[CalcIndex(WaveX, WaveY + 1)];
+	}
 
 	float x = uL - uR;
 	float y = uT - uB;
@@ -375,6 +377,7 @@ FVector AWaterSurface::AdjustMoveInLand(FVector actorPos, FVector moveVec, float
 FVector AWaterSurface::AdjustMoveInWater(FVector actorPos, FVector moveVec, float circleRadius)
 {
 	FVector movedPos = actorPos + moveVec;
+	
 	if (!IsLand(movedPos)) return movedPos;
 
 	TArray<AActor*> FoundActors;
@@ -426,8 +429,8 @@ bool AWaterSurface::IsInWater(FVector worldPos)
 
 	int index = CalcIndex(WaveX, WaveY);
 
-	if (index <= 0) return false;
-	if (index >= Vertices.Num()) return false;
+	if (index <= 1) return false;
+	if (index >= Vertices.Num() - 1) return false;
 
 	return true;
 }
