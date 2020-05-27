@@ -55,6 +55,6 @@ void ATitleMemo::FadeStart()
 	{
 		if (fade->GetFadeIsEnable())return;
 		fade->AddToViewport();
-		fade->SetFadeLevel(FColor::Black, 0.5f, FName(*StageLevelPath));
+		fade->SetFadeLevel(FColor::Black, 0.4f, FName(*StageLevelPath));
 	}
 }
