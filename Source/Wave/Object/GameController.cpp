@@ -4,8 +4,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Goal.h"
 #include "Blueprint/UserWidget.h"
-#include "../UI/HammerCountUI.h"
 #include "../UI/StageClearUI.h"
+#include "../UI/GameOverUI.h"
+#include "../InputManager.h"
+#include "../Player/PlayerCharacter.h"
 // Sets default values
 AGameController::AGameController()
 {
@@ -28,8 +30,9 @@ void AGameController::BeginPlay()
 	{
 		GoalArray.Add(Cast<AGoal>(Actor));
 	}
-
-	CreateHammerCountUI();
+	SetNorma();
+	//ポーズ中でもTickが来るようにする
+	SetTickableWhenPaused(true);
 }
 
 // Called every frame
@@ -39,11 +42,17 @@ void AGameController::Tick(float DeltaTime)
 
 	int GoalCount = GetGoalCount();
 	int NotExplotionCount = GetNotExplotionCount(); //壊れていない家の数Get
-	//どうやってもここからノルマ達成は不可
+	//どうやってもここからノルマ達成不可能の時ゲームオーバーにする
 	if (NotExplotionCount < NormaGoalCount)
 	{
 		IsGameOver = true;
-		//下記あとゲームオーバーUIオナシャス
+		CreateGameOverUI();
+		if (UGameplayStatics::IsGamePaused(GetWorld()))
+		{//ゲームオーバー画面はポーズ扱いにするのでインプットが終わり次第returnする
+			InputGameOverUI();
+			return;
+		}
+		
 	}
 
 	// ノルマ達成ならとりあえずゲームクリア
@@ -76,36 +85,13 @@ int AGameController::GetNotExplotionCount()
 	return Count;
 }
 
-
-void AGameController::CreateHammerCountUI()
-{
-	//ハンマーカウントが0なら生成しない
-	if (HammerCount == 0)return;
-	if (UIClass != nullptr)
-	{
-		HammerCountUI = CreateWidget<UHammerCountUI>(GetWorld(), UIClass);
-		if (HammerCountUI != nullptr)
-		{
-			HammerCountUI->AddToViewport();
-			HammerCountUI->SetHammerCount(HammerCount);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("HammerCountUI : %s"), L"Widget cannot create");
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("HammerCountUI : %s"), L"UIClass is nullptr");
-	}
-}
-
 void AGameController::CreateStageClearUI()
 {
+	if (StageClearUI)return;
 	if (StageClearUIClass != nullptr)
 	{
 		StageClearUI = CreateWidget<UStageClearUI>(GetWorld(), StageClearUIClass);
-		if (HammerCountUI != nullptr)
+		if (StageClearUI != nullptr)
 		{
 			StageClearUI->AddToViewport();
 		}
@@ -120,10 +106,55 @@ void AGameController::CreateStageClearUI()
 	}
 }
 
-void AGameController::MinusHammerCount()
+void AGameController::CreateGameOverUI()
 {
-	if (HammerCount == 0)return;
-	if (!HammerCountUI)return;
-	HammerCountUI->MinusHammerCount();
-	HammerCountUI->MinusCountAnimation();
+	if (GameOverUI)return;
+	if (GameOverUIClass != nullptr)
+	{
+		GameOverUI = CreateWidget<UGameOverUI>(GetWorld(), GameOverUIClass);
+		if (GameOverUI != nullptr)
+		{
+			GameOverUI->AddToViewport();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("GameOverUIClass : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameOverUIClass : %s"), L"UIClass is nullptr");
+	}
+}
+
+void AGameController::InputGameOverUI()
+{
+	if (!GameOverUI)return;
+	if (GameOverUI->GetIsPlayAnimation())return;
+	const AInputManager * inputManager = AInputManager::GetInstance();
+	if (!inputManager)return;
+	const InputState * input = inputManager->GetState();
+	if (input->Up.IsPress)
+	{
+		GameOverUI->BackSelectState();
+	}
+	if (input->Down.IsPress)
+	{
+		GameOverUI->NextSelectState();
+	}
+	if (input->Select.IsPress)
+	{
+		GameOverUI->SelectStateAction();
+	}
+}
+
+void AGameController::SetNorma()
+{
+	float percent = NormaPercent * 0.01f;
+	APlayerCharacter* player;
+	player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
+	if (player)
+	{
+		player->SetNormaPercent(percent);
+	}
 }

@@ -52,6 +52,7 @@ void UPauseUI::BackSelectState()
 
 void UPauseUI::SelectStateAction()
 {
+	if (IsPlayAnimation)return;
 	switch (SelectNumber)
 	{
 		case static_cast<int>(PauseState::GAMEBACK):

@@ -8,7 +8,8 @@
 #include "Player/TitlePlayer.h"
 #include "Blueprint/UserWidget.h"
 #include "UI/TitleUI.h"
-
+#include "GlobalGameInstance.h"
+#include "UI/FadeUI.h"
 // Sets default values
 ATitleManager::ATitleManager()
 {
@@ -21,20 +22,56 @@ ATitleManager::ATitleManager()
 void ATitleManager::BeginPlay()
 {
 	Super::BeginPlay();
-	State = ETitleState::Title;
-	IsNoInput = false;
+	UGlobalGameInstance* instance = UGlobalGameInstance::GetInstance();
+	if (instance)
+	{//リザルト画面やポーズ画面からステージ選択に戻ったらステージセレクト画面からにする
+		if (instance->GetIsStageSelectMode())
+		{
+			State = ETitleState::TitleMove;
+			MoveFrameTime = StageSelectTime * 60.0f;
+			SetCameraMove(TitleMoveCamera, 0.0f);
+			IsNoInput = true;
+			if (FadeUIClass != nullptr)
+			{
+				UFadeUI* fade = CreateWidget<UFadeUI>(GetWorld(), FadeUIClass);
+				if (fade != nullptr)
+				{
+					fade->AddToViewport();
+					fade->SetFade(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f),false, 1.0f);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Error, TEXT("FadeUIClass : %s"), L"Widget cannot create");
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("FadeUIClass : %s"), L"UIClass is nullptr");
+			}
+			instance->SetIsStageSelectMode(false);
+			SetCameraMove(StageSelectCamera, 0.0f);
+			StageSelectCamera->SetCenterTitleMemo();
+			TitlePlayer->TargetRotation();
+		}
+		else
+		{
+			IsNoInput = false;
+			State = ETitleState::Title;
+			APlayerController *playerControtller = UGameplayStatics::GetPlayerController(this, 0);
+			if (playerControtller)
+			{
+				playerControtller->SetViewTargetWithBlend(TitleCamera, 0.0f, EViewTargetBlendFunction::VTBlend_Linear, 0.0f, false);
+			}
+			TitleUI = CreateWidget<UTitleUI>(GetWorld(), TitleUIClass);
+			if (TitleUI)
+			{
+				TitleUI->AddToViewport();
+			}
+		}
+	}	
 	MoveFrameCount = 0;
 	MoveFrameTime = TitleMoveTime * 60.0f;
-	APlayerController *playerControtller = UGameplayStatics::GetPlayerController(this, 0);
-	if (playerControtller)
-	{
-		playerControtller->SetViewTargetWithBlend(TitleCamera, 0.0f, EViewTargetBlendFunction::VTBlend_Linear, 0.0f, false);
-	}
-	TitleUI = CreateWidget<UTitleUI>(GetWorld(), TitleUIClass);
-	if (TitleUI)
-	{
-		TitleUI->AddToViewport();
-	}
+
 }
 
 // Called every frame

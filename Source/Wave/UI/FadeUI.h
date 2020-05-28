@@ -26,11 +26,13 @@ public:
 	UFadeUI(const FObjectInitializer& ObjectInitializer);
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 	FORCEINLINE FLinearColor GetFadeColor() const { return FadeColor; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
 	FORCEINLINE bool GetFadeIsEnable() const { return IsEnable; }
 	//フェード状態にする
 	//第一引数 フェード色
 	//第二引数 trueでフェードイン、falseでフェードアウト
 	//第三引数 フェード速度
+	//FLinearColorはFLinearColor::Blackのように呼び出すこともできる
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 	void SetFade(const FLinearColor fade_color,const bool fade_in,const float fade_speed)
 	{
@@ -38,7 +40,7 @@ public:
 		IsFadeIn = fade_in;
 		IsEnable = true;
 		IsSceneFade = false;
-		FadeSpeed = fade_speed;
+		FadeSpeed = 1.0f / fade_speed;
 		if (IsFadeIn)
 		{
 			FadeColor.A = 0.0f;
@@ -59,7 +61,7 @@ public:
 		IsFadeIn = true;
 		IsEnable = true;
 		IsSceneFade = true;
-		FadeSpeed = fade_speed;
+		FadeSpeed = 1.0f / fade_speed;
 		NextLevelName = levelname;
 		if (IsFadeIn)
 		{

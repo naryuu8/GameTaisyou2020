@@ -73,22 +73,7 @@ void APlayerCharacter::BeginPlay_C()
 		// ハンマーで叩いた時に呼ばれる関数を登録
 		AnimInst->AttackEndCallBack.BindUObject(this, &APlayerCharacter::HummerAttackEnd);
 	}
-	//BarUI生成
-	if (HammerCountBarUIClass != nullptr)
-	{
-		HammerCountBarUI = CreateWidget<UHammerCountBarUI>(GetWorld(), HammerCountBarUIClass);
-		HammerCountBarUI->AddToViewport();
-		HammerCountBarUI->SetMaxHammerHP(MaxHammerHP);
-		//生成してもnullptrだったらエラー文表示
-		if (HammerCountBarUI == nullptr)
-		{
-			UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"Widget cannot create");
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"HammerCountBarUIClass is nullptr");
-	}
+	CreateHammerCountBarUI();
 
 	PrevPos = FVector::ZeroVector;
 
@@ -299,19 +284,7 @@ void APlayerCharacter::HummerAttackEnd()
 		// カメラシェイク
 		if(FollowCamera) FollowCamera->EventCameraShake(HammerPower);
 	}
-	// ハンマーの叩けるカウントを減らす
-	MinusHammerCount();
 	HammerPower = 0.0f;
-}
-
-void APlayerCharacter::MinusHammerCount()
-{
-	AGameController* game;
-	game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
-	if (game)
-	{
-		game->MinusHammerCount();
-	}
 }
 
 void APlayerCharacter::MinusHammerGauge(const float Power)
@@ -394,3 +367,39 @@ void APlayerCharacter::WaterAttack(FVector Point, float Power)
 		}
 	}
 }
+
+void APlayerCharacter::CreateHammerCountBarUI()
+{
+	if (HammerCountBarUI)return;
+	//BarUI生成
+	if (HammerCountBarUIClass != nullptr)
+	{
+		HammerCountBarUI = CreateWidget<UHammerCountBarUI>(GetWorld(), HammerCountBarUIClass);
+		HammerCountBarUI->AddToViewport();
+		HammerCountBarUI->SetMaxHammerHP(MaxHammerHP);
+		//生成してもnullptrだったらエラー文表示
+		if (HammerCountBarUI == nullptr)
+		{
+			UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"HammerCountBarUIClass is nullptr");
+	}
+
+}
+
+void APlayerCharacter::SetNormaPercent(const float percent)
+{
+	if (HammerCountBarUI)
+	{
+		HammerCountBarUI->SetNormaPercent(percent);
+	}
+	else
+	{
+		CreateHammerCountBarUI();
+		HammerCountBarUI->SetNormaPercent(percent);
+	}
+}
+
