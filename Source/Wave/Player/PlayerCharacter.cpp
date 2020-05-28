@@ -153,6 +153,11 @@ void APlayerCharacter::Tick(float DeltaTime)
 					IsRaftRiding = false;
 				}
 			}
+
+
+
+
+
 		}
 
 		if (input->Select.IsRelease)
@@ -190,6 +195,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 			MoveRight(input->LeftStick.Horizontal);
 		}
 		PrevPos = movedPos;
+
+
+		
 	}
 
 	if (IsAttackHold)
@@ -198,6 +206,16 @@ void APlayerCharacter::Tick(float DeltaTime)
 		MinusHammerGauge(HammerPower);
 	}
 
+	//カメラにレイを飛ばして当たらなければアウトライン適用
+	ACharacter* myCharacter = this;
+	FVector Start = this->GetActorLocation();
+	FVector End = (FollowCamera->Camera->GetComponentLocation() - Start) * 10000 + Start;
+
+	FHitResult HitData(ForceInit);
+	if (Trace(AActor::GetWorld(), myCharacter, Start, End, HitData) && HitData.GetActor()) OutLineDrow();
+	else OutLineNotDrow();
+	
+	
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -227,6 +245,7 @@ void APlayerCharacter::MoveForward(float Value)
 		if (FMath::Abs(Direction.Z) > 0.9f){ Direction = FollowCamera->GetActorUpVector(); } // カメラが真上にある時にも対応
 		Direction.Z = 0.0f; Direction.Normalize();
 		AddMovementInput(Direction, Value);
+		
 	}
 }
 
