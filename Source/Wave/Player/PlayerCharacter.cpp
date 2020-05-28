@@ -196,6 +196,15 @@ void APlayerCharacter::Tick(float DeltaTime)
 		MinusHammerGauge(HammerPower);
 	}
 
+
+	//カメラにレイを飛ばして当たらなければアウトライン適用
+	ACharacter* myCharacter = this;
+	FVector Start = this->GetActorLocation();
+	FVector End = (FollowCamera->Camera->GetComponentLocation() - Start) * 10000 + Start;
+
+	FHitResult HitData(ForceInit);
+	if (Trace(AActor::GetWorld(), myCharacter, Start, End, HitData) && HitData.GetActor()) OutLineDrow();
+	else OutLineNotDrow();
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
