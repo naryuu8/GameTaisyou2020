@@ -4,6 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameCameraComponent.h"
 #include "Camera/CameraComponent.h"
+#include "../InputManager.h"
 
 
 // Sets default values
@@ -22,7 +23,7 @@ AGameCameraActor::AGameCameraActor()
 	Camera->bUsePawnControlRotation = false;
 
 	// カメラブームのメンバにアタッチ
-	GameCameraBoom->FollowCamera = Camera;
+	GameCameraBoom->SetCamera(Camera);
 }
 
 // Called when the game starts or when spawned
@@ -30,6 +31,9 @@ void AGameCameraActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// 初めの位置をステージの中心として保持しておく
+	FieldCenterPos = GetActorLocation();
+
 	// カメラのビューポートをセット
 	APlayerController *playerControtller = UGameplayStatics::GetPlayerController(this, 0);
 	if (playerControtller)
@@ -38,10 +42,49 @@ void AGameCameraActor::BeginPlay()
 	}
 }
 
+void AGameCameraActor::InputChangeType()
+{
+	auto IM = AInputManager::GetInstance();
+	if (!IM) return;
+
+	auto input = IM->GetState();
+	if (input->RightStickButton.IsPress)
+	{
+		int value = (int)Type + 1;
+		if (value >= (int)FollowType::Num) value = 0;
+		Type = (FollowType)value;
+	}
+}
+
 // Called every frame
 void AGameCameraActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	InputChangeType();
+
+	float FollowDist = 0.0f;
+	FVector FollowPos;
+
+	switch (Type)
+	{
+	case FollowType::FieldCenter:
+		FollowDist = FieldDistance;
+		FollowPos = FieldCenterPos;
+		break;
+	case FollowType::CharacterFollow_Far:
+		FollowDist = CharacterDistance_Far;
+		if(FollowTarget) FollowPos = FollowTarget->GetActorLocation();
+		break;
+	case FollowType::CharacterFollow_Near:
+		FollowDist = CharacterDistance_Near;
+		if (FollowTarget) FollowPos = FollowTarget->GetActorLocation();
+		break;
+	}
+
+	// なめらかに追従
+	SetActorLocation(FMath::Lerp<FVector>(GetActorLocation(), FollowPos, 0.1f));
+	// カメラの距離をセット
+	GameCameraBoom->SetTargetDistance(FollowDist);
 }
 

@@ -16,6 +16,8 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float Speed;
 	UPROPERTY(BlueprintReadOnly, Category = "C++Class")
+		bool IsCharge;
+	UPROPERTY(BlueprintReadOnly, Category = "C++Class")
 		bool IsAttackAnime;
 
 private:
@@ -41,6 +43,8 @@ public:
 
 	void HummerChergeEvent();
 	void HummerAttackEvent();
+
+	bool GetIsCharge() const { return IsCharge; }
 
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE bool GetIsAttackAnime() const { return IsAttackAnime; }

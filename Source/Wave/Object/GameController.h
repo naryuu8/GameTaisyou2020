@@ -27,10 +27,9 @@ protected:
 	// クリアかどうかのゴールのノルマカウント
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game")
 		int NormaGoalCount = 0;
-	//ハンマーを叩ける回数
+	//ノルマの割合 0-100で入力
 	UPROPERTY(EditAnywhere, Category = "Game")
-		int HammerCount = 0;
-
+		float NormaPercent = 0;
 private:
 	// ゲームクリアかどうか
 	bool IsGameClear;
@@ -41,13 +40,9 @@ private:
 
 	// 表示するUI　エディタで指定する
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<UHammerCountUI> HammerCountUIClass;
-	UPROPERTY(EditAnywhere)
 		TSubclassOf<UStageClearUI> StageClearUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UGameOverUI> GameOverUIClass;
-	// ハンマーのカウントを表示するUI
-	UHammerCountUI* HammerCountUI;
 	UStageClearUI* StageClearUI;
 	UGameOverUI* GameOverUI;
 public:	
@@ -58,16 +53,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE bool GetIsClear() const { return IsGameClear; }
 
-	void MinusHammerCount();
-
 private:
 	// ゴール済みの個数を取得
 	int GetGoalCount();
 	// 爆発済みの家の個数を取得
 	int GetNotExplotionCount();
-	//ハンマーを叩ける回数が1以上ならUIを生成
-	void CreateHammerCountUI();
 	void CreateStageClearUI();
 	void CreateGameOverUI();
 	void InputGameOverUI();
+	//ゲージのノルマ設定
+	void SetNorma();
 };

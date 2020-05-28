@@ -52,6 +52,16 @@ APlayerCharacter::APlayerCharacter()
 
 void APlayerCharacter::BeginPlay_C()
 {
+	// シーン上のゲームカメラを検索する
+	AGameCameraActor* cameraActor;
+	cameraActor = Cast<AGameCameraActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameCameraActor::StaticClass()));
+	if (cameraActor)
+	{
+		// 互いにプレイヤーとカメラの参照をセット
+		FollowCamera = cameraActor;
+		cameraActor->SetFollowTarget(this);
+	}
+
 	//現在のBegibPlayはモデルの都合上こちらで書けないので関数で呼ぶ
 	IsAttackHold = false;
 	IsPlayAttackAnime = false;
@@ -63,22 +73,7 @@ void APlayerCharacter::BeginPlay_C()
 		// ハンマーで叩いた時に呼ばれる関数を登録
 		AnimInst->AttackEndCallBack.BindUObject(this, &APlayerCharacter::HummerAttackEnd);
 	}
-	//BarUI生成
-	if (HammerCountBarUIClass != nullptr)
-	{
-		HammerCountBarUI = CreateWidget<UHammerCountBarUI>(GetWorld(), HammerCountBarUIClass);
-		HammerCountBarUI->AddToViewport();
-		HammerCountBarUI->SetMaxHammerHP(MaxHammerHP);
-		//生成してもnullptrだったらエラー文表示
-		if (HammerCountBarUI == nullptr)
-		{
-			UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"Widget cannot create");
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"HammerCountBarUIClass is nullptr");
-	}
+	CreateHammerCountBarUI();
 
 	PrevPos = FVector::ZeroVector;
 
@@ -114,6 +109,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 		const InputState * input = inputManager->GetState();
 		if (input->Attack.IsPress) TriggerHammerAttack();
 		else if (input->Attack.IsRelease) ReleaseHammerAttack();
+
+		float MoveSpeed = 0.8f;
+		if (AnimInst->GetIsCharge()) MoveSpeed = 0.3f;
 
 		FVector movedPos = GetActorLocation();
 		if (input->Select.IsPress && IsRide)
@@ -153,11 +151,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 					IsRaftRiding = false;
 				}
 			}
-
-
-
-
-
 		}
 
 		if (input->Select.IsRelease)
@@ -176,8 +169,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 			}
 			else
 			{
-				MoveForward(input->LeftStick.Vertical);
-				MoveRight(input->LeftStick.Horizontal);
+				MoveForward(input->LeftStick.Vertical * MoveSpeed);
+				MoveRight(input->LeftStick.Horizontal * MoveSpeed);
 			}
 		}
 		else if (!Water->IsLand(movedPos))
@@ -191,13 +184,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 		}
 		else
 		{
-			MoveForward(input->LeftStick.Vertical);
-			MoveRight(input->LeftStick.Horizontal);
+			MoveForward(input->LeftStick.Vertical * MoveSpeed);
+			MoveRight(input->LeftStick.Horizontal * MoveSpeed);
 		}
 		PrevPos = movedPos;
-
-
-		
 	}
 
 	if (IsAttackHold)
@@ -205,6 +195,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		HammerPower += ChargePower;
 		MinusHammerGauge(HammerPower);
 	}
+
 
 	//カメラにレイを飛ばして当たらなければアウトライン適用
 	ACharacter* myCharacter = this;
@@ -214,8 +205,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 	FHitResult HitData(ForceInit);
 	if (Trace(AActor::GetWorld(), myCharacter, Start, End, HitData) && HitData.GetActor()) OutLineDrow();
 	else OutLineNotDrow();
-	
-	
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -236,7 +225,7 @@ void APlayerCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Locat
 
 void APlayerCharacter::MoveForward(float Value)
 {
-	if (IsAttackHold)return;
+	//if (IsAttackHold)return;
 	if (IsPlayAttackAnime)return;
 
 	if ((FollowCamera != NULL) && (Value != 0.0f))
@@ -245,13 +234,12 @@ void APlayerCharacter::MoveForward(float Value)
 		if (FMath::Abs(Direction.Z) > 0.9f){ Direction = FollowCamera->GetActorUpVector(); } // カメラが真上にある時にも対応
 		Direction.Z = 0.0f; Direction.Normalize();
 		AddMovementInput(Direction, Value);
-		
 	}
 }
 
 void APlayerCharacter::MoveRight(float Value)
 {
-	if (IsAttackHold)return;
+	//if (IsAttackHold)return;
 	if (IsPlayAttackAnime)return;
 
 	if ((FollowCamera != NULL) && (Value != 0.0f))
@@ -305,19 +293,7 @@ void APlayerCharacter::HummerAttackEnd()
 		// カメラシェイク
 		if(FollowCamera) FollowCamera->EventCameraShake(HammerPower);
 	}
-	// ハンマーの叩けるカウントを減らす
-	MinusHammerCount();
 	HammerPower = 0.0f;
-}
-
-void APlayerCharacter::MinusHammerCount()
-{
-	AGameController* game;
-	game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
-	if (game)
-	{
-		game->MinusHammerCount();
-	}
 }
 
 void APlayerCharacter::MinusHammerGauge(const float Power)
@@ -400,3 +376,39 @@ void APlayerCharacter::WaterAttack(FVector Point, float Power)
 		}
 	}
 }
+
+void APlayerCharacter::CreateHammerCountBarUI()
+{
+	if (HammerCountBarUI)return;
+	//BarUI生成
+	if (HammerCountBarUIClass != nullptr)
+	{
+		HammerCountBarUI = CreateWidget<UHammerCountBarUI>(GetWorld(), HammerCountBarUIClass);
+		HammerCountBarUI->AddToViewport();
+		HammerCountBarUI->SetMaxHammerHP(MaxHammerHP);
+		//生成してもnullptrだったらエラー文表示
+		if (HammerCountBarUI == nullptr)
+		{
+			UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"HammerCountBarUIClass is nullptr");
+	}
+
+}
+
+void APlayerCharacter::SetNormaPercent(const float percent)
+{
+	if (HammerCountBarUI)
+	{
+		HammerCountBarUI->SetNormaPercent(percent);
+	}
+	else
+	{
+		CreateHammerCountBarUI();
+		HammerCountBarUI->SetNormaPercent(percent);
+	}
+}
+

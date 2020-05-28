@@ -4,10 +4,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Goal.h"
 #include "Blueprint/UserWidget.h"
-#include "../UI/HammerCountUI.h"
 #include "../UI/StageClearUI.h"
 #include "../UI/GameOverUI.h"
 #include "../InputManager.h"
+#include "../Player/PlayerCharacter.h"
 // Sets default values
 AGameController::AGameController()
 {
@@ -30,8 +30,7 @@ void AGameController::BeginPlay()
 	{
 		GoalArray.Add(Cast<AGoal>(Actor));
 	}
-
-	CreateHammerCountUI();
+	SetNorma();
 	//ポーズ中でもTickが来るようにする
 	SetTickableWhenPaused(true);
 }
@@ -86,37 +85,13 @@ int AGameController::GetNotExplotionCount()
 	return Count;
 }
 
-
-void AGameController::CreateHammerCountUI()
-{
-	//ハンマーカウントが0なら生成しない
-	if (HammerCount == 0)return;
-	if (HammerCountUIClass != nullptr)
-	{
-		HammerCountUI = CreateWidget<UHammerCountUI>(GetWorld(), HammerCountUIClass);
-		if (HammerCountUI != nullptr)
-		{
-			HammerCountUI->AddToViewport();
-			HammerCountUI->SetHammerCount(HammerCount);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("HammerCountUI : %s"), L"Widget cannot create");
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("HammerCountUI : %s"), L"UIClass is nullptr");
-	}
-}
-
 void AGameController::CreateStageClearUI()
 {
 	if (StageClearUI)return;
 	if (StageClearUIClass != nullptr)
 	{
 		StageClearUI = CreateWidget<UStageClearUI>(GetWorld(), StageClearUIClass);
-		if (HammerCountUI != nullptr)
+		if (StageClearUI != nullptr)
 		{
 			StageClearUI->AddToViewport();
 		}
@@ -129,14 +104,6 @@ void AGameController::CreateStageClearUI()
 	{
 		UE_LOG(LogTemp, Error, TEXT("StageClearUIClass : %s"), L"UIClass is nullptr");
 	}
-}
-
-void AGameController::MinusHammerCount()
-{
-	if (HammerCount == 0)return;
-	if (!HammerCountUI)return;
-	HammerCountUI->MinusHammerCount();
-	HammerCountUI->MinusCountAnimation();
 }
 
 void AGameController::CreateGameOverUI()
@@ -178,5 +145,16 @@ void AGameController::InputGameOverUI()
 	if (input->Select.IsPress)
 	{
 		GameOverUI->SelectStateAction();
+	}
+}
+
+void AGameController::SetNorma()
+{
+	float percent = NormaPercent * 0.01f;
+	APlayerCharacter* player;
+	player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
+	if (player)
+	{
+		player->SetNormaPercent(percent);
 	}
 }
