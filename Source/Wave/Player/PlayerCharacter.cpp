@@ -52,6 +52,16 @@ APlayerCharacter::APlayerCharacter()
 
 void APlayerCharacter::BeginPlay_C()
 {
+	// シーン上のゲームカメラを検索する
+	AGameCameraActor* cameraActor;
+	cameraActor = Cast<AGameCameraActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameCameraActor::StaticClass()));
+	if (cameraActor)
+	{
+		// 互いにプレイヤーとカメラの参照をセット
+		FollowCamera = cameraActor;
+		cameraActor->SetFollowTarget(this);
+	}
+
 	//現在のBegibPlayはモデルの都合上こちらで書けないので関数で呼ぶ
 	IsAttackHold = false;
 	IsPlayAttackAnime = false;
@@ -99,6 +109,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 		const InputState * input = inputManager->GetState();
 		if (input->Attack.IsPress) TriggerHammerAttack();
 		else if (input->Attack.IsRelease) ReleaseHammerAttack();
+
+		float MoveSpeed = 0.8f;
+		if (AnimInst->GetIsCharge()) MoveSpeed = 0.3f;
 
 		FVector movedPos = GetActorLocation();
 		if (input->Select.IsPress && IsRide)
@@ -156,8 +169,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 			}
 			else
 			{
-				MoveForward(input->LeftStick.Vertical);
-				MoveRight(input->LeftStick.Horizontal);
+				MoveForward(input->LeftStick.Vertical * MoveSpeed);
+				MoveRight(input->LeftStick.Horizontal * MoveSpeed);
 			}
 		}
 		else if (!Water->IsLand(movedPos))
@@ -171,8 +184,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 		}
 		else
 		{
-			MoveForward(input->LeftStick.Vertical);
-			MoveRight(input->LeftStick.Horizontal);
+			MoveForward(input->LeftStick.Vertical * MoveSpeed);
+			MoveRight(input->LeftStick.Horizontal * MoveSpeed);
 		}
 		PrevPos = movedPos;
 	}
@@ -203,7 +216,7 @@ void APlayerCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Locat
 
 void APlayerCharacter::MoveForward(float Value)
 {
-	if (IsAttackHold)return;
+	//if (IsAttackHold)return;
 	if (IsPlayAttackAnime)return;
 
 	if ((FollowCamera != NULL) && (Value != 0.0f))
@@ -217,7 +230,7 @@ void APlayerCharacter::MoveForward(float Value)
 
 void APlayerCharacter::MoveRight(float Value)
 {
-	if (IsAttackHold)return;
+	//if (IsAttackHold)return;
 	if (IsPlayAttackAnime)return;
 
 	if ((FollowCamera != NULL) && (Value != 0.0f))
