@@ -16,6 +16,7 @@ void UPlayerAnimInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
 	Speed = 0.0f;
+	IsCharge = false;
 	IsAttackAnime = false;
 }
 
@@ -52,21 +53,23 @@ void UPlayerAnimInstance::NativeUninitializeAnimation()
 void UPlayerAnimInstance::HummerChergeEvent()
 {
 	//アニメモンタージュを参照
-	if (!AnimMontage)
-	{
-		const FName AnimMontageAssetPath(TEXT("AnimMontage'/Game/Main/Player/HummerAttackMontage.HummerAttackMontage'"));
-		AnimMontage = Cast<UAnimMontage>(StaticLoadObject(UObject::StaticClass(), nullptr, *AnimMontageAssetPath.ToString()));
-	}
-	Montage_Play(AnimMontage, 0.4f);
-	Montage_JumpToSection("Charge", AnimMontage);
-	IsAttackAnime = true;
-	Montage_Pause(AnimMontage);
+	//if (!AnimMontage)
+	//{
+	//	const FName AnimMontageAssetPath(TEXT("AnimMontage'/Game/Main/Player/HummerAttackMontage.HummerAttackMontage'"));
+	//	AnimMontage = Cast<UAnimMontage>(StaticLoadObject(UObject::StaticClass(), nullptr, *AnimMontageAssetPath.ToString()));
+	//}
+	//Montage_Play(AnimMontage, 0.4f);
+	//Montage_JumpToSection("Charge", AnimMontage);
+	IsCharge = true;
+	//Montage_Pause(AnimMontage);
 }
 
 void UPlayerAnimInstance::HummerAttackEvent()
 {
-	Montage_Play(AnimMontage, 0.4f);
-	Montage_JumpToSection("Attack", AnimMontage);
+	IsCharge = false;
+	IsAttackAnime = true;
+	//Montage_Play(AnimMontage, 0.4f);
+	//Montage_JumpToSection("Attack", AnimMontage);
 }
 
 void UPlayerAnimInstance::AttackAnimEnd()

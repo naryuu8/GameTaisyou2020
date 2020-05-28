@@ -44,6 +44,7 @@ void AInputManager::Tick(float DeltaTime)
 	State.Right.Refresh();
 	State.Left.Refresh();
 	State.Attack.Refresh();
+	State.RightStickButton.Refresh();
 
 }
 
@@ -59,6 +60,9 @@ void AInputManager::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AInputManager::InputAttackPress);
 	PlayerInputComponent->BindAction("Attack", IE_Released, this, &AInputManager::InputAttackRelease);
+
+	PlayerInputComponent->BindAction("ChangeCameraType", IE_Pressed, this, &AInputManager::InputRightStickButtonPress);
+	PlayerInputComponent->BindAction("ChangeCameraType", IE_Released, this, &AInputManager::InputRightStickButtonRelease);
 
 	//ポーズインプット
 	//ポーズ中でもインプットが反応するようにbExecuteWhenPausedをtrueにする

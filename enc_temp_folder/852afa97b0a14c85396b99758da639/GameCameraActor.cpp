@@ -45,7 +45,7 @@ void AGameCameraActor::BeginPlay()
 void AGameCameraActor::InputChangeType()
 {
 	auto IM = AInputManager::GetInstance();
-	if (!IM) return;
+	if (IM) return;
 
 	auto input = IM->GetState();
 	if (input->RightStickButton.IsPress)
