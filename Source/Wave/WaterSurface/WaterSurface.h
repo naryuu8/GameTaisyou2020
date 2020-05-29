@@ -18,10 +18,11 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	void AddPower(FVector worldPos, float pawer);
-	FVector GetWavePower(FVector worldPos);
+	FVector GetWavePower(const FVector & worldPos);
+	float GetWaveHeight(const FVector & worldPos);	// îgÇÃçÇÇ≥ÇéÊìæ
 	float GetWaveSpeed() { return WaveSpeed; }
 	FVector GetOutLandPos(FVector worldPos, float circleRadius);
-	FVector AdjustMoveInWater(FVector worldPos, FVector moveVec, float circleRadius);
+	FVector AdjustMoveInWater(const AActor * Object, FVector& moveVec, float circleRadius);
 	FVector AdjustMoveInLand(FVector worldPos, FVector moveVec, float circleRadius);
 	bool IsInWater(FVector worldPos);
 	bool IsLand(FVector worldPos);
