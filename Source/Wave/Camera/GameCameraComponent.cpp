@@ -16,6 +16,12 @@ UGameCameraComponent::UGameCameraComponent()
 void UGameCameraComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (FollowCamera)
+	{
+		// 初期のカメラ距離で初期化
+		FollowDistance = FollowCamera->GetRelativeLocation().Z;
+	}
 }
 
 void UGameCameraComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -25,8 +31,12 @@ void UGameCameraComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	UpdateRotation();
 
 	// CameraBoomのローカル空間で距離を設定
-	if (FollowCamera) 
+	if (FollowCamera)
+	{
+		// なめらかに距離を変更
+		FollowDistance = FMath::Lerp<float>(FollowDistance, TargetFollowDistance, 0.1f);
 		FollowCamera->SetRelativeLocation(FVector(-FollowDistance, 0.0f, 0.0f));
+	}
 }
 
 void UGameCameraComponent::UpdateRotation()

@@ -70,6 +70,45 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
 		float AttackEffectScale = 1.0f;
 
+
+
+
+	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
+		void OutLineDrow();
+	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
+		void OutLineNotDrow();
+
+	static FORCEINLINE bool Trace(
+		UWorld* World,
+		AActor* ActorToIgnore,
+		const FVector& Start,
+		const FVector& End,
+		FHitResult& HitOut,
+		ECollisionChannel CollisionChannel = ECC_Pawn,
+		bool ReturnPhysMat = false)
+	{
+		if (!World)
+		{
+			return false;
+		}
+
+		FCollisionQueryParams TraceParms(FName(TEXT("VictoreCore Trace")), true, ActorToIgnore);
+		TraceParms.bTraceComplex = true;
+		TraceParms.bReturnPhysicalMaterial = ReturnPhysMat;
+		TraceParms.AddIgnoredActor(ActorToIgnore);
+		HitOut = FHitResult(ForceInit);
+		World->LineTraceSingleByChannel(
+			HitOut,
+			Start,
+			End,
+			CollisionChannel,
+			TraceParms
+			);
+
+
+		return (HitOut.GetActor() != NULL);
+	}
+
 protected:
 
 	/** Called for forwards/backward input */

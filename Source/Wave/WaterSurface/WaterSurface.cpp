@@ -9,6 +9,8 @@
 #include "CircleLand.h"
 #include "SquareLand.h"
 #include "FlashFlood.h"
+#include "FloatActor.h"
+#include "../MyFunc.h"
 
 AWaterSurface::AWaterSurface()
 {
@@ -252,7 +254,27 @@ void AWaterSurface::AddPower(FVector worldPos, float power = 100.0f)
 	CreateWave(WaveX, WaveY, power);
 }
 
-FVector AWaterSurface::GetWavePower(FVector worldPos)
+float AWaterSurface::GetWaveHeight(const FVector & worldPos)
+{
+	if (!IsInWater(worldPos)) return 0.0f;
+
+	int32 WaveX = worldPos.X / X_Size;
+	int32 WaveY = worldPos.Y / Y_Size;
+	float uL, uR, uT, uB;
+
+	if (WaveX >= 0 && WaveX < SplitVector.X && WaveY >= 0 && WaveY < SplitVector.Y)
+	{
+		uL = CurrentHeights[CalcIndex(WaveX - 1, WaveY)];
+		uR = CurrentHeights[CalcIndex(WaveX + 1, WaveY)];
+		uT = CurrentHeights[CalcIndex(WaveX, WaveY - 1)];
+		uB = CurrentHeights[CalcIndex(WaveX, WaveY + 1)];
+	}
+
+	float result = (uL + uR + uT + uB) * 0.25f;	// 高さの平均を返す
+	return (result < MaxWaveHight) ? result : MaxWaveHight;	
+}
+
+FVector AWaterSurface::GetWavePower(const FVector & worldPos)
 {
 	if (!IsInWater(worldPos)) return FVector::ZeroVector;
 
@@ -374,15 +396,40 @@ FVector AWaterSurface::AdjustMoveInLand(FVector actorPos, FVector moveVec, float
 }
 
 
-FVector AWaterSurface::AdjustMoveInWater(FVector actorPos, FVector moveVec, float circleRadius)
+FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector& moveVec, float circleRadius)
 {
+	FVector actorPos = Object->GetActorLocation();
 	FVector movedPos = actorPos + moveVec;
-	
-	if (!IsLand(movedPos)) return movedPos;
 
 	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALandPoint::StaticClass(), FoundActors);
+	// 他のFloatActorとの当たり判定
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFloatActor::StaticClass(), FoundActors);
+	for (auto Actor : FoundActors)
+	{
+		AFloatActor* FloatActor = Cast<AFloatActor>(Actor);
+		if (!FloatActor || Object == Actor) continue;
 
+		float distance = FVector::Distance(movedPos, FloatActor->GetActorLocation());
+		float judgDistance = circleRadius + FloatActor->GetRadius();
+		float landingDistance = judgDistance - distance;
+		if (landingDistance <= 0) continue;
+
+		FVector outDirection = movedPos - FloatActor->GetActorLocation();
+		outDirection.Z = 0;
+		outDirection.Normalize();
+
+		// 相互に押し出す
+		movedPos += outDirection * landingDistance;
+
+		// 相互に力を加える
+		FVector Power = outDirection * landingDistance;
+		moveVec += Power;
+		FloatActor->Velocity -= Power;
+	}
+
+	// 地形との当たり判定
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALandPoint::StaticClass(), FoundActors);
+	// 円形の地上との当たり判定
 	for (auto Actor : FoundActors)
 	{
 		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
@@ -399,27 +446,102 @@ FVector AWaterSurface::AdjustMoveInWater(FVector actorPos, FVector moveVec, floa
 
 		movedPos = movedPos + outDirection * landingDistance;
 
-		if (!IsLand(movedPos)) return movedPos;
+		FVector2D MoveDirection = FVector2D(movedPos - actorPos);
+		FVector2D Ref = (MoveDirection - 2.0f * FVector2D::DotProduct(MoveDirection, FVector2D(outDirection)) * FVector2D(outDirection));
+		moveVec = FVector(Ref, 0.0f);
 	}
 
+	// 矩形の地上との当たり判定
 	for (auto Actor : FoundActors)
 	{
 		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
 		if (!SquareLand) continue;
 
-		float XDistance = fabs(SquareLand->GetActorLocation().X - movedPos.X);
-		float YDistance = fabs(SquareLand->GetActorLocation().Y - movedPos.Y);
-		float JudgXDistance = circleRadius + SquareLand->GetXLength() * 0.5f;
-		float JudgYDistance = circleRadius + SquareLand->GetYLength() * 0.5f;
-		if (JudgXDistance > XDistance)
-			movedPos.X = actorPos.X;
-		if (JudgYDistance > YDistance)
-			movedPos.Y = actorPos.Y;
+		FVector2D SquarePos = FVector2D(SquareLand->GetActorLocation().X, SquareLand->GetActorLocation().Y);
+		float XLen = SquareLand->GetXLength() * 0.5f;
+		float YLen = SquareLand->GetYLength() * 0.5f;
 
-		if (!IsLand(movedPos)) return movedPos;
+		float XDistance = (SquarePos.X - movedPos.X);
+		float YDistance = (SquarePos.Y - movedPos.Y);
+		float JudgXDistance = circleRadius + XLen;
+		float JudgYDistance = circleRadius + YLen;
+
+		float X_Deff = JudgXDistance - fabs(XDistance);
+		float Y_Deff = JudgYDistance - fabs(YDistance);
+
+		// 衝突判定
+		if (X_Deff > 0 && Y_Deff > 0)
+		{
+			FVector2D VecA, VecB, VecC, VecD;
+			FVector2D NearPos, NearNormal;
+			FRay2D NearSideRay;
+			bool IsHit = false;
+			float HitDist = 0.0f;
+			// レイの交点を調べて距離を取得する関数
+			auto CheckDistance = [&IsHit, &HitDist, &NearSideRay, &NearNormal, &NearPos, circleRadius]
+			(FRay2D RayA, const FRay2D & RayB, const FVector2D & Normal)
+			{
+				FVector2D HitPos;
+				FVector2D CorrectionPos = circleRadius * Normal;
+				RayA.Direction -= CorrectionPos;	// 円の補正分ずらす
+
+				if (MyFunc::ColSegments(RayA, RayB, &HitPos))
+				{
+					if (IsHit)
+					{
+						float Dist = FVector2D::Distance(RayA.Origin, HitPos);
+						if (Dist < HitDist)
+						{
+							HitDist = Dist;
+							NearSideRay = RayB;
+							NearNormal = Normal;
+							NearPos = HitPos + CorrectionPos;
+						}
+					}
+					else
+					{
+						IsHit = true;
+						HitDist = FVector2D::Distance(RayA.Origin, HitPos);
+						NearSideRay = RayB;
+						NearNormal = Normal;
+						NearPos = HitPos + CorrectionPos;
+					}
+				}
+			};
+
+			VecA = SquarePos + FVector2D(XLen, YLen);
+			VecB = SquarePos + FVector2D(-XLen, YLen);
+			VecC = SquarePos + FVector2D(-XLen, -YLen);
+			VecD = SquarePos + FVector2D(XLen, -YLen);
+
+			FRay2D PosToMovedPos = FRay2D(actorPos, movedPos - actorPos);
+			CheckDistance(PosToMovedPos, FRay2D(VecA, VecB - VecA), FVector2D(0.0f, 1.0f));
+			CheckDistance(PosToMovedPos, FRay2D(VecB, VecC - VecB), FVector2D(-1.0f, 0.0f));
+			CheckDistance(PosToMovedPos, FRay2D(VecC, VecD - VecC), FVector2D(0.0f, -1.0f));
+			CheckDistance(PosToMovedPos, FRay2D(VecD, VecA - VecD), FVector2D(1.0f, 0.0f));
+
+			// 辺に衝突していた時
+			if (IsHit)
+			{
+				// 衝突点に位置を修正
+				movedPos = FVector(NearPos, movedPos.Z);
+				// 反射ベクトルを算出
+				FVector2D Ref = (PosToMovedPos.Direction - 2.0f * FVector2D::DotProduct(PosToMovedPos.Direction, NearNormal) * NearNormal);
+				moveVec = FVector(Ref, 0.0f);
+			}
+			// 既に埋まっている状態
+			else
+			{
+				// X軸の押し出し（ないとは思うけど一応埋まり防止用）
+				if (X_Deff > 0)
+				{
+					movedPos.X += (XDistance > 0) ? -X_Deff : X_Deff;
+				}
+			}
+		}
 	}
-
-	return actorPos;
+	
+	return movedPos;
 }
 
 bool AWaterSurface::IsInWater(FVector worldPos)
