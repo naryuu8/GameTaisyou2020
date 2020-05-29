@@ -37,7 +37,13 @@ private:
 	//1フレーム毎に溜めるハンマーパワー
 	UPROPERTY(EditAnywhere, Category = "Instanced")
 		float ChargePower = 0.1f;
+	// プレイヤーの当たり判定の半径
+	UPROPERTY(EditAnywhere, Category = "Instanced")
+		float Radius = 100.0f;
+
 	float HammerHP;
+	float MoveAmount;	// 移動量の割合
+
 	void PauseInput();
 	void CreateHammerCountBarUI();
 	FVector PrevPos;
@@ -46,6 +52,7 @@ private:
 
 	ARaft* CurrentRaft;
 	bool IsRaftRiding;
+
 public:
 	APlayerCharacter();
 
@@ -70,13 +77,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
 		float AttackEffectScale = 1.0f;
 
-
-
-
 	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
-		void OutLineDrow();
+		void OutLineDraw();
 	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
-		void OutLineNotDrow();
+		void OutLineNotDraw();
 
 	static FORCEINLINE bool Trace(
 		UWorld* World,
@@ -111,20 +115,8 @@ public:
 
 protected:
 
-	/** Called for forwards/backward input */
-	void MoveForward(float Value);
+	void Move(const FVector & Direction, float Value);
 
-	/** Called for side to side input */
-	void MoveRight(float Value);
-
-	/** Handler for when a touch input begins. */
-	void TouchStarted(ETouchIndex::Type FingerIndex, FVector Location);
-
-	/** Handler for when a touch input stops. */
-	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
-	void TurnAtRate(float Rate);
-
-	void LookUpAtRate(float Rate);
 	//キーを押したときのハンマー攻撃
 	void TriggerHammerAttack(void);
 	//キーを離したときのハンマー攻撃
@@ -132,9 +124,6 @@ protected:
 
 	void HummerAttackEnd();
 protected:
-	// APawn interface
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	// End of APawn interface
 
 	//BlueprintReadWrite=GetとSet関数をブルーブリントで公開
 
@@ -160,8 +149,6 @@ private:
 public:
 	//HPバーのノルマ位置をセット
 	void SetNormaPercent(const float percent);
-	/** Returns CameraBoom subobject **/
-//	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns FollowCamera subobject **/
-//	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	float GetMoveAmount() { return MoveAmount; };
+
 };
