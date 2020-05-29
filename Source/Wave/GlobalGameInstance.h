@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "SaveData.h"
 #include "GlobalGameInstance.generated.h"
 
 // グローバル変数クラス
