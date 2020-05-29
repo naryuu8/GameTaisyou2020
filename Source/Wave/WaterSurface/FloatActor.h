@@ -21,15 +21,19 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere)
+		float MinFloatWavePower = 0.1f;
+	UPROPERTY(EditAnywhere)
+		float FloatSpeed = 0.7f;
+	UPROPERTY(EditAnywhere)
+		float FloatScale = 40.0f;
 public:	
+	FVector Velocity;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
-		float MinFloatWavePower = 1.0f;
-
-	UPROPERTY(EditAnywhere)
-		float FloatSpeed = 0.1f;
+	float GetRadius() { return FloatScale; }
 
 protected:
 	AWaterSurface* WaterSurface;
