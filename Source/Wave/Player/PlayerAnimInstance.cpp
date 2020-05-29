@@ -5,6 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "Math/Vector.h"
 #include "UObject/ConstructorHelpers.h"
+#include "PlayerCharacter.h"
 
 UPlayerAnimInstance::UPlayerAnimInstance(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -29,12 +30,14 @@ void UPlayerAnimInstance::NativeInitializeAnimation()
 void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
+
+	APlayerCharacter * OwnerPlayer = Cast<APlayerCharacter>(GetOwningActor());
+
 	//実行中であればアニメーション参照先の移動スピードを受け取る
-	if (TryGetPawnOwner())
+	if (OwnerPlayer)
 	{
-		FVector vec_speed = TryGetPawnOwner()->GetVelocity();
-		//FVectorの長さを取得
-		vec_speed.FVector::ToDirectionAndLength(vec_speed, Speed);
+		// 0.0f ～ 100.0fの値にする
+		Speed = OwnerPlayer->GetMoveAmount() * 100.0f;
 	}
 }
 
