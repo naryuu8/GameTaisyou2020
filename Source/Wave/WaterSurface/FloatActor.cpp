@@ -27,14 +27,21 @@ void AFloatActor::Tick(float DeltaTime)
 
 	if ((!WaterSurface->IsInWater(GetActorLocation())))
 	{
-		SetActorLocation(GetActorLocation() + FVector(0, 0, -1));
+		SetActorLocation(GetActorLocation() + FVector(0, 0, -2));
 		return;
 	}
 
+	// ”g‚ÌŒX‚«‚É‰ž‚¶‚ÄˆÚ“®‚·‚é
 	FVector WavePower = WaterSurface->GetWavePower(GetActorLocation());
-	FVector MoveVec = WavePower * FloatSpeed;
+	FVector MoveVec = WavePower * FloatSpeed * 0.01f;
+	Velocity += MoveVec;
+	if (Velocity.Size() > MinFloatWavePower)
+		SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, FloatScale));
+	Velocity *= 0.98f;
 
-	if (MoveVec.Size() < MinFloatWavePower) return;
-
-	SetActorLocation(WaterSurface->AdjustMoveInWater(GetActorLocation(), MoveVec, 100.0f));
+	// ”g‚Ì‚‚³‚É‡‚í‚¹‚é
+	FVector CurPos = GetActorLocation();
+	float Height = WaterSurface->GetWaveHeight(CurPos);
+	Height = FMath::Lerp(CurPos.Z, Height, 0.1f);
+	SetActorLocation(FVector(CurPos.X, CurPos.Y, Height));
 }
