@@ -43,7 +43,7 @@ protected:
 	// カメラが追従するターゲット
 	ACharacter * FollowTarget;
 
-	FollowType Type = FollowType::CharacterFollow_Far;
+	FollowType Type = FollowType::FieldCenter;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 		float FieldDistance = 800.0f; // ステージ見降ろし視点でのカメラの距離
