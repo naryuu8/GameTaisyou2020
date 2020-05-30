@@ -7,6 +7,7 @@
 void UPauseUI::NativeConstruct()
 {
 	IsPlayAnimation = false;
+	IsNoInput = false;
 	InitPlayAnimation();
 	SelectNumber = static_cast<int>(PauseState::GAMEBACK);
 	UGameplayStatics::SetGamePaused(GetWorld(),true);
@@ -33,6 +34,7 @@ ESlateVisibility UPauseUI::GetPauseTextVisibility()
 void UPauseUI::NextSelectState()
 {
 	if (IsPlayAnimation)return;
+	if (IsNoInput)return;
 	SelectNumber++;
 	if (SelectNumber > static_cast<int>(PauseState::STAGESELECT))
 	{
@@ -43,6 +45,7 @@ void UPauseUI::NextSelectState()
 void UPauseUI::BackSelectState()
 {
 	if (IsPlayAnimation)return;
+	if (IsNoInput)return;
 	SelectNumber--;
 	if (SelectNumber < 0)
 	{
@@ -53,19 +56,21 @@ void UPauseUI::BackSelectState()
 void UPauseUI::SelectStateAction()
 {
 	if (IsPlayAnimation)return;
+	if (IsNoInput)return;
+	IsNoInput = true;
 	switch (SelectNumber)
 	{
 		case static_cast<int>(PauseState::GAMEBACK):
 			EndPlayAnimation();
 			break;
 		case static_cast<int>(PauseState::RESTART) :
-				TestStampPlayAnimation();
+			Retry();
 			break;
-		case static_cast<int>(PauseState::SCORE):
-
+			case static_cast<int>(PauseState::SCORE) :
+				IsNoInput = false;
 			break;
-		case static_cast<int>(PauseState::STAGESELECT):
-
+			case static_cast<int>(PauseState::STAGESELECT) :
+			StageSelectChenge();
 			break;
 	}
 }

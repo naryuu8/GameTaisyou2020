@@ -8,6 +8,7 @@
 #include "../UI/GameOverUI.h"
 #include "../InputManager.h"
 #include "../Player/PlayerCharacter.h"
+#include "../WaterSurface/FloatActor.h"
 // Sets default values
 AGameController::AGameController()
 {
@@ -22,7 +23,7 @@ void AGameController::BeginPlay()
 	Super::BeginPlay();
 	
 	IsGameClear = false;
-
+	DataTableLoad();
 	// シーン上のゴールを全て取得
 	TArray<class AActor*> FoundGoals;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGoal::StaticClass(), FoundGoals);
@@ -33,7 +34,6 @@ void AGameController::BeginPlay()
 	SetNorma();
 	//ポーズ中でもTickが来るようにする
 	SetTickableWhenPaused(true);
-	DataTableLoad();
 }
 
 // Called every frame
@@ -158,4 +158,22 @@ void AGameController::SetNorma()
 	{
 		player->SetNormaPercent(percent);
 	}
+}
+
+int AGameController::GetMaxNimotu()
+{
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFloatActor::StaticClass(), FoundActors);
+	for (auto Actor : FoundActors)
+	{
+		AFloatActor* act = Cast<AFloatActor>(Actor);
+		if (act)
+		{
+			if (act->ActorHasTag("Nimotu"))
+			{
+				MaxNimotu++;
+			}
+		}
+	}
+	return MaxNimotu;
 }

@@ -24,4 +24,8 @@ public:
 		FText StampNimotu;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		FText StampPercent;
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetMaxHP(const float hp);
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetHP(const float hp);
 };

@@ -31,5 +31,6 @@ public:
 		FORCEINLINE bool GetIsStageSelectMode() const { return IsStageSelectMode; }
 
 	void SetIsStageSelectMode(const bool set) { IsStageSelectMode = set; }
+	UFUNCTION(BlueprintCallable, Category = "GlobalC++Class")
 	void StageSelectChenge();//ステージセレクト画面に移行
 };

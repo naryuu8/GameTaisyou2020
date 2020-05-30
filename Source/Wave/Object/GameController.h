@@ -37,6 +37,8 @@ private:
 	bool IsGameOver;
 	//ゴールに入った荷物をカウント
 	int GoalCount;
+	//このステージのゴール条件に入る荷物の数
+	int MaxNimotu = 0;
 	// シーン上の全てのゴールのポインタを所持する
 	TArray<class AGoal*> GoalArray;
 
@@ -60,6 +62,8 @@ public:
 		void SetNormaGoalCount(const int goalcount) { NormaGoalCount = goalcount; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE int GetNormaGoalCount() const { return NormaGoalCount; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE int GetMaxNimotu();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE float GetNormaPercent() const { return NormaPercent; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
