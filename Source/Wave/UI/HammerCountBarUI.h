@@ -33,6 +33,9 @@ public:
 	//現在のHPを受け取り減ってるゲージを表示する
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void UpdateGauge(const float HammerHP);
+	//現在のHPを受け取り減ってるゲージを表示する(ポーズの時は赤ゲージを表示しないようにする
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void UpdatePauseGauge(const float HammerHP);
 	//ダメージゲージを減らすのを開始するイベント
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void ReflectionGauge();
@@ -42,5 +45,6 @@ public:
 	//ノルマバーの位置をセット
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void SetNormaPercent(const float Percent);
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
 	void SetMaxHammerHP(const float hp) { MaxHammerHP = hp; }
 };

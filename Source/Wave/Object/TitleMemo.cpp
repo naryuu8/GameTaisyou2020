@@ -6,6 +6,7 @@
 #include "../MyFunc.h"
 #include "Components/WidgetComponent.h"
 #include "../UI/FadeUI.h"
+#include "../GlobalGameInstance.h"
 // Sets default values
 ATitleMemo::ATitleMemo()
 {
@@ -54,6 +55,11 @@ void ATitleMemo::FadeStart()
 	if (fade)
 	{
 		if (fade->GetFadeIsEnable())return;
+		UGlobalGameInstance* instance = UGlobalGameInstance::GetInstance();
+		if (instance)
+		{//ステージ番号をセット
+			instance->SetStageNumber(MyStageNumber);
+		}
 		fade->AddToViewport();
 		fade->SetFadeLevel(FColor::Black, 0.4f, FName(*StageLevelPath));
 	}
