@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "../SaveData.h"
 #include "BackGroundUI.generated.h"
 
 /**
@@ -18,4 +19,9 @@ public:
 		FText MaxNimotu;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		FText InNimotu;
+	//スタンプ用テキスト
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		FText StampNimotu;
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		FText StampPercent;
 };

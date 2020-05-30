@@ -35,6 +35,8 @@ private:
 	bool IsGameClear;
 	//ゲームオーバーかどうか
 	bool IsGameOver;
+	//ゴールに入った荷物をカウント
+	int GoalCount;
 	// シーン上の全てのゴールのポインタを所持する
 	TArray<class AGoal*> GoalArray;
 
@@ -52,7 +54,20 @@ public:
 	// ゲームクリアかどうかを判断する関数
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE bool GetIsClear() const { return IsGameClear; }
-
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE int GetGoalCount() const { return GoalCount; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void SetNormaGoalCount(const int goalcount) { NormaGoalCount = goalcount; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE int GetNormaGoalCount() const { return NormaGoalCount; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE float GetNormaPercent() const { return NormaPercent; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void SetNormaPercent(const float percent) { NormaPercent = percent; }
+	//データテーブルから対応するステージ番号から
+	//ゲージのパーセントとクリアに必要な荷物数取得（デバッグの時は読み込まない）
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void DataTableLoad();
 private:
 	// ゴール済みの個数を取得
 	int GetGoalCount();

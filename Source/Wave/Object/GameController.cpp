@@ -33,6 +33,7 @@ void AGameController::BeginPlay()
 	SetNorma();
 	//ポーズ中でもTickが来るようにする
 	SetTickableWhenPaused(true);
+	DataTableLoad();
 }
 
 // Called every frame
@@ -40,7 +41,7 @@ void AGameController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	int GoalCount = GetGoalCount();
+	GoalCount = GetGoalCount();
 	int NotExplotionCount = GetNotExplotionCount(); //壊れていない家の数Get
 	//どうやってもここからノルマ達成不可能の時ゲームオーバーにする
 	if (NotExplotionCount < NormaGoalCount)
