@@ -372,10 +372,42 @@ FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
 	return worldPos;
 }
 
+FVector AWaterSurface::AdjustMoveInField(const FVector & worldPos, float circleRadius)
+{
+	FVector Result = worldPos;
+
+	float Right_X = EndPoint->GetActorLocation().X;
+	float Left_X = StartPoint->GetActorLocation().X;
+	float Up_Y = EndPoint->GetActorLocation().Y;
+	float Bottom_Y = StartPoint->GetActorLocation().Y;
+
+	// X軸を確認
+	float Deff = Result.X + circleRadius - (Right_X);
+	if (Deff > 0.0f) Result.X -= Deff;
+	else
+	{
+		Deff = Result.X - circleRadius - (Left_X);
+		if (Deff < 0.0f) Result.X -= Deff;
+	}
+	// Y軸を確認
+	Deff = Result.Y + circleRadius - (Up_Y);
+	if (Deff > 0.0f) Result.Y -= Deff;
+	else
+	{
+		Deff = Result.Y - circleRadius - (Bottom_Y);
+		if (Deff < 0.0f) Result.Y -= Deff;
+	}
+
+	return Result;
+}
+
 // 水の座標を調べて移動する位置が衝突していたら押し出す関数
 FVector AWaterSurface::AdjustMoveInLand(const FVector & worldPos, const FVector & moveVec, float circleRadius, const FVector & WaterCheckPos, float WaterCheckRadius)
 {
 	FVector movedPos = worldPos + moveVec;
+
+	// フィールドの外に出ないようにする
+	movedPos = AdjustMoveInField(movedPos, circleRadius);
 
 	// フィールドのメッシュ全体を検索
 	for (int xi = 0; xi < SplitVector.X; ++xi)
@@ -392,7 +424,7 @@ FVector AWaterSurface::AdjustMoveInLand(const FVector & worldPos, const FVector 
 
 			// 移動先の座標と水との距離を測る
 			if ((xp - xc)*(xp - xc) + (yp - yc)*(yp - yc) <= WaterCheckRadius * WaterCheckRadius)
-			{
+			{	
 				// ここで移動先が水と分かったので今いる地面を調べる
 				// 地形の形によってそれぞれ処理を書く
 				ALandPoint * LandActor = GetLandPoint(worldPos);
@@ -577,6 +609,19 @@ bool AWaterSurface::IsLand(FVector worldPos)
 	int index = CalcIndex(WaveX, WaveY);
 
 	return IsLands[index];
+}
+
+bool AWaterSurface::IsInField(FVector worldPos)
+{
+	int32 WaveX = worldPos.X / X_Size;
+	int32 WaveY = worldPos.Y / Y_Size;
+
+	int index = CalcIndex(WaveX, WaveY);
+
+	if (index <= 1) return false;
+	if (index >= Vertices.Num() - 1) return false;
+
+	return true;
 }
 
 FVector AWaterSurface::GetGetOffPos(FVector WorldPos, float Radius)

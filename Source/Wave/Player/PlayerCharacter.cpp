@@ -242,7 +242,9 @@ void APlayerCharacter::Move(const FVector & Direction, float Value)
 
 	AddMovementInput(Direction, Value);
 	// –³—‚â‚èˆÚ“®—Ê‚ð’²®
+	float FallForce = GetMovementComponent()->Velocity.Z;
 	GetMovementComponent()->Velocity = Direction * Value * 40.0f;
+	GetMovementComponent()->Velocity.Z = FallForce;
 }
 
 void APlayerCharacter::TriggerHammerAttack(void)
