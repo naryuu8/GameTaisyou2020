@@ -66,18 +66,20 @@ void AWaterSurface::BeginPlay()
 
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALandPoint::StaticClass(), FoundActors);
-
+	
 	for (auto Actor : FoundActors)
 	{
+		// 結構処理に使うのでメンバに登録しておく
+		LandPointActors.Add(Cast<ALandPoint>(Actor));
+
+		// 円形の地形の初期化
 		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
 		if (CircleLand)
 		{
 			SetCircleLand(CircleLand->GetActorLocation(), CircleLand->GetRadius());
+			continue;
 		}
-	}
-
-	for (auto Actor : FoundActors)
-	{
+		// 矩形の地形の初期化
 		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
 		if (SquareLand)
 		{
@@ -260,7 +262,7 @@ float AWaterSurface::GetWaveHeight(const FVector & worldPos)
 
 	int32 WaveX = worldPos.X / X_Size;
 	int32 WaveY = worldPos.Y / Y_Size;
-	float uL, uR, uT, uB;
+	float uL = 0.0f, uR = 0.0f, uT = 0.0f, uB = 0.0f;
 
 	if (WaveX >= 0 && WaveX < SplitVector.X && WaveY >= 0 && WaveY < SplitVector.Y)
 	{
@@ -296,7 +298,7 @@ FVector AWaterSurface::GetWavePower(const FVector & worldPos)
 
 	int32 WaveX = worldPos.X / X_Size;
 	int32 WaveY = worldPos.Y / Y_Size;
-	float uL, uR, uT, uB;
+	float uL = 0.0f, uR = 0.0f, uT = 0.0f, uB = 0.0f;
 
 	if (WaveX >= 0 && WaveX < SplitVector.X && WaveY >= 0 && WaveY < SplitVector.Y)
 	{
@@ -318,10 +320,7 @@ FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
 {
 	if (!IsLand(worldPos)) return worldPos;
 
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALandPoint::StaticClass(), FoundActors);
-
-	for (auto Actor : FoundActors)
+	for (auto Actor : LandPointActors)
 	{
 		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
 		if (!CircleLand) continue;
@@ -340,7 +339,7 @@ FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
 		if (!IsLand(worldPos)) return worldPos;
 	}
 
-	for (auto Actor : FoundActors)
+	for (auto Actor : LandPointActors)
 	{
 		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
 		if (!SquareLand) continue;
@@ -373,25 +372,40 @@ FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
 	return worldPos;
 }
 
-FVector AWaterSurface::AdjustMoveInLand(FVector actorPos, FVector moveVec, float circleRadius)
+// 水の座標を調べて移動する位置が衝突していたら押し出す関数
+FVector AWaterSurface::AdjustMoveInLand(const FVector & worldPos, const FVector & moveVec, float circleRadius, const FVector & WaterCheckPos, float WaterCheckRadius)
 {
-	FVector movedPos = actorPos + moveVec;
+	FVector movedPos = worldPos + moveVec;
 
+	// フィールドのメッシュ全体を検索
 	for (int xi = 0; xi < SplitVector.X; ++xi)
 	{
 		for (int yi = 0; yi < SplitVector.Y; ++yi)
 		{
-			float xp = Vertices[CalcIndex(xi, yi)].X;
-			float yp = Vertices[CalcIndex(xi, yi)].Y;
-			float xc = movedPos.X;
-			float yc = movedPos.Y;
-			if ((xp - xc)*(xp - xc) + (yp - yc)*(yp - yc) <= circleRadius * circleRadius)
+			int index = CalcIndex(xi, yi);
+			if (IsLands[index]) continue;	// 地上なら距離を測る必要がないので次へ
+
+			float xp = Vertices[index].X;
+			float yp = Vertices[index].Y;
+			float xc = WaterCheckPos.X;
+			float yc = WaterCheckPos.Y;
+
+			// 移動先の座標と水との距離を測る
+			if ((xp - xc)*(xp - xc) + (yp - yc)*(yp - yc) <= WaterCheckRadius * WaterCheckRadius)
 			{
-				if (!IsLands[CalcIndex(xi, yi)]) return actorPos - moveVec * 0.1f;
+				// ここで移動先が水と分かったので今いる地面を調べる
+				// 地形の形によってそれぞれ処理を書く
+				ALandPoint * LandActor = GetLandPoint(worldPos);
+
+				// 水の上に存在している時は移動できない
+				if (!LandActor) return worldPos;
+
+				return LandActor->AdjustMoveInLand(movedPos, circleRadius);
 			}
 		}
 	}
 
+	// 移動先が地上だったのでそのまま移動
 	return movedPos;
 }
 
@@ -427,51 +441,50 @@ FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector& moveVec
 		FloatActor->Velocity -= Power;
 	}
 
-	// 地形との当たり判定
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALandPoint::StaticClass(), FoundActors);
-	// 円形の地上との当たり判定
-	for (auto Actor : FoundActors)
+	// 地形と当たり判定
+	for (auto Actor : LandPointActors)
 	{
+		// 円形の地上との当たり判定
 		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
-		if (!CircleLand) continue;
-
-		float distance = FVector::Distance(movedPos, CircleLand->GetActorLocation());
-		float judgDistance = circleRadius + CircleLand->GetRadius();
-		float landingDistance = judgDistance - distance;
-		if (landingDistance <= 0) continue;
-
-		FVector outDirection = movedPos - CircleLand->GetActorLocation();
-		outDirection.Z = 0;
-		outDirection.Normalize();
-
-		movedPos = movedPos + outDirection * landingDistance;
-
-		FVector2D MoveDirection = FVector2D(movedPos - actorPos);
-		FVector2D Ref = (MoveDirection - 2.0f * FVector2D::DotProduct(MoveDirection, FVector2D(outDirection)) * FVector2D(outDirection));
-		moveVec = FVector(Ref, 0.0f);
-	}
-
-	// 矩形の地上との当たり判定
-	for (auto Actor : FoundActors)
-	{
-		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
-		if (!SquareLand) continue;
-
-		FVector2D SquarePos = FVector2D(SquareLand->GetActorLocation().X, SquareLand->GetActorLocation().Y);
-		float XLen = SquareLand->GetXLength() * 0.5f;
-		float YLen = SquareLand->GetYLength() * 0.5f;
-
-		float XDistance = (SquarePos.X - movedPos.X);
-		float YDistance = (SquarePos.Y - movedPos.Y);
-		float JudgXDistance = circleRadius + XLen;
-		float JudgYDistance = circleRadius + YLen;
-
-		float X_Deff = JudgXDistance - fabs(XDistance);
-		float Y_Deff = JudgYDistance - fabs(YDistance);
-
-		// 衝突判定
-		if (X_Deff > 0 && Y_Deff > 0)
+		if (CircleLand)
 		{
+			float distance = FVector::Distance(movedPos, CircleLand->GetActorLocation());
+			float judgDistance = circleRadius + CircleLand->GetRadius();
+			float landingDistance = judgDistance - distance;
+			if (landingDistance <= 0) continue;
+
+			FVector outDirection = movedPos - CircleLand->GetActorLocation();
+			outDirection.Z = 0;
+			outDirection.Normalize();
+
+			movedPos = movedPos + outDirection * landingDistance;
+
+			FVector2D MoveDirection = FVector2D(movedPos - actorPos);
+			FVector2D Ref = (MoveDirection - 2.0f * FVector2D::DotProduct(MoveDirection, FVector2D(outDirection)) * FVector2D(outDirection));
+			moveVec = FVector(Ref, 0.0f);
+			continue;
+		}
+
+		// 矩形の地上との当たり判定
+		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
+		if (SquareLand)
+		{
+			FVector2D SquarePos = FVector2D(SquareLand->GetActorLocation().X, SquareLand->GetActorLocation().Y);
+			float XLen = SquareLand->GetXLength() * 0.5f;
+			float YLen = SquareLand->GetYLength() * 0.5f;
+
+			float XDistance = (SquarePos.X - movedPos.X);
+			float YDistance = (SquarePos.Y - movedPos.Y);
+			float JudgXDistance = circleRadius + XLen;
+			float JudgYDistance = circleRadius + YLen;
+
+			float X_Deff = JudgXDistance - fabs(XDistance);
+			float Y_Deff = JudgYDistance - fabs(YDistance);
+
+			if (X_Deff < 0 || Y_Deff < 0) continue;
+
+			// 衝突している
+
 			FVector2D VecA, VecB, VecC, VecD;
 			FVector2D NearPos, NearNormal;
 			FRay2D NearSideRay;
@@ -533,10 +546,7 @@ FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector& moveVec
 			else
 			{
 				// X軸の押し出し（ないとは思うけど一応埋まり防止用）
-				if (X_Deff > 0)
-				{
-					movedPos.X += (XDistance > 0) ? -X_Deff : X_Deff;
-				}
+				movedPos.X += (XDistance > 0) ? -X_Deff : X_Deff;
 			}
 		}
 	}
@@ -589,4 +599,17 @@ FVector AWaterSurface::GetGetOffPos(FVector WorldPos, float Radius)
 	}
 
 	return FVector::ZeroVector;
+}
+
+// 引数の座標の位置にある地面を取得
+ALandPoint * AWaterSurface::GetLandPoint(const FVector & WorldPos)
+{
+	for (auto Actor : LandPointActors)
+	{
+		if (Actor->OnGround(WorldPos))
+		{
+			return Actor;
+		}
+	}
+	return nullptr;
 }

@@ -55,6 +55,9 @@ public:
 
 	OBB2D GetOBB() { return Obb; }
 
+	bool OnGround(const FVector & Pos) override;
+	FVector AdjustMoveInLand(const FVector & Pos, float CircleRadius) override;
+
 private:
 	UPROPERTY(EditAnywhere)
 		float XLength = 100.0f;

@@ -19,6 +19,7 @@
 #include "PlayerAnimInstance.h"
 #include "Niagara/Public/NiagaraFunctionLibrary.h"
 #include "../GlobalGameInstance.h"
+#include "../MyFunc.h"
 //////////////////////////////////////////////////////////////////////////
 // APlayerCharacter
 
@@ -28,11 +29,11 @@ APlayerCharacter::APlayerCharacter()
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
 	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
-	GetCharacterMovement()->JumpZVelocity = 600.f;
+	//GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
+	//GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
+	//GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.2f;
-
+	
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -77,16 +78,7 @@ void APlayerCharacter::BeginPlay_C()
 
 	PrevPos = FVector::ZeroVector;
 
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
-	for (auto Actor : FoundActors)
-	{
-		AWaterSurface* water = Cast<AWaterSurface>(Actor);
-		if (water)
-		{
-			Water = water;
-		}
-	}
+	Water = Cast<AWaterSurface>(UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass()));
 
 	IsRaftRiding = false;
 
@@ -110,8 +102,36 @@ void APlayerCharacter::Tick(float DeltaTime)
 		if (input->Attack.IsPress) TriggerHammerAttack();
 		else if (input->Attack.IsRelease) ReleaseHammerAttack();
 
-		float MoveSpeed = 0.8f;
-		if (AnimInst->GetIsCharge()) MoveSpeed = 0.3f;
+		float MoveSpeed = 10.0f;
+		if (AnimInst->GetIsCharge()) MoveSpeed *= 0.5f;
+
+		// 左スティックの倒し具合の割合を算出
+		MoveAmount = FMath::Clamp(FMath::Abs(input->LeftStick.Horizontal) + FMath::Abs(input->LeftStick.Vertical), 0.0f, 1.0f);
+		
+		// カメラから移動する向きを算出
+		FVector Direction;
+		if (FollowCamera != NULL)
+		{
+			FVector V_Direction = FollowCamera->GetActorForwardVector();
+			if (FMath::Abs(V_Direction.Z) > 0.9f) { V_Direction = FollowCamera->GetActorUpVector(); } // カメラが真上にある時にも対応
+			V_Direction.Z = 0.0f; 
+			V_Direction.Normalize();
+
+			FVector H_Direction = FollowCamera->GetActorRightVector();
+			H_Direction.Z = 0.0f; 
+			H_Direction.Normalize();
+
+			Direction = V_Direction * input->LeftStick.Vertical + H_Direction * input->LeftStick.Horizontal;
+			Direction.Normalize();
+		}
+
+		// 進む方向に向きを変える
+		if (MoveAmount > 0.01f)
+		{
+			float angle = FMath::Atan2(Direction.Y, Direction.X);
+			FQuat LookAt = MyFunc::FromAxisAngleToQuaternion(FVector::UpVector, angle);
+			SetActorRotation(FQuat::Slerp(GetActorQuat(), LookAt, 0.1f));
+		}
 
 		FVector movedPos = GetActorLocation();
 		if (input->Select.IsPress && IsRide)
@@ -158,6 +178,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			IsRide = true;
 		}
 
+		// イカダに乗っている時
 		if (IsRaftRiding)
 		{
 			movedPos = CurrentRaft->GetMoveVec() + movedPos;
@@ -169,23 +190,28 @@ void APlayerCharacter::Tick(float DeltaTime)
 			}
 			else
 			{
-				MoveForward(input->LeftStick.Vertical * MoveSpeed);
-				MoveRight(input->LeftStick.Horizontal * MoveSpeed);
+				Move(Direction, MoveAmount * MoveSpeed);
 			}
 		}
-		else if (!Water->IsLand(movedPos))
-		{
-			if (PrevPos != FVector::ZeroVector)
-			{
-				FVector moveVec = movedPos - PrevPos;
-				moveVec.Z = 0;
-				SetActorLocation(Water->AdjustMoveInLand(PrevPos, moveVec, 100.0f));
-			}
-		}
+		// 通常時
 		else
 		{
-			MoveForward(input->LeftStick.Vertical * MoveSpeed);
-			MoveRight(input->LeftStick.Horizontal * MoveSpeed);
+			float WaterCheckRadius = Radius * 1.3f;
+			float dist = WaterCheckRadius * 1.3f;
+			FVector CurPos = GetActorLocation();
+			FVector moveForce = Direction * MoveAmount * MoveSpeed;
+			FVector moveDir = moveForce.GetSafeNormal();
+			FVector WaterCheckPos = CurPos + moveDir * dist;
+
+			UKismetSystemLibrary::DrawDebugCylinder(this, WaterCheckPos - FVector(0, 0, 50), WaterCheckPos - FVector(0, 0, 40), WaterCheckRadius, 64, FLinearColor::Blue, 0.0f, 3.0f);
+			UKismetSystemLibrary::DrawDebugCylinder(this, CurPos + moveForce - FVector(0, 0, 50), CurPos + moveForce - FVector(0, 0, 40), Radius, 64, FLinearColor::Red, 0.0f, 3.0f);
+
+			FVector NextPos = Water->AdjustMoveInLand(CurPos, moveForce, Radius, WaterCheckPos, WaterCheckRadius);
+			
+			float MoveValue = 0.0f;
+			(NextPos - CurPos).ToDirectionAndLength(Direction, MoveValue);
+			// 最終的に決定した移動量を加算
+			Move(Direction, MoveValue);
 		}
 		PrevPos = movedPos;
 	}
@@ -196,70 +222,27 @@ void APlayerCharacter::Tick(float DeltaTime)
 		MinusHammerGauge(HammerPower);
 	}
 
-
 	//カメラにレイを飛ばして当たらなければアウトライン適用
 	ACharacter* myCharacter = this;
 	FVector Start = this->GetActorLocation();
 	FVector End = (FollowCamera->Camera->GetComponentLocation() - Start) * 10000 + Start;
 
 	FHitResult HitData(ForceInit);
-	if (Trace(AActor::GetWorld(), myCharacter, Start, End, HitData) && HitData.GetActor()) OutLineDrow();
-	else OutLineNotDrow();
+	if (Trace(AActor::GetWorld(), myCharacter, Start, End, HitData) && HitData.GetActor()) OutLineDraw();
+	else OutLineNotDraw();
 }
 
-void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+void APlayerCharacter::Move(const FVector & Direction, float Value)
 {
-	// Set up gameplay key bindings
-	check(PlayerInputComponent);
-}
-
-void APlayerCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
-{
-	Jump();
-}
-
-void APlayerCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
-{
-	StopJumping();
-}
-
-void APlayerCharacter::MoveForward(float Value)
-{
-	//if (IsAttackHold)return;
 	if (IsPlayAttackAnime)return;
+	if (Value < 0.05f) return;
 
-	if ((FollowCamera != NULL) && (Value != 0.0f))
-	{
-		FVector Direction = FollowCamera->GetActorForwardVector();
-		if (FMath::Abs(Direction.Z) > 0.9f){ Direction = FollowCamera->GetActorUpVector(); } // カメラが真上にある時にも対応
-		Direction.Z = 0.0f; Direction.Normalize();
-		AddMovementInput(Direction, Value);
-	}
-}
+	//FVector NextPos = GetActorLocation() + Direction * Value;
+	//SetActorLocation(NextPos);
 
-void APlayerCharacter::MoveRight(float Value)
-{
-	//if (IsAttackHold)return;
-	if (IsPlayAttackAnime)return;
-
-	if ((FollowCamera != NULL) && (Value != 0.0f))
-	{
-		FVector Direction = FollowCamera->GetActorRightVector();
-		Direction.Z = 0.0f; Direction.Normalize();
-		AddMovementInput(Direction, Value);
-	}
-}
-
-void APlayerCharacter::TurnAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
-}
-
-void APlayerCharacter::LookUpAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+	AddMovementInput(Direction, Value);
+	// 無理やり移動量を調整
+	GetMovementComponent()->Velocity = Direction * Value * 40.0f;
 }
 
 void APlayerCharacter::TriggerHammerAttack(void)
