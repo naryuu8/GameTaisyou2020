@@ -6,7 +6,7 @@
 #include "../ProceduralMesh/ProceduralMeshActor.h"
 #include "WaterSurface.generated.h"
 
-class ACircleLandPoint;
+class ALandPoint;
 
 UCLASS()
 class WAVE_API AWaterSurface : public AProceduralMeshActor
@@ -23,10 +23,11 @@ public:
 	float GetWaveSpeed() { return WaveSpeed; }
 	FVector GetOutLandPos(FVector worldPos, float circleRadius);
 	FVector AdjustMoveInWater(const AActor * Object, FVector& moveVec, float circleRadius);
-	FVector AdjustMoveInLand(FVector worldPos, FVector moveVec, float circleRadius);
+	FVector AdjustMoveInLand(const FVector & worldPos, const FVector & moveVec, float circleRadius, const FVector & WaterCheckPos, float WaterCheckRadius);
 	bool IsInWater(FVector worldPos);
 	bool IsLand(FVector worldPos);
 	FVector GetGetOffPos(FVector WorldPos, float Radius);
+	ALandPoint * GetLandPoint(const FVector & WorldPos);	// 指定した座標に接している地面を取得
 
 private:
 	void CreateWave(int32 x, int32 y, float pawer);
@@ -64,4 +65,6 @@ private:
 	TArray<float> CurrentHeights;
 	TArray<float> PrevHeights;
 	TArray<float> NewHeights;
+
+	TArray<ALandPoint*> LandPointActors;	// 衝突処理などに使うのでメンバにする
 };
