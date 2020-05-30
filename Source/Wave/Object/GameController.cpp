@@ -8,6 +8,7 @@
 #include "../UI/GameOverUI.h"
 #include "../InputManager.h"
 #include "../Player/PlayerCharacter.h"
+#include "../WaterSurface/FloatActor.h"
 // Sets default values
 AGameController::AGameController()
 {
@@ -22,7 +23,7 @@ void AGameController::BeginPlay()
 	Super::BeginPlay();
 	
 	IsGameClear = false;
-
+	DataTableLoad();
 	// シーン上のゴールを全て取得
 	TArray<class AActor*> FoundGoals;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGoal::StaticClass(), FoundGoals);
@@ -40,7 +41,7 @@ void AGameController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	int GoalCount = GetGoalCount();
+	GoalCount = GetGoalCount();
 	int NotExplotionCount = GetNotExplotionCount(); //壊れていない家の数Get
 	//どうやってもここからノルマ達成不可能の時ゲームオーバーにする
 	if (NotExplotionCount < NormaGoalCount)
@@ -157,4 +158,22 @@ void AGameController::SetNorma()
 	{
 		player->SetNormaPercent(percent);
 	}
+}
+
+int AGameController::GetMaxNimotu()
+{
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFloatActor::StaticClass(), FoundActors);
+	for (auto Actor : FoundActors)
+	{
+		AFloatActor* act = Cast<AFloatActor>(Actor);
+		if (act)
+		{
+			if (act->ActorHasTag("Nimotu"))
+			{
+				MaxNimotu++;
+			}
+		}
+	}
+	return MaxNimotu;
 }

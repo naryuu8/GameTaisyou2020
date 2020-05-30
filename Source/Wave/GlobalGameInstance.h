@@ -18,7 +18,7 @@ class WAVE_API UGlobalGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 private:
-		int StageNumber;//選択ステージ番号
+		int StageNumber = -1;//選択ステージ番号 デバッグ時にデバッグテキストを出すように―1を初期値にする
 		bool IsStageSelectMode = false;//trueでタイトル画面を飛ばしステージ選択にする
 public:
 	static UGlobalGameInstance* GetInstance();
@@ -26,8 +26,11 @@ public:
 		void SetStageNumber(const int number) { StageNumber = number; };
 	UFUNCTION(BlueprintCallable, Category = "GlobalC++Class")
 		FORCEINLINE int GetStageNumber() const { return StageNumber; }
+
 	UFUNCTION(BlueprintCallable, Category = "GlobalC++Class")
 		FORCEINLINE bool GetIsStageSelectMode() const { return IsStageSelectMode; }
+
 	void SetIsStageSelectMode(const bool set) { IsStageSelectMode = set; }
+	UFUNCTION(BlueprintCallable, Category = "GlobalC++Class")
 	void StageSelectChenge();//ステージセレクト画面に移行
 };

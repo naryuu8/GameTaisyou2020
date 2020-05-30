@@ -6,6 +6,10 @@
 #include "GameFramework/SaveGame.h"
 #include "SaveData.generated.h"
 #define STAMP_NUM (3)//配達紙のスタンプの数
+// セーブデータクラス
+//----------------------------------------------------
+// セーブデータに必要な構造体、変数を定義
+//----------------------------------------------------
 USTRUCT(BlueprintType)
 struct FSaveDataStruct
 {
@@ -35,8 +39,6 @@ private:
 public:
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		TArray<FSaveDataStruct> Save;
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		void InSaveData(const int number, const FSaveDataStruct savedata);
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE FSaveDataStruct GetSaveData(const int number) const;
 };
