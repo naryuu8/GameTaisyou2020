@@ -16,6 +16,9 @@ public:
 
 	float GetRadius() { return Radius; }
 
+	bool OnGround(const FVector & Pos) override;
+	FVector AdjustMoveInLand(const FVector & Pos, float CircleRadius) override;
+
 private:
 	UPROPERTY(EditAnywhere)
 		float Radius = 100.0f;
