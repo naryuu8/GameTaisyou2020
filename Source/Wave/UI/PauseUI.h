@@ -21,6 +21,7 @@ class WAVE_API UPauseUI : public UUserWidget
 private:
 	virtual void NativeConstruct() override;
 	int SelectNumber;
+	bool IsNoInput;//true時インプットを受け付けない
 protected:
 	//引数で一致する番号と同じセレクト番号になったら色を変える
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
@@ -45,6 +46,18 @@ public:
 	//スタンプテスト用イベント
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void TestStampPlayAnimation();
+	//ポーズ画面のバーため現在のプレイヤーの最大HPを受け取る
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetMaxHP(const float hp);
+	//ポーズ画面のバー更新のため現在のプレイヤーHPを受け取る
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetHP(const float hp);
+	//フェードインを行いリトライする
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void Retry();
+	//フェードインを行いステージ選択画面に戻る
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void StageSelectChenge();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsPlayAnimation() const{ return IsPlayAnimation; };
 };

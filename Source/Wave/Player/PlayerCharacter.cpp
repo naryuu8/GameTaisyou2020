@@ -87,13 +87,17 @@ void APlayerCharacter::BeginPlay_C()
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
-	PauseInput();
-	if (UGameplayStatics::IsGamePaused(GetWorld()))
-	{//ポーズ中はポーズの入力しか受け付けない
-		return;
-	}
 	//アタックアニメが再生中か確認
 	IsPlayAttackAnime = AnimInst->GetIsAttackAnime();
+	//アタックアニメ中はポーズを開けないようにする
+	if (!IsPlayAttackAnime && !IsAttackHold)
+	{
+		PauseInput();
+		if (UGameplayStatics::IsGamePaused(GetWorld()))
+		{//ポーズ中はポーズの入力しか受け付けない
+			return;
+		}
+	}
 
 	const AInputManager * inputManager = AInputManager::GetInstance();
 	if (inputManager)
@@ -196,7 +200,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		// 通常時
 		else
 		{
-			float WaterCheckRadius = Radius * 1.3f;
+			float WaterCheckRadius = Radius * 1.2f;
 			float dist = WaterCheckRadius * 1.3f;
 			FVector CurPos = GetActorLocation();
 			FVector moveForce = Direction * MoveAmount * MoveSpeed;
@@ -242,7 +246,9 @@ void APlayerCharacter::Move(const FVector & Direction, float Value)
 
 	AddMovementInput(Direction, Value);
 	// 無理やり移動量を調整
+	float FallForce = GetMovementComponent()->Velocity.Z;
 	GetMovementComponent()->Velocity = Direction * Value * 40.0f;
+	GetMovementComponent()->Velocity.Z = FallForce;
 }
 
 void APlayerCharacter::TriggerHammerAttack(void)
@@ -305,11 +311,15 @@ void APlayerCharacter::PauseInput()
 				{
 					PauseUI = CreateWidget<UPauseUI>(GetWorld(), PauseUIClass);
 					PauseUI->AddToViewport();
+					//ポーズ用のバーを更新するためHPを渡す
+					PauseUI->SetMaxHP(MaxHammerHP);
+					PauseUI->SetHP(HammerHP);
 				}
 				else if (PauseUI)
 				{
 					if (PauseUI->GetIsPlayAnimation())return;
 					PauseUI->AddToViewport();
+					PauseUI->SetHP(HammerHP);
 				}
 				//生成してもnullptrだったらエラー文表示
 				if(PauseUI == nullptr)
