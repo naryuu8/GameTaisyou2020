@@ -32,13 +32,19 @@ private:
 	UPauseUI* PauseUI = nullptr;
 	UHammerCountBarUI* HammerCountBarUI = nullptr;
 	//ゲージで表示する用のプレイヤーのハンマーMAXHP
-	UPROPERTY(EditAnywhere, Category = "Instanced")
+	UPROPERTY(EditAnywhere, Category = "Parameter")
 		float MaxHammerHP = 100.0f;
 	//1フレーム毎に溜めるハンマーパワー
-	UPROPERTY(EditAnywhere, Category = "Instanced")
-		float ChargePower = 0.1f;
+	UPROPERTY(EditAnywhere, Category = "Parameter")
+		float ChargeSpeed = 0.1f;
+	// 一回で溜められる最大パワー
+	UPROPERTY(EditAnywhere, Category = "Parameter")
+		float ChargePowerMax = 20.0f;
+	// 波を起こす力
+	UPROPERTY(EditAnywhere, Category = "Parameter")
+		float HammerPowerValue = 1.0f;
 	// プレイヤーの当たり判定の半径
-	UPROPERTY(EditAnywhere, Category = "Instanced")
+	UPROPERTY(EditAnywhere, Category = "Parameter")
 		float Radius = 100.0f;
 
 	float HammerHP;
@@ -136,6 +142,7 @@ protected:
 	//ハンマーパワー変数
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float HammerPower;
+
 private:
 
 	UPlayerAnimInstance* AnimInst;
