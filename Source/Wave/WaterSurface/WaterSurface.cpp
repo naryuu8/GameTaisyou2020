@@ -235,8 +235,8 @@ void AWaterSurface::SetSquareLand(FVector SquareLocation, float XLength, float Y
 
 void AWaterSurface::AddPower(FVector worldPos, float power = 100.0f)
 {
-	int32 WaveX = worldPos.X / SplitSpace;
-	int32 WaveY = worldPos.Y / SplitSpace;
+	int32 WaveX = (worldPos.X - Vertices[0].X) / SplitSpace;
+	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 
 	//if (WaveX <= 0) return;
 	//if (WaveX > SplitPointNum.X) return;
@@ -250,8 +250,8 @@ float AWaterSurface::GetWaveHeight(const FVector & worldPos)
 {
 	if (!IsInWater(worldPos)) return 0.0f;
 
-	int32 WaveX = worldPos.X / SplitSpace;
-	int32 WaveY = worldPos.Y / SplitSpace;
+	int32 WaveX = (worldPos.X - Vertices[0].X) / SplitSpace;
+	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 	float uL = 0.0f, uR = 0.0f, uT = 0.0f, uB = 0.0f;
 
 	if (WaveX >= 0 && WaveX < SplitPointNum.X && WaveY >= 0 && WaveY < SplitPointNum.Y)
@@ -286,8 +286,8 @@ FVector AWaterSurface::GetWavePower(const FVector & worldPos)
 		}
 	}
 
-	int32 WaveX = worldPos.X / SplitSpace;
-	int32 WaveY = worldPos.Y / SplitSpace;
+	int32 WaveX = (worldPos.X - Vertices[0].X) / SplitSpace;
+	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 	float uL = 0.0f, uR = 0.0f, uT = 0.0f, uB = 0.0f;
 
 	if (WaveX >= 0 && WaveX < SplitPointNum.X && WaveY >= 0 && WaveY < SplitPointNum.Y)
@@ -578,8 +578,8 @@ FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector& moveVec
 
 bool AWaterSurface::IsInWater(FVector worldPos)
 {
-	int32 WaveX = worldPos.X / SplitSpace;
-	int32 WaveY = worldPos.Y / SplitSpace;
+	int32 WaveX = (worldPos.X - Vertices[0].X) / SplitSpace;
+	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 
 	int index = CalcIndex(WaveX, WaveY);
 
@@ -593,8 +593,8 @@ bool AWaterSurface::IsLand(FVector worldPos)
 {
 	if (!IsInWater(worldPos)) return false;
 
-	int32 WaveX = worldPos.X / SplitSpace;
-	int32 WaveY = worldPos.Y / SplitSpace;
+	int32 WaveX = (worldPos.X - Vertices[0].X) / SplitSpace;
+	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 
 	int index = CalcIndex(WaveX, WaveY);
 
