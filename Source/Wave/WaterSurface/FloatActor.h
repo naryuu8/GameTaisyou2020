@@ -21,6 +21,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void MyDestroy();
+
 	UPROPERTY(EditAnywhere)
 		float MinFloatWavePower = 0.1f;
 	UPROPERTY(EditAnywhere)
@@ -37,4 +39,6 @@ public:
 
 protected:
 	AWaterSurface* WaterSurface;
+	UStaticMeshComponent* StaticMeshComponent;
+private:
 };

@@ -4,6 +4,8 @@
 #include "FloatActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "WaterSurface.h"
+#include "Components/StaticMeshComponent.h"
+#include "TimerManager.h"
 
 // Sets default values
 AFloatActor::AFloatActor()
@@ -18,6 +20,7 @@ void AFloatActor::BeginPlay()
 	Super::BeginPlay();
 	
 	WaterSurface = Cast<AWaterSurface>((UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass())));
+	StaticMeshComponent = Cast<UStaticMeshComponent>(GetComponentByClass(UStaticMeshComponent::StaticClass()));
 }
 
 // Called every frame
@@ -25,9 +28,20 @@ void AFloatActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if ((!WaterSurface->IsInWater(GetActorLocation())))
+	// メッシュがセットされていなかったら何もしない
+	if (!StaticMeshComponent) return;
+
+	// フィールドの外に出た時
+	if ((!WaterSurface->IsInField(GetActorLocation())))
 	{
-		SetActorLocation(GetActorLocation() + FVector(0, 0, -2));
+		// 物理演算を使用する
+		if (!StaticMeshComponent->IsSimulatingPhysics())
+			StaticMeshComponent->SetSimulatePhysics(true);
+
+		// 数秒後にオブジェクトを削除
+		FTimerManager& timerManager = GetWorld()->GetTimerManager();
+		FTimerHandle handle;
+		timerManager.SetTimer(handle, this, &AFloatActor::MyDestroy, 3.0f);
 		return;
 	}
 
@@ -43,5 +57,11 @@ void AFloatActor::Tick(float DeltaTime)
 	FVector CurPos = GetActorLocation();
 	float Height = WaterSurface->GetWaveHeight(CurPos);
 	Height = FMath::Lerp(CurPos.Z, Height, 0.1f);
+
 	SetActorLocation(FVector(CurPos.X, CurPos.Y, Height));
+}
+
+void AFloatActor::MyDestroy()
+{
+	this->Destroy();
 }

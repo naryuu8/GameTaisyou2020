@@ -12,57 +12,50 @@
 #include "FloatActor.h"
 #include "../MyFunc.h"
 
-AWaterSurface::AWaterSurface()
+AWaterSurface::AWaterSurface() : AProceduralMeshActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
-	for (int yi = 0; yi < SplitVector.Y; ++yi)
-	{
-		for (int xi = 0; xi < SplitVector.X; ++xi)
-		{
-			Vertices.Emplace(0, 0, 0);
-			VertexColors.Emplace(WaterColor);
-			UV0.Emplace((xi / SplitVector.X) * 0.5f , (yi / SplitVector.Y));
-		}
-	}
-
-	IsLands.Init(false, Vertices.Num());
-
-	for (int yi = 0; yi < SplitVector.Y - 1; yi++)
-	{
-		for (int xi = 0; xi < SplitVector.X - 1; xi++)
-		{
-			Triangles.Emplace((SplitVector.Y * (yi + 0)) + xi);
-			Triangles.Emplace((SplitVector.Y * (yi + 1)) + xi);
-			Triangles.Emplace((SplitVector.Y * (yi + 0)) + xi + 1);
-			Triangles.Emplace((SplitVector.Y * (yi + 0)) + xi + 1);
-			Triangles.Emplace((SplitVector.Y * (yi + 1)) + xi);
-			Triangles.Emplace((SplitVector.Y * (yi + 1)) + xi + 1);
-		}
-	}
-	CreateMesh();
 }
 
 void AWaterSurface::BeginPlay()
 {
 	Super::BeginPlay();
 
-	X_Size = (-StartPoint->GetActorLocation().X + EndPoint->GetActorLocation().X) / SplitVector.X;
-	Y_Size = (-StartPoint->GetActorLocation().Y + EndPoint->GetActorLocation().Y) / SplitVector.Y;
+	// 頂点の数をフィールドの大きさに応じて決定する
+	float X_Start = StartPoint->GetActorLocation().X;
+	float Y_Start = StartPoint->GetActorLocation().Y;
+	SplitPointNum.X = (int)((-X_Start + EndPoint->GetActorLocation().X) / SplitSpace);
+	SplitPointNum.Y = (int)((-Y_Start + EndPoint->GetActorLocation().Y) / SplitSpace);
 
-	for (int yi = 0; yi < SplitVector.Y; ++yi)
+	for (int yi = 0; yi < SplitPointNum.Y; ++yi)
 	{
-		for (int xi = 0; xi < SplitVector.X; ++xi)
+		for (int xi = 0; xi < SplitPointNum.X; ++xi)
 		{
-			Vertices[CalcIndex(xi, yi)].X = X_Size * xi;
-			Vertices[CalcIndex(xi, yi)].Y = Y_Size * yi;
+			Vertices.Emplace(SplitSpace * xi + X_Start, SplitSpace * yi + Y_Start, 0);
+			VertexColors.Emplace(WaterColor);
+			UV0.Emplace((xi / SplitPointNum.X) * 0.5f, (yi / SplitPointNum.Y));
+
+			if (xi < SplitPointNum.X - 1 && yi < SplitPointNum.Y - 1)
+			{
+				Triangles.Emplace(CalcIndex(xi + 0, yi + 0));
+				Triangles.Emplace(CalcIndex(xi + 0, yi + 1));
+				Triangles.Emplace(CalcIndex(xi + 1, yi + 0));
+				Triangles.Emplace(CalcIndex(xi + 1, yi + 0));
+				Triangles.Emplace(CalcIndex(xi + 0, yi + 1));
+				Triangles.Emplace(CalcIndex(xi + 1, yi + 1));
+			}
 		}
 	}
 
+	IsLands.Init(false, Vertices.Num());
+
+	// メンバの頂点データなどからメッシュを生成
+	CreateMesh();
+
 	// 波演算用リストの初期化
-	CurrentHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
-	PrevHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
-	NewHeights.Init(0.0f, SplitVector.X * SplitVector.Y);
+	CurrentHeights.Init(0.0f, SplitPointNum.X * SplitPointNum.Y);
+	PrevHeights.Init(0.0f, SplitPointNum.X * SplitPointNum.Y);
+	NewHeights.Init(0.0f, SplitPointNum.X * SplitPointNum.Y);
 
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALandPoint::StaticClass(), FoundActors);
@@ -102,10 +95,10 @@ void AWaterSurface::Tick(float DeltaTime)
 	float DeltaSpeed = WaveSpeed / 60;
 
 	float c = 2.0f;
-	float mul = DeltaSpeed * DeltaSpeed * c * c / (SplitVector.X * SplitVector.Y) * (SplitVector.X * SplitVector.Y);
-	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
+	float mul = DeltaSpeed * DeltaSpeed * c * c / (SplitPointNum.X * SplitPointNum.Y) * (SplitPointNum.X * SplitPointNum.Y);
+	for (int xi = 1; xi < SplitPointNum.X - 1; ++xi)
 	{
-		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
+		for (int yi = 1; yi < SplitPointNum.Y - 1; ++yi)
 		{
 			int32 index = CalcIndex(xi, yi);
 
@@ -123,33 +116,26 @@ void AWaterSurface::Tick(float DeltaTime)
 		}
 	}
 
-	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
+	for (int xi = 1; xi < SplitPointNum.X - 1; ++xi)
 	{
-		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
+		for (int yi = 1; yi < SplitPointNum.Y - 1; ++yi)
 		{
-			if (IsLands[CalcIndex(xi, yi)])
-			{
-				if (abs(NewHeights[CalcIndex(xi, yi)]) > abs(CurrentHeights[CalcIndex(xi, yi)]))
-					continue;
-			}
-
 			int32 index = CalcIndex(xi, yi);
+			if (IsLands[index] && 
+				abs(NewHeights[index]) > abs(CurrentHeights[index]))
+				continue;
+
 			PrevHeights[index] = CurrentHeights[index];
 			CurrentHeights[index] = NewHeights[index];
-		}
-	}
 
-	for (int yi = 0; yi < SplitVector.X; ++yi)
-	{
-		for (int xi = 0; xi < SplitVector.Y; ++xi)
-		{
-			if(!IsLands[CalcIndex(xi,yi)])
-				Vertices[CalcIndex(xi,yi)].Z = CurrentHeights[CalcIndex(xi,yi)];
-
-			if (Vertices[CalcIndex(xi, yi)].Z > MaxWaveHight)
-				Vertices[CalcIndex(xi, yi)].Z = MaxWaveHight;
-
-			VertexColors[CalcIndex(xi, yi)] = FLinearColor::LerpUsingHSV(WaterColor, WaveColor, Vertices[CalcIndex(xi, yi)].Z / MaxWaveHight);
+			if (!IsLands[index])
+			{
+				Vertices[index].Z = CurrentHeights[index];
+				// 高さに応じてカラーを変更
+				VertexColors[index] = FLinearColor::LerpUsingHSV(WaterColor, WaveColor, FMath::Abs(Vertices[index].Z) / MaxWaveHight);
+			}
+			// 高さ制限を適用
+			Vertices[index].Z = FMath::Clamp(Vertices[index].Z, -MaxWaveHight, MaxWaveHight);
 		}
 	}
 
@@ -166,9 +152,9 @@ void AWaterSurface::CreateWave(int32 x, int32 y, float power)
 
 	FVector2D wv = FVector2D(x, y);
 
-	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
+	for (int xi = 1; xi < SplitPointNum.X - 1; ++xi)
 	{
-		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
+		for (int yi = 1; yi < SplitPointNum.Y - 1; ++yi)
 		{
 			int index = CalcIndex(xi, yi);
 			float value = 0.0f;
@@ -187,34 +173,36 @@ void AWaterSurface::CreateWave(int32 x, int32 y, float power)
 
 FVector2D AWaterSurface::LocationToVertices(FVector Location)
 {
-	int xi = (Location.X - GetActorLocation().X) / X_Size;
-	int yi = (Location.Y - GetActorLocation().Y) / Y_Size;
+	int xi = (Location.X - GetActorLocation().X) / SplitSpace;
+	int yi = (Location.Y - GetActorLocation().Y) / SplitSpace;
 	return FVector2D(xi, yi);
 }
 
 int32 AWaterSurface::CalcIndex(int32 x, int32 y)
 {
-	int32 index = x + (y * SplitVector.X);
+	int32 index = x + (y * SplitPointNum.X);
 	if (index < 0 ) return 0;
-	if (index > SplitVector.X * SplitVector.Y) return 0;
+	if (index > SplitPointNum.X * SplitPointNum.Y) return 0;
 	return index;
 }
 
 void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius)
 {
-	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
+	for (int xi = 1; xi < SplitPointNum.X - 1; ++xi)
 	{
-		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
+		for (int yi = 1; yi < SplitPointNum.Y - 1; ++yi)
 		{
-			float xp = Vertices[CalcIndex(xi, yi)].X;
-			float yp = Vertices[CalcIndex(xi, yi)].Y;
+			int32 index = CalcIndex(xi, yi);
+			float xp = Vertices[index].X;
+			float yp = Vertices[index].Y;
 			float xc = CirclePostion.X;
 			float yc = CirclePostion.Y;
 			if ((xp - xc)*(xp - xc) + (yp - yc)*(yp - yc) <= Radius * Radius)
 			{
-				IsLands[CalcIndex(xi, yi)] = true;
-				Vertices[CalcIndex(xi, yi)].Z = CirclePostion.Z;
-				UV0[CalcIndex(xi, yi)] = FVector2D((xi / SplitVector.X) * 0.5f + 0.5f, (yi / SplitVector.Y));
+				IsLands[index] = true;
+				Vertices[index].Z = CirclePostion.Z;
+				UV0[index] = FVector2D((xi / SplitPointNum.X) * 0.5f + 0.5f, (yi / SplitPointNum.Y));
+				VertexColors[index] = FLinearColor::Black;
 			}
 		}
 	}
@@ -222,12 +210,13 @@ void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius)
 
 void AWaterSurface::SetSquareLand(FVector SquareLocation, float XLength, float YLength)
 {
-	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
+	for (int xi = 1; xi < SplitPointNum.X - 1; ++xi)
 	{
-		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
+		for (int yi = 1; yi < SplitPointNum.Y - 1; ++yi)
 		{
-			float xp = Vertices[CalcIndex(xi, yi)].X;
-			float yp = Vertices[CalcIndex(xi, yi)].Y;
+			int32 index = CalcIndex(xi, yi);
+			float xp = Vertices[index].X;
+			float yp = Vertices[index].Y;
 			float xs = SquareLocation.X;
 			float ys = SquareLocation.Y;
 
@@ -236,22 +225,23 @@ void AWaterSurface::SetSquareLand(FVector SquareLocation, float XLength, float Y
 			if (yp > ys + YLength * 0.5f) continue;
 			if (yp < ys - YLength * 0.5f) continue;
 
-			IsLands[CalcIndex(xi, yi)] = true;
-			Vertices[CalcIndex(xi, yi)].Z = SquareLocation.Z;
-			UV0[CalcIndex(xi, yi)] = FVector2D((xi / SplitVector.X) * 0.5f + 0.5f, (yi / SplitVector.Y));
+			IsLands[index] = true;
+			Vertices[index].Z = SquareLocation.Z;
+			UV0[index] = FVector2D((xi / SplitPointNum.X) * 0.5f + 0.5f, (yi / SplitPointNum.Y));
+			VertexColors[index] = FLinearColor::Black;
 		}
 	}
 }
 
 void AWaterSurface::AddPower(FVector worldPos, float power = 100.0f)
 {
-	int32 WaveX = worldPos.X / X_Size;
-	int32 WaveY = worldPos.Y / Y_Size;
+	int32 WaveX = (worldPos.X - Vertices[0].X) / SplitSpace;
+	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 
 	//if (WaveX <= 0) return;
-	//if (WaveX > SplitVector.X) return;
+	//if (WaveX > SplitPointNum.X) return;
 	//if (WaveY <= 0) return;
-	//if (WaveY > SplitVector.Y) return;
+	//if (WaveY > SplitPointNum.Y) return;
 
 	CreateWave(WaveX, WaveY, power);
 }
@@ -260,11 +250,11 @@ float AWaterSurface::GetWaveHeight(const FVector & worldPos)
 {
 	if (!IsInWater(worldPos)) return 0.0f;
 
-	int32 WaveX = worldPos.X / X_Size;
-	int32 WaveY = worldPos.Y / Y_Size;
+	int32 WaveX = (worldPos.X - Vertices[0].X) / SplitSpace;
+	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 	float uL = 0.0f, uR = 0.0f, uT = 0.0f, uB = 0.0f;
 
-	if (WaveX >= 0 && WaveX < SplitVector.X && WaveY >= 0 && WaveY < SplitVector.Y)
+	if (WaveX >= 0 && WaveX < SplitPointNum.X && WaveY >= 0 && WaveY < SplitPointNum.Y)
 	{
 		uL = CurrentHeights[CalcIndex(WaveX - 1, WaveY)];
 		uR = CurrentHeights[CalcIndex(WaveX + 1, WaveY)];
@@ -296,11 +286,11 @@ FVector AWaterSurface::GetWavePower(const FVector & worldPos)
 		}
 	}
 
-	int32 WaveX = worldPos.X / X_Size;
-	int32 WaveY = worldPos.Y / Y_Size;
+	int32 WaveX = (worldPos.X - Vertices[0].X) / SplitSpace;
+	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 	float uL = 0.0f, uR = 0.0f, uT = 0.0f, uB = 0.0f;
 
-	if (WaveX >= 0 && WaveX < SplitVector.X && WaveY >= 0 && WaveY < SplitVector.Y)
+	if (WaveX >= 0 && WaveX < SplitPointNum.X && WaveY >= 0 && WaveY < SplitPointNum.Y)
 	{
 		uL = CurrentHeights[CalcIndex(WaveX - 1, WaveY)];
 		uR = CurrentHeights[CalcIndex(WaveX + 1, WaveY)];
@@ -372,15 +362,47 @@ FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
 	return worldPos;
 }
 
+FVector AWaterSurface::AdjustMoveInField(const FVector & worldPos, float circleRadius)
+{
+	FVector Result = worldPos;
+
+	float Right_X = EndPoint->GetActorLocation().X;
+	float Left_X = StartPoint->GetActorLocation().X;
+	float Up_Y = EndPoint->GetActorLocation().Y;
+	float Bottom_Y = StartPoint->GetActorLocation().Y;
+
+	// X軸を確認
+	float Deff = Result.X + circleRadius - (Right_X);
+	if (Deff > 0.0f) Result.X -= Deff;
+	else
+	{
+		Deff = Result.X - circleRadius - (Left_X);
+		if (Deff < 0.0f) Result.X -= Deff;
+	}
+	// Y軸を確認
+	Deff = Result.Y + circleRadius - (Up_Y);
+	if (Deff > 0.0f) Result.Y -= Deff;
+	else
+	{
+		Deff = Result.Y - circleRadius - (Bottom_Y);
+		if (Deff < 0.0f) Result.Y -= Deff;
+	}
+
+	return Result;
+}
+
 // 水の座標を調べて移動する位置が衝突していたら押し出す関数
 FVector AWaterSurface::AdjustMoveInLand(const FVector & worldPos, const FVector & moveVec, float circleRadius, const FVector & WaterCheckPos, float WaterCheckRadius)
 {
 	FVector movedPos = worldPos + moveVec;
 
+	// フィールドの外に出ないようにする
+	movedPos = AdjustMoveInField(movedPos, circleRadius);
+
 	// フィールドのメッシュ全体を検索
-	for (int xi = 0; xi < SplitVector.X; ++xi)
+	for (int xi = 0; xi < SplitPointNum.X; ++xi)
 	{
-		for (int yi = 0; yi < SplitVector.Y; ++yi)
+		for (int yi = 0; yi < SplitPointNum.Y; ++yi)
 		{
 			int index = CalcIndex(xi, yi);
 			if (IsLands[index]) continue;	// 地上なら距離を測る必要がないので次へ
@@ -392,7 +414,7 @@ FVector AWaterSurface::AdjustMoveInLand(const FVector & worldPos, const FVector 
 
 			// 移動先の座標と水との距離を測る
 			if ((xp - xc)*(xp - xc) + (yp - yc)*(yp - yc) <= WaterCheckRadius * WaterCheckRadius)
-			{
+			{	
 				// ここで移動先が水と分かったので今いる地面を調べる
 				// 地形の形によってそれぞれ処理を書く
 				ALandPoint * LandActor = GetLandPoint(worldPos);
@@ -556,8 +578,8 @@ FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector& moveVec
 
 bool AWaterSurface::IsInWater(FVector worldPos)
 {
-	int32 WaveX = worldPos.X / X_Size;
-	int32 WaveY = worldPos.Y / Y_Size;
+	int32 WaveX = (worldPos.X - Vertices[0].X) / SplitSpace;
+	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 
 	int index = CalcIndex(WaveX, WaveY);
 
@@ -571,19 +593,30 @@ bool AWaterSurface::IsLand(FVector worldPos)
 {
 	if (!IsInWater(worldPos)) return false;
 
-	int32 WaveX = worldPos.X / X_Size;
-	int32 WaveY = worldPos.Y / Y_Size;
+	int32 WaveX = (worldPos.X - Vertices[0].X) / SplitSpace;
+	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 
 	int index = CalcIndex(WaveX, WaveY);
 
 	return IsLands[index];
 }
 
+bool AWaterSurface::IsInField(FVector worldPos)
+{
+	FVector2D Origin = FVector2D(Vertices[0].X, Vertices[0].Y);
+	FVector2D End = FVector2D(Vertices[Vertices.Num() - 1].X, Vertices[Vertices.Num() - 1].Y);
+
+	return  Origin.X <= worldPos.X && 
+			End.X >= worldPos.X && 
+			Origin.Y <= worldPos.Y && 
+			End.Y >= worldPos.Y;
+}
+
 FVector AWaterSurface::GetGetOffPos(FVector WorldPos, float Radius)
 {
-	for (int xi = 1; xi < SplitVector.X - 1; ++xi)
+	for (int xi = 1; xi < SplitPointNum.X - 1; ++xi)
 	{
-		for (int yi = 1; yi < SplitVector.Y - 1; ++yi)
+		for (int yi = 1; yi < SplitPointNum.Y - 1; ++yi)
 		{
 			if (!IsLands[CalcIndex(xi, yi)]) continue;
 

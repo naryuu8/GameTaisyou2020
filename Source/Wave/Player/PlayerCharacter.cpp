@@ -200,7 +200,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		// ’ÊíŽž
 		else
 		{
-			float WaterCheckRadius = Radius * 1.3f;
+			float WaterCheckRadius = Radius * 1.2f;
 			float dist = WaterCheckRadius * 1.3f;
 			FVector CurPos = GetActorLocation();
 			FVector moveForce = Direction * MoveAmount * MoveSpeed;
@@ -246,7 +246,9 @@ void APlayerCharacter::Move(const FVector & Direction, float Value)
 
 	AddMovementInput(Direction, Value);
 	// –³—‚â‚èˆÚ“®—Ê‚ð’²®
+	float FallForce = GetMovementComponent()->Velocity.Z;
 	GetMovementComponent()->Velocity = Direction * Value * 40.0f;
+	GetMovementComponent()->Velocity.Z = FallForce;
 }
 
 void APlayerCharacter::TriggerHammerAttack(void)
