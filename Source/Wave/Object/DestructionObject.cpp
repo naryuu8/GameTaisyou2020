@@ -28,6 +28,7 @@ ADestructionObject::ADestructionObject()
 void ADestructionObject::BeginPlay()
 {
 	Super::BeginPlay();
+	WaterSurface = Cast<AWaterSurface>((UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass())));
 
 }
 
@@ -36,6 +37,26 @@ void ADestructionObject::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
+	if ((!WaterSurface->IsInWater(GetActorLocation())))
+	{
+		SetActorLocation(GetActorLocation() + FVector(0, 0, -2));
+		return;
+	}
+
+	// ”g‚ÌŒX‚«‚É‰ž‚¶‚ÄˆÚ“®‚·‚é
+	FVector WavePower = WaterSurface->GetWavePower(GetActorLocation());
+	FVector MoveVec = WavePower * FloatSpeed * 0.01f;
+	Velocity += MoveVec;
+	if (Velocity.Size() > MinFloatWavePower)
+		SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, FloatScale));
+	Velocity *= 0.98f;
+
+	// ”g‚Ì‚‚³‚É‡‚í‚¹‚é
+	FVector CurPos = GetActorLocation();
+	float Height = WaterSurface->GetWaveHeight(CurPos);
+	Height = FMath::Lerp(CurPos.Z, Height, 0.1f);
+	SetActorLocation(FVector(CurPos.X, CurPos.Y, Height));
 
 }
 
@@ -49,5 +70,6 @@ void ADestructionObject::OnOverlapBegin(class UPrimitiveComponent* OverlappedCom
 		BreakObject();
 		return;
 	}
+
 }
 
