@@ -40,11 +40,10 @@ private:
 	FVector2D LocationToVertices(FVector Location);
 
 private:
-	float X_Size;
-	float Y_Size;
+	FIntPoint SplitPointNum = FIntPoint(0,0);
 
-	UPROPERTY(EditAnywhere)
-		FVector2D SplitVector = FVector2D(100,100);
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "5.0", ClampMax = "100.0"))
+		float SplitSpace = 10.0f;	// ’¸“_‚ÌŠÔŠu
 	UPROPERTY(EditAnywhere)
 		AActor* StartPoint;
 	UPROPERTY(EditAnywhere)

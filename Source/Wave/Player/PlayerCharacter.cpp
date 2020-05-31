@@ -200,7 +200,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		// �ʏ펞
 		else
 		{
-			float WaterCheckRadius = Radius * 1.3f;
+			float WaterCheckRadius = Radius * 1.2f;
 			float dist = WaterCheckRadius * 1.3f;
 			FVector CurPos = GetActorLocation();
 			FVector moveForce = Direction * MoveAmount * MoveSpeed;
