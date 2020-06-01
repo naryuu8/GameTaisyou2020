@@ -4,12 +4,14 @@
 #include "Kismet/GameplayStatics.h"
 #include "Goal.h"
 #include "Blueprint/UserWidget.h"
-#include "../UI/StageClearUI.h"
+#include "../UI/TimeCountUI.h"
 #include "../UI/GameOverUI.h"
+#include "../UI/ResultUI.h"
 #include "../InputManager.h"
 #include "../Player/PlayerCharacter.h"
 #include "../WaterSurface/FloatActor.h"
 // Sets default values
+
 AGameController::AGameController()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -34,34 +36,24 @@ void AGameController::BeginPlay()
 	SetNorma();
 	//ポーズ中でもTickが来るようにする
 	SetTickableWhenPaused(true);
+	//MaxNimotuが0の時はデバッグモードなので現在のマップの荷物数を得る
+	if (MaxNimotu == 0)
+	{
+		GetMaxNimotu();
+	}
 }
 
 // Called every frame
 void AGameController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 	GoalCount = GetGoalCount();
-	int NotExplotionCount = GetNotExplotionCount(); //壊れていない家の数Get
-	//どうやってもここからノルマ達成不可能の時ゲームオーバーにする
-	if (NotExplotionCount < NormaGoalCount)
-	{
-		IsGameOver = true;
-		CreateGameOverUI();
-		if (UGameplayStatics::IsGamePaused(GetWorld()))
-		{//ゲームオーバー画面はポーズ扱いにするのでインプットが終わり次第returnする
-			InputGameOverUI();
-			return;
-		}
-		
-	}
-
-	// ノルマ達成ならとりあえずゲームクリア
-	if (GoalCount >= NormaGoalCount)
-	{
-		IsGameClear = true;
-		CreateStageClearUI();
-	}
+	CheckTimeCount();
+	GameOverCheck();
+	GameClearCheck();
+	InputGameOverUI();
+	InputResultUI();
 }
 
 int AGameController::GetGoalCount()
@@ -86,24 +78,25 @@ int AGameController::GetNotExplotionCount()
 	return Count;
 }
 
-void AGameController::CreateStageClearUI()
+void AGameController::CreateTimeCountUI()
 {
-	if (StageClearUI)return;
-	if (StageClearUIClass != nullptr)
+	if (TimeCountUI)return;
+	if (TimeCountUIClass != nullptr)
 	{
-		StageClearUI = CreateWidget<UStageClearUI>(GetWorld(), StageClearUIClass);
-		if (StageClearUI != nullptr)
+		TimeCountUI = CreateWidget<UTimeCountUI>(GetWorld(), TimeCountUIClass);
+		if (TimeCountUI != nullptr)
 		{
-			StageClearUI->AddToViewport();
+			TimeCountUI->AddToViewport();
+			TimeCountUI->SetTimeCount(LimitTime);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("StageClearUIClass : %s"), L"Widget cannot create");
+			UE_LOG(LogTemp, Error, TEXT("TimeCountUIClass : %s"), L"Widget cannot create");
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("StageClearUIClass : %s"), L"UIClass is nullptr");
+		UE_LOG(LogTemp, Error, TEXT("TimeCountUIClass : %s"), L"UIClass is nullptr");
 	}
 }
 
@@ -128,8 +121,41 @@ void AGameController::CreateGameOverUI()
 	}
 }
 
+void AGameController::CreateResultUI()
+{
+	if (ResultUI)return;
+	if (ResultUIClass != nullptr)
+	{
+		ResultUI = CreateWidget<UResultUI>(GetWorld(), ResultUIClass);
+		if (ResultUI != nullptr)
+		{
+			ResultUI->AddToViewport();
+			APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
+			if (player)
+			{
+				player->HammerCountBarParent();
+				ResultUI->SetResultGaugeAnimeCheckEvent(player->GetMaxHammerHP(),player->GetHammerHP(), NormaPercent);
+				//ResultUI->SetResultGaugeAnimeCheckEvent(100.0f, 80.0f, 30.0f);
+			}
+			ResultUI->SetResultNowNimotuCheckEvent(GoalCount);
+			//ResultUI->SetResultNowNimotuCheckEvent(3);
+			ResultUI->SetStampAnimeCheckEvent(NormaGoalCount, MaxNimotu);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("ResultUIClass : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ResultUIClass : %s"), L"UIClass is nullptr");
+	}
+}
+
 void AGameController::InputGameOverUI()
 {
+	if (!IsGameOver)return;
+	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
 	if (!GameOverUI)return;
 	if (GameOverUI->GetIsPlayAnimation())return;
 	const AInputManager * inputManager = AInputManager::GetInstance();
@@ -149,11 +175,31 @@ void AGameController::InputGameOverUI()
 	}
 }
 
+void AGameController::InputResultUI()
+{
+	if (!IsGameClear)return;
+	if (!ResultUI)return;
+	const AInputManager * inputManager = AInputManager::GetInstance();
+	if (!inputManager)return;
+	const InputState * input = inputManager->GetState();
+	if (input->Up.IsPress)
+	{
+		ResultUI->BackSelectState();
+	}
+	if (input->Down.IsPress)
+	{
+		ResultUI->NextSelectState();
+	}
+	if (input->Select.IsPress)
+	{
+		ResultUI->SelectStateAction();
+	}
+}
+
 void AGameController::SetNorma()
 {
 	float percent = NormaPercent * 0.01f;
-	APlayerCharacter* player;
-	player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
+	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	if (player)
 	{
 		player->SetNormaPercent(percent);
@@ -162,6 +208,8 @@ void AGameController::SetNorma()
 
 int AGameController::GetMaxNimotu()
 {
+	//すでに荷物数を数えているならリターン
+	if (MaxNimotu != 0)return MaxNimotu;
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFloatActor::StaticClass(), FoundActors);
 	for (auto Actor : FoundActors)
@@ -176,4 +224,112 @@ int AGameController::GetMaxNimotu()
 		}
 	}
 	return MaxNimotu;
+}
+
+void AGameController::GameClearCheck()
+{
+	if (IsGameOver)return;
+	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
+	int GameMaxNimotu = CountGameNimotu();
+	bool islimit = false;
+	auto gameclear = [=]
+	{
+		IsGameClear = true;
+		CreateResultUI();
+		if (TimeCountUI)
+		{
+			TimeCountUI->RemoveFromParent();
+		}
+	};
+	// ゲームクリア条件
+
+	//①ノルマ以上荷物を入れている時かつハンマーが壊れて残り時間が0になったら
+	if (GoalCount >= NormaGoalCount && GetLimitTimeZero())
+	{
+		gameclear();
+	}
+	//②荷物を全て入れる
+	else if (GoalCount == MaxNimotu)
+	{
+		gameclear();
+	}
+	//③ゲーム内の荷物が0でゴールカウントがノルマより大きかったら
+	else if (GameMaxNimotu == 0 &&  GoalCount >= NormaGoalCount)
+	{
+		gameclear();
+	}
+}
+
+void AGameController::GameOverCheck()
+{
+	if (IsGameClear)return;
+	// ゲームオーバー条件
+	//ノルマを1つも達成できなくなったらゲームオーバー
+	int NotExplotionCount = GetNotExplotionCount(); //壊れていない家の数Get
+	int GameMaxNimotu = CountGameNimotu();
+	bool islimit = false;
+	auto gameover = [=] 
+	{ 
+		IsGameOver = true;
+		CreateGameOverUI();
+		if (TimeCountUI)
+		{
+			TimeCountUI->RemoveFromParent();
+		}
+	};
+	//①ノルマまで荷物を運んでおらずハンマーが壊れて残り時間が0になったら
+	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
+	if (GoalCount < NormaGoalCount && GetLimitTimeZero())
+	{
+		gameover();
+	}
+	//②荷物がノルマ数達成できないほど無くなった時(ゴールに入った荷物と合わせる)
+	else if (GameMaxNimotu + GoalCount < NormaGoalCount)
+	{
+		gameover();
+	}
+	//どうやってもここからノルマ達成不可能の時ゲームオーバーにする
+	//③ゴールがノルマの荷物より少なくなった時
+	else if (NotExplotionCount < NormaGoalCount && GoalCount < NormaGoalCount)
+	{
+		gameover();
+	}
+}
+
+int AGameController::CountGameNimotu()
+{
+	int num = 0;
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFloatActor::StaticClass(), FoundActors);
+	for (auto Actor : FoundActors)
+	{
+		AFloatActor* act = Cast<AFloatActor>(Actor);
+		if (act)
+		{
+			if (act->ActorHasTag("Nimotu"))
+			{
+				num++;
+			}
+		}
+	}
+	return num;
+}
+
+void AGameController::CheckTimeCount()
+{
+	//プレイヤーのハンマーHPが0でハンマーを叩き終わったら時間カウント開始と残り時間監視
+	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
+	if (player->GetHammerHP() <= 0.0f && player->GetHammerPower() == 0.0f)
+	{
+		CreateTimeCountUI();
+	}
+}
+
+bool AGameController::GetLimitTimeZero()
+{
+	if (TimeCountUI)
+	{
+		return TimeCountUI->GetIsCountZero();
+	}
+	return false;
 }

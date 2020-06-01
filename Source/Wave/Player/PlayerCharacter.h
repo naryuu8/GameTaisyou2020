@@ -157,5 +157,14 @@ public:
 	//HPバーのノルマ位置をセット
 	void SetNormaPercent(const float percent);
 	float GetMoveAmount() { return MoveAmount; };
-
+	//ゲージUIを非表示にする
+	void HammerCountBarParent();
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	float GetMaxHammerHP() const { return MaxHammerHP; };
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	float GetHammerHP() const { return HammerHP; };
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	float GetHammerPower() const { return HammerPower; };
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	bool GetIsAttackHold() const { return IsAttackHold; };
 };
