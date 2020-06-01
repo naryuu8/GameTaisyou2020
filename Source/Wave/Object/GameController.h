@@ -7,8 +7,9 @@
 #include "GameController.generated.h"
 
 class UHammerCountUI;
-class UStageClearUI;
 class UGameOverUI;
+class UResultUI;
+class UTimeCountUI;
 // ゲーム中のクリア条件などを管理するクラス
 
 UCLASS()
@@ -30,6 +31,9 @@ protected:
 	//ノルマの割合 0-100で入力
 	UPROPERTY(EditAnywhere, Category = "Game")
 		float NormaPercent = 0;
+	//ハンマーが0になった時の残り時間
+	UPROPERTY(EditAnywhere, Category = "Game")
+		int LimitTime = 10;
 private:
 	// ゲームクリアかどうか
 	bool IsGameClear;
@@ -44,11 +48,14 @@ private:
 
 	// 表示するUI　エディタで指定する
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<UStageClearUI> StageClearUIClass;
+		TSubclassOf<UTimeCountUI> TimeCountUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UGameOverUI> GameOverUIClass;
-	UStageClearUI* StageClearUI;
-	UGameOverUI* GameOverUI;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UResultUI> ResultUIClass;
+	UTimeCountUI* TimeCountUI = nullptr;
+	UGameOverUI* GameOverUI = nullptr;
+	UResultUI* ResultUI = nullptr;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -57,11 +64,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE bool GetIsClear() const { return IsGameClear; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE bool GetIsGameOver() const { return IsGameOver; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE int GetGoalCount() const { return GoalCount; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void SetNormaGoalCount(const int goalcount) { NormaGoalCount = goalcount; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE int GetNormaGoalCount() const { return NormaGoalCount; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void SetMaxNimotu(const int num) { MaxNimotu = num; };
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE int GetMaxNimotu();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
@@ -77,9 +88,21 @@ private:
 	int GetGoalCount();
 	// 爆発済みの家の個数を取得
 	int GetNotExplotionCount();
-	void CreateStageClearUI();
+	void CreateTimeCountUI();
 	void CreateGameOverUI();
+	void CreateResultUI();
 	void InputGameOverUI();
+	void InputResultUI();
 	//ゲージのノルマ設定
 	void SetNorma();
+	//ゲームクリア条件確認
+	void GameClearCheck();
+	//ゲームオーバー条件確認
+	void GameOverCheck();
+	//ゲームプレイ中の荷物数確認
+	int CountGameNimotu();
+	//ハンマーのHPが0でハンマーを叩き終わったらカウントダウンを開始する
+	void CheckTimeCount();
+	//カウントダウンの残り時間0の時trueを返す
+	bool GetLimitTimeZero();
 };

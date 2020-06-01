@@ -18,14 +18,20 @@ private:
 protected:
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float MaxHammerHP;
+	//プレイヤークリア時のHP
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		float ClearHammerHP;
+	//ゲージ上昇アニメが終わったらTrue（リザルトで使用）
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		bool IsGaugeAnimeEnd = false;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float DefaultHpSizeX;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float DefaultHpSizeY;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
-		bool IsDamage;
+		bool IsDamage = false;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
-		bool IsDamageDown;//ダメージゲージが減っている時true
+		bool IsDamageDown = false;//ダメージゲージが減っている時true
 public:
 	//ハンマーを構えた開始を通知イベント
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
@@ -46,5 +52,7 @@ public:
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void SetNormaPercent(const float Percent);
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
-	void SetMaxHammerHP(const float hp) { MaxHammerHP = hp; }
+		void SetMaxHammerHP(const float hp) { MaxHammerHP = hp; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE bool GetIsGaugeAnimeEnd() const { return IsGaugeAnimeEnd; }
 };
