@@ -19,7 +19,7 @@ class WAVE_API UGameOverUI : public UUserWidget
 {
 	GENERATED_BODY()
 private:
-	int SelectNumber;
+	int SelectNumber = 0;
 public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	int GetSelectNumber() const { return SelectNumber; };

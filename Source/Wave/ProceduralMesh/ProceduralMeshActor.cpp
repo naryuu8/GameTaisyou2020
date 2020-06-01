@@ -37,6 +37,7 @@ void AProceduralMeshActor::CreateMesh()
 
 void AProceduralMeshActor::UpdateMesh()
 {
+	//Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Mesh->UpdateMeshSection_LinearColor(0, Vertices, Normals, UV0, VertexColors, Tangents);
 }
 
