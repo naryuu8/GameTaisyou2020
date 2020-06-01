@@ -69,14 +69,14 @@ void AWaterSurface::BeginPlay()
 		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
 		if (CircleLand)
 		{
-			SetCircleLand(CircleLand->GetActorLocation(), CircleLand->GetRadius());
+			SetCircleLand(CircleLand->GetActorLocation(), CircleLand->GetRadius(), CircleLand->GetIsUse());
 			continue;
 		}
 		// ãÈå`ÇÃínå`ÇÃèâä˙âª
 		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
 		if (SquareLand)
 		{
-			SetSquareLand(SquareLand->GetActorLocation(), SquareLand->GetXLength(), SquareLand->GetYLength());
+			SetSquareLand(SquareLand->GetActorLocation(), SquareLand->GetXLength(), SquareLand->GetYLength(), SquareLand->GetIsUse());
 		}
 	}
 
@@ -101,7 +101,24 @@ void AWaterSurface::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	float DeltaSpeed = WaveSpeed / 60;
+	float DeltaSpeed = WaveSpeed / 60;	
+
+	// ó§îªíËÇ™è¡Ç¶ÇÈó§Ç™Ç†ÇÍÇŒè¡Ç∑
+	for (auto Actor : LandPointActors)
+	{
+		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
+		if (CircleLand)
+		{
+			if(!CircleLand->GetIsUse())SetCircleLand(CircleLand->GetActorLocation(), CircleLand->GetRadius(), false);
+			continue;
+		}
+		
+		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
+		if (SquareLand)
+		{
+			if (!SquareLand->GetIsUse())SetSquareLand(SquareLand->GetActorLocation(), SquareLand->GetXLength(), SquareLand->GetYLength(), false);
+		}
+	}
 
 	float c = 2.0f;
 	float mul = DeltaSpeed * DeltaSpeed * c * c / (SplitPointNum.X * SplitPointNum.Y) * (SplitPointNum.X * SplitPointNum.Y);
@@ -198,7 +215,7 @@ int32 AWaterSurface::CalcIndex(int32 x, int32 y)
 	return index;
 }
 
-void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius)
+void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius, bool use)
 {
 	for (int xi = 1; xi < SplitPointNum.X - 1; ++xi)
 	{
@@ -211,16 +228,28 @@ void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius)
 			float yc = CirclePostion.Y;
 			if ((xp - xc)*(xp - xc) + (yp - yc)*(yp - yc) <= Radius * Radius)
 			{
-				IsLands[index] = true;
-				Vertices[index].Z = CirclePostion.Z;
-				UV0[index] = FVector2D((xi / SplitPointNum.X) * 0.5f + 0.5f, (yi / SplitPointNum.Y));
-				VertexColors[index] = FLinearColor::Black;
+				if (use)
+				{
+					IsLands[index] = true;
+					Vertices[index].Z = CirclePostion.Z;
+					UV0[index] = FVector2D((xi / SplitPointNum.X) * 0.5f + 0.5f, (yi / SplitPointNum.Y));
+					VertexColors[index] = FLinearColor::Black;
+				}
+				else
+				{
+					IsLands[index] = false;
+					float X_Start = StartPoint->GetActorLocation().X;
+					float Y_Start = StartPoint->GetActorLocation().Y;
+					Vertices[index].Z = CirclePostion.Z;
+					VertexColors[index] = (WaterColor);
+					UV0[index] = FVector2D((xi / SplitPointNum.X) * 0.5f, (yi / SplitPointNum.Y));
+				}
 			}
 		}
 	}
 }
 
-void AWaterSurface::SetSquareLand(FVector SquareLocation, float XLength, float YLength)
+void AWaterSurface::SetSquareLand(FVector SquareLocation, float XLength, float YLength, bool use)
 {
 	for (int xi = 1; xi < SplitPointNum.X - 1; ++xi)
 	{
@@ -237,10 +266,22 @@ void AWaterSurface::SetSquareLand(FVector SquareLocation, float XLength, float Y
 			if (yp > ys + YLength * 0.5f) continue;
 			if (yp < ys - YLength * 0.5f) continue;
 
-			IsLands[index] = true;
-			Vertices[index].Z = SquareLocation.Z;
-			UV0[index] = FVector2D((xi / SplitPointNum.X) * 0.5f + 0.5f, (yi / SplitPointNum.Y));
-			VertexColors[index] = FLinearColor::Black;
+			if (use)
+			{
+				IsLands[index] = true;
+				Vertices[index].Z = SquareLocation.Z;
+				UV0[index] = FVector2D((xi / SplitPointNum.X) * 0.5f + 0.5f, (yi / SplitPointNum.Y));
+				VertexColors[index] = FLinearColor::Black;
+			}
+			else
+			{
+				IsLands[index] = false;
+				float X_Start = StartPoint->GetActorLocation().X;
+				float Y_Start = StartPoint->GetActorLocation().Y;
+				Vertices[index].Z = SquareLocation.Z;
+				VertexColors[index] = (WaterColor);
+				UV0[index] = FVector2D((xi / SplitPointNum.X) * 0.5f, (yi / SplitPointNum.Y));
+			}
 		}
 	}
 }
@@ -314,10 +355,7 @@ FVector AWaterSurface::GetWavePower(const FVector & worldPos)
 
 	FVector answerVec = FVector::ZeroVector;
 
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFlashFlood::StaticClass(), FoundActors);
-
-	for (auto Actor : FoundActors)
+	for (auto Actor : FlashFloods)
 	{
 		AFlashFlood* FlashFlood = Cast<AFlashFlood>(Actor);
 		if (FlashFlood)

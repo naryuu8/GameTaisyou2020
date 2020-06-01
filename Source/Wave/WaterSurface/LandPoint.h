@@ -47,7 +47,12 @@ public:
 	// この地面の外に出ないように移動する際のチェック
 	virtual FVector AdjustMoveInLand(const FVector & Pos, float CircleRadius) { return FVector::ZeroVector; };
 
+	void SetIsUse(bool isUse) { IsUse = isUse; }
+	bool GetIsUse() { return IsUse; }
+
 private:
 	UPROPERTY(EditAnywhere)
 		TEnumAsByte<ELandType> LandType = ELandType::Grass;
+
+	bool IsUse = true; // falseにすることで陸でなくすることができる（橋の処理に使う）
 };

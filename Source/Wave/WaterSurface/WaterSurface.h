@@ -33,8 +33,8 @@ public:
 
 private:
 	void CreateWave(int32 x, int32 y, float pawer);
-	void SetCircleLand(FVector CirclePostion, float Radius);
-	void SetSquareLand(FVector SquareLocation, float XLength, float YLength);
+	void SetCircleLand(FVector CirclePostion, float Radius, bool use);
+	void SetSquareLand(FVector SquareLocation, float XLength, float YLength, bool use);
 
 	void TickFlashFloodWave(AFlashFlood* FlashFlood);
 
