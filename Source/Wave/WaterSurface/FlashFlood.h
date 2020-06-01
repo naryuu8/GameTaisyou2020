@@ -30,7 +30,13 @@ public:
 
 	FVector GetFloatVec(FVector worldPos);
 
-private:
+	float GetCurrentTime() { return CurrentTime; }
+
+public:
+	UPROPERTY(EditAnywhere)
+		float SwingWight = 0.01f;
+	UPROPERTY(EditAnywhere)
+		float MaxHight = 30.0f;
 	UPROPERTY(EditAnywhere)
 		float XLength = 100.0f;
 	UPROPERTY(EditAnywhere)
@@ -39,4 +45,7 @@ private:
 		float Speed = 100.0f;
 	UPROPERTY(EditAnywhere)
 		FVector FloatVec;
+
+private:
+	float CurrentTime = 0.0f; // ŽžŠÔŒv‘ª—p
 };
