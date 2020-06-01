@@ -7,6 +7,7 @@
 #include "WaterSurface.generated.h"
 
 class ALandPoint;
+class AFlashFlood;
 
 UCLASS()
 class WAVE_API AWaterSurface : public AProceduralMeshActor
@@ -21,14 +22,13 @@ public:
 	FVector GetWavePower(const FVector & worldPos);
 	float GetWaveHeight(const FVector & worldPos);	// 波の高さを取得
 	float GetWaveSpeed() { return WaveSpeed; }
-	FVector GetOutLandPos(FVector worldPos, float circleRadius);
 	FVector AdjustMoveInField(const FVector & worldPos, float circleRadius);
 	FVector AdjustMoveInWater(const AActor * Object, FVector& moveVec, float circleRadius);
 	FVector AdjustMoveInLand(const FVector & worldPos, const FVector & moveVec, float circleRadius, const FVector & WaterCheckPos, float WaterCheckRadius);
 	bool IsInWater(FVector worldPos);
 	bool IsLand(FVector worldPos);
 	bool IsInField(FVector worldPos);	// ステージ外かどうか調べる
-	FVector GetGetOffPos(FVector WorldPos, float Radius);
+	FVector GetGetOffPos(FVector WorldPos, float Radius);	// 筏から降りれる場所を取得
 	ALandPoint * GetLandPoint(const FVector & WorldPos);	// 指定した座標に接している地面を取得
 
 private:
@@ -36,8 +36,9 @@ private:
 	void SetCircleLand(FVector CirclePostion, float Radius);
 	void SetSquareLand(FVector SquareLocation, float XLength, float YLength);
 
+	void TickFlashFloodWave(AFlashFlood* FlashFlood);
+
 	int32 CalcIndex(int32 x, int32 y);
-	FVector2D LocationToVertices(FVector Location);
 
 private:
 	FIntPoint SplitPointNum = FIntPoint(0,0);
@@ -68,4 +69,5 @@ private:
 	TArray<float> NewHeights;
 
 	TArray<ALandPoint*> LandPointActors;	// 衝突処理などに使うのでメンバにする
+	TArray<AFlashFlood*> FlashFloods;		// 水流の計算に使うのでメンバにする
 };
