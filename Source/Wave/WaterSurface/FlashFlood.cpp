@@ -25,6 +25,10 @@ void AFlashFlood::BeginPlay()
 void AFlashFlood::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	// 時間の計測
+	CurrentTime += (DeltaTime * Speed);
+
 	float XOffset = XLength * 0.5f;
 	float YOffset = YLength * 0.5f;
 	// デバッグ用の四角を描画(高さや太さは決め打ち）
@@ -51,6 +55,5 @@ FVector AFlashFlood::GetFloatVec(FVector worldPos)
 	if (yp > ys + YLength * 0.5f) return FVector::ZeroVector;
 	if (yp < ys - YLength * 0.5f) return FVector::ZeroVector;
 
-	UE_LOG(LogTemp, Log, TEXT("Float"));
 	return FloatVec * Speed;
 }

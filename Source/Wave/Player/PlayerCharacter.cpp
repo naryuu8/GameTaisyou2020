@@ -221,9 +221,16 @@ void APlayerCharacter::Tick(float DeltaTime)
 	}
 
 	if (IsAttackHold)
-	{//ハンマーを溜めていたら力を足す
-		HammerPower += ChargePower;
-		MinusHammerGauge(HammerPower);
+	{
+		// 溜められる最大値以上はいかない
+		if (HammerPower < ChargePowerMax)
+		{
+			//ハンマーを溜めていたら力を足す
+			HammerPower += ChargeSpeed;
+			HammerPower = FMath::Min(HammerPower, ChargePowerMax);
+			MinusHammerGauge(HammerPower);
+		}
+		
 	}
 
 	//カメラにレイを飛ばして当たらなければアウトライン適用
@@ -276,7 +283,7 @@ void APlayerCharacter::HummerAttackEnd()
 		// ハンマーの先端を取得
 		FVector AttackPoint = HummerTipPoint->GetComponentLocation();
 		// 波を起こす
-		WaterAttack(AttackPoint, HammerPower);
+		WaterAttack(AttackPoint, HammerPower * HammerPowerValue);
 		// エフェクトを生成
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, AttackEffect, AttackPoint, GetActorRotation(), FVector::OneVector * AttackEffectScale, true);
 		// カメラシェイク
@@ -288,7 +295,7 @@ void APlayerCharacter::HummerAttackEnd()
 void APlayerCharacter::MinusHammerGauge(const float Power)
 {
 	if (!HammerCountBarUI)return;
-	HammerHP -= ChargePower;
+	HammerHP -= ChargeSpeed;
 	if (HammerHP < 0.0f)
 	{
 		HammerHP = 0.0f;

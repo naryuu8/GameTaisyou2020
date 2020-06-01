@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
+#include "../WaterSurface/WaterSurface.h"
 #include "DestructionObject.generated.h"
 
 UCLASS()
@@ -34,4 +35,15 @@ public:
 	UPROPERTY(EditAnywhere, BluePrintReadWrite)
 		USphereComponent* sphere;
 private:
+	AWaterSurface* WaterSurface;
+
+	UPROPERTY(EditAnywhere)
+		float MinFloatWavePower = 0.1f;
+	UPROPERTY(EditAnywhere)
+		float FloatSpeed = 0.7f;
+	UPROPERTY(EditAnywhere)
+		float FloatScale = 40.0f;
+public:
+	FVector Velocity;
+
 };

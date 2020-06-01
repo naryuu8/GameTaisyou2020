@@ -80,6 +80,15 @@ void AWaterSurface::BeginPlay()
 		}
 	}
 
+	TArray<AActor*> FoundFlashFloods;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFlashFlood::StaticClass(), FoundFlashFloods);
+	for (auto Actor : FoundFlashFloods)
+	{
+		// 結構処理に使うのでメンバに登録しておく
+		FlashFloods.Add(Cast<AFlashFlood>(Actor));
+	}
+
+
 	if (Material)
 	{
 		Mesh->SetMaterial(0, Material);
@@ -139,6 +148,16 @@ void AWaterSurface::Tick(float DeltaTime)
 		}
 	}
 
+	// 普通の波にならないよう水流は最後に計算
+	for (auto Actor : FlashFloods)
+	{
+		AFlashFlood* FlashFlood = Cast<AFlashFlood>(Actor);
+		if (FlashFlood)
+		{
+			TickFlashFloodWave(FlashFlood);
+		}
+	}
+
 	UpdateMesh();
 }
 
@@ -169,13 +188,6 @@ void AWaterSurface::CreateWave(int32 x, int32 y, float power)
 			NewHeights[index] += value;
 		}
 	}
-}
-
-FVector2D AWaterSurface::LocationToVertices(FVector Location)
-{
-	int xi = (Location.X - GetActorLocation().X) / SplitSpace;
-	int yi = (Location.Y - GetActorLocation().Y) / SplitSpace;
-	return FVector2D(xi, yi);
 }
 
 int32 AWaterSurface::CalcIndex(int32 x, int32 y)
@@ -233,16 +245,46 @@ void AWaterSurface::SetSquareLand(FVector SquareLocation, float XLength, float Y
 	}
 }
 
+void AWaterSurface::TickFlashFloodWave(AFlashFlood* FlashFlood)
+{
+	float MaxHight = FlashFlood->MaxHight;
+	float Time = FlashFlood->GetCurrentTime();
+	float SwingWight = FlashFlood->SwingWight;
+
+	for (int xi = 1; xi < SplitPointNum.X - 1; ++xi)
+	{
+		for (int yi = 1; yi < SplitPointNum.Y - 1; ++yi)
+		{
+			int index = CalcIndex(xi, yi);
+
+			if (IsLands[index]) continue;
+			if (FlashFlood->GetFloatVec(Vertices[index]) == FVector::ZeroVector) continue;
+
+			// 流れの方向と距離の内積から流れ方向の中心点からの距離を取得
+			FVector DistanceVec = FlashFlood->GetActorLocation() - Vertices[index];
+			float DotDistance = FVector::DotProduct(FlashFlood->FloatVec, DistanceVec);
+
+			// 流れ方向の距離と経過時間から高さを正弦波の計算で算出
+			float Radian = DotDistance * 2 * PI * SwingWight + Time;
+			float NewHight = MaxHight * sin(Radian);
+
+			// 波と水流両方の影響がある場合、高さの高い方を優先
+			Vertices[index].Z = Vertices[index].Z < NewHight ? NewHight : Vertices[index].Z;
+
+			// 高さに応じてカラーを変更
+			VertexColors[index] = FLinearColor::LerpUsingHSV(WaterColor, WaveColor, FMath::Abs(Vertices[index].Z) / MaxWaveHight);
+
+			// 高さ制限を適用
+			Vertices[index].Z = FMath::Clamp(Vertices[index].Z, -MaxWaveHight, MaxWaveHight);
+		}
+	}
+}
+
 void AWaterSurface::AddPower(FVector worldPos, float power = 100.0f)
 {
 	int32 WaveX = (worldPos.X - Vertices[0].X) / SplitSpace;
 	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
-
-	//if (WaveX <= 0) return;
-	//if (WaveX > SplitPointNum.X) return;
-	//if (WaveY <= 0) return;
-	//if (WaveY > SplitPointNum.Y) return;
-
+	
 	CreateWave(WaveX, WaveY, power);
 }
 
@@ -304,62 +346,6 @@ FVector AWaterSurface::GetWavePower(const FVector & worldPos)
 	answerVec += FVector(x, y, 0);
 
 	return answerVec;
-}
-
-FVector AWaterSurface::GetOutLandPos(FVector worldPos, float circleRadius)
-{
-	if (!IsLand(worldPos)) return worldPos;
-
-	for (auto Actor : LandPointActors)
-	{
-		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
-		if (!CircleLand) continue;
-
-		float distance = FVector::Distance(worldPos, CircleLand->GetActorLocation());
-		float judgDistance = circleRadius + CircleLand->GetRadius();
-		float landingDistance = judgDistance - distance;
-		if (landingDistance <= 0) continue;
-
-		FVector outDirection = worldPos - CircleLand->GetActorLocation();
-		outDirection.Z = 0;
-		outDirection.Normalize();
-
-		worldPos = worldPos + outDirection * landingDistance;
-
-		if (!IsLand(worldPos)) return worldPos;
-	}
-
-	for (auto Actor : LandPointActors)
-	{
-		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
-		if (!SquareLand) continue;
-
-		FVector judgVec = FVector::ZeroVector;
-		FVector moveVec = FVector::ZeroVector;
-		OBB2D obb = SquareLand->GetOBB();
-		for (int i = 0; i < 2; i++)
-		{
-			float length = obb.GetLength(i);
-			if (length <= 0) continue;
-			float dot = FVector::DotProduct(worldPos - obb.GetPosition(), obb.GetDirecton(i)) / length;
-			dot = fabs(dot);
-			if (dot > 1)
-				judgVec += (1 - dot) * obb.GetDirecton(i) * length;
-
-			if ((dot - 1) * length <= circleRadius)
-				moveVec += obb.GetDirecton(i) * (((dot - 1) * length) - circleRadius);
-
-		}
-
-		if (judgVec.Size() >= circleRadius) continue;
-
-		moveVec.Y = 0;
-		worldPos = worldPos + moveVec;
-
-		if (!IsLand(worldPos)) return worldPos;
-	}
-
-	return worldPos;
 }
 
 FVector AWaterSurface::AdjustMoveInField(const FVector & worldPos, float circleRadius)
