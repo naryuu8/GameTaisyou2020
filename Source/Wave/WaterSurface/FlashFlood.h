@@ -15,9 +15,6 @@ public:
 	// Sets default values for this actor's properties
 	AFlashFlood();
 
-	float GetXLength() { return XLength; }
-	float GetYLength() { return YLength; }
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -28,24 +25,25 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	FVector GetFloatVec(FVector worldPos);
+	bool CheckRange(FVector worldPos);	// 座標が範囲内かどうか
+	FVector GetFloatVec(FVector worldPos);	// 座標から範囲内なら方向ベクトルを返す
+	FVector GetFloatVector() { return GetActorForwardVector(); };	// 流れる方向
 
 	float GetCurrentTime() { return CurrentTime; }
 
+	float GetHeight(const FVector & worldPos);
+
 public:
-	UPROPERTY(EditAnywhere)
-		float SwingWight = 0.01f;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "10.0"))
+		float SwingWeight = 1.0f;
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0"))
 		float MaxHight = 30.0f;
-	UPROPERTY(EditAnywhere)
-		float XLength = 100.0f;
-	UPROPERTY(EditAnywhere)
-		float YLength = 100.0f;
-	UPROPERTY(EditAnywhere)
-		float Speed = 100.0f;
-	UPROPERTY(EditAnywhere)
-		FVector FloatVec;
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0"))
+		float Speed = 5.0f;
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0"))
+		float Power = 1.0f;
 
 private:
 	float CurrentTime = 0.0f; // 時間計測用
+	float ScaleInterpolation = 100.0f;
 };
