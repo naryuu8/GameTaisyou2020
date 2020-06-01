@@ -236,7 +236,10 @@ void AGameController::GameClearCheck()
 	{
 		IsGameClear = true;
 		CreateResultUI();
-		TimeCountUI->RemoveFromParent();
+		if (TimeCountUI)
+		{
+			TimeCountUI->RemoveFromParent();
+		}
 	};
 	// ゲームクリア条件
 
@@ -269,7 +272,10 @@ void AGameController::GameOverCheck()
 	{ 
 		IsGameOver = true;
 		CreateGameOverUI();
-		TimeCountUI->RemoveFromParent();
+		if (TimeCountUI)
+		{
+			TimeCountUI->RemoveFromParent();
+		}
 	};
 	//①ノルマまで荷物を運んでおらずハンマーが壊れて残り時間が0になったら
 	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
