@@ -80,8 +80,6 @@ void APlayerCharacter::BeginPlay_C()
 	}
 	CreateHammerCountBarUI();
 
-	PrevPos = FVector::ZeroVector;
-
 	Water = Cast<AWaterSurface>(UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass()));
 
 	CurrentRaft = nullptr;
@@ -186,6 +184,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			{
 				Move(Direction, MoveSpeed * MoveAmount);
 			}
+			// ínè„Ç…Ç¢ÇÈéû
 			else
 			{
 				float WaterCheckRadius = Radius * 1.2f;

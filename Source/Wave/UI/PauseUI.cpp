@@ -8,6 +8,7 @@ void UPauseUI::NativeConstruct()
 {
 	IsPlayAnimation = false;
 	IsNoInput = false;
+	IsScoreCheck = false;
 	InitPlayAnimation();
 	SelectNumber = static_cast<int>(PauseState::GAMEBACK);
 	UGameplayStatics::SetGamePaused(GetWorld(),true);
@@ -24,7 +25,7 @@ FSlateColor UPauseUI::SelectTextColor(const PauseState state)
 
 ESlateVisibility UPauseUI::GetPauseTextVisibility()
 {
-	if (IsPlayAnimation)
+	if (IsPlayAnimation || IsScoreCheck)
 	{
 		return ESlateVisibility::Hidden;
 	}
@@ -59,6 +60,11 @@ void UPauseUI::SelectStateAction()
 {
 	if (IsPlayAnimation)return;
 	if (IsNoInput)return;
+	if (IsScoreCheck)
+	{
+		IsScoreCheck = false;
+		return;
+	}
 	IsNoInput = true;
 	EnterSE_Play();
 	switch (SelectNumber)
@@ -70,6 +76,7 @@ void UPauseUI::SelectStateAction()
 			Retry();
 			break;
 			case static_cast<int>(PauseState::SCORE) :
+				IsScoreCheck = true;
 				IsNoInput = false;
 			break;
 			case static_cast<int>(PauseState::STAGESELECT) :
