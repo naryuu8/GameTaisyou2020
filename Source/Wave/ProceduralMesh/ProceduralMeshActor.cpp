@@ -19,6 +19,8 @@ AProceduralMeshActor::AProceduralMeshActor()
 void AProceduralMeshActor::BeginPlay()
 {
 	Super::BeginPlay();
+	/// このメッシュコリジョンはあレイキャストを無視する
+	Mesh->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
 }
 
 void AProceduralMeshActor::CreateMesh()
@@ -37,7 +39,6 @@ void AProceduralMeshActor::CreateMesh()
 
 void AProceduralMeshActor::UpdateMesh()
 {
-	//Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Mesh->UpdateMeshSection_LinearColor(0, Vertices, Normals, UV0, VertexColors, Tangents);
 }
 
@@ -45,5 +46,13 @@ void AProceduralMeshActor::UpdateMesh()
 void AProceduralMeshActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void AProceduralMeshActor::SetCollisionEnabled(bool Flag)
+{
+	if (Flag)
+		Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	else 
+		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 

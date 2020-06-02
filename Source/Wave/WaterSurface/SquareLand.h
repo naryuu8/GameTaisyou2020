@@ -56,7 +56,10 @@ public:
 	OBB2D GetOBB() { return Obb; }
 
 	bool OnGround(const FVector & Pos) override;
+	bool OnGround(const FVector & Pos, float CircleRadius) override;
 	FVector AdjustMoveInLand(const FVector & Pos, float CircleRadius) override;
+	FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius) override;
+	FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen) override;
 
 private:
 	UPROPERTY(EditAnywhere)

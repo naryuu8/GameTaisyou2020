@@ -27,6 +27,8 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	
+	void SetCollisionEnabled(bool Flag);
+
 protected:
 	UProceduralMeshComponent* Mesh;
 

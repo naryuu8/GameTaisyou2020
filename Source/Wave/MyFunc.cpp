@@ -57,3 +57,65 @@ bool MyFunc::ColSegments(const FRay2D & seg1, const FRay2D & seg2, FVector2D * o
 
 	return true;
 }
+
+bool MyFunc::Check_Ray2D_VS_Ray2D(FRay2DCastInfo & Info, FRay2D RayA, const FRay2D & RayB, const FVector2D & Normal)
+{
+	FVector2D HitPos;
+
+	if (MyFunc::ColSegments(RayA, RayB, &HitPos))
+	{
+		if (Info.IsHit)
+		{
+			float Dist = FVector2D::Distance(RayA.Origin, HitPos);
+			if (Dist < Info.HitDist)
+			{
+				Info.HitDist = Dist;
+				Info.NearSideRay = RayB;
+				Info.NearNormal = Normal;
+				Info.NearPos = HitPos;
+			}
+		}
+		else
+		{
+			Info.IsHit = true;
+			Info.HitDist = FVector2D::Distance(RayA.Origin, HitPos);
+			Info.NearSideRay = RayB;
+			Info.NearNormal = Normal;
+			Info.NearPos = HitPos;
+		}
+		return true;
+	}
+	return false;
+}
+
+bool MyFunc::Check_CircleRay2D_VS_Ray2D(FRay2DCastInfo & Info, FRay2D RayA, float CircleRadius, const FRay2D & RayB, const FVector2D & Normal)
+{
+	FVector2D HitPos;
+	FVector2D CorrectionPos = CircleRadius * Normal;
+	RayA.Direction -= CorrectionPos;	// ‰~‚Ì•â³•ª‚¸‚ç‚·
+
+	if (MyFunc::ColSegments(RayA, RayB, &HitPos))
+	{
+		if (Info.IsHit)
+		{
+			float Dist = FVector2D::Distance(RayA.Origin, HitPos);
+			if (Dist < Info.HitDist)
+			{
+				Info.HitDist = Dist;
+				Info.NearSideRay = RayB;
+				Info.NearNormal = Normal;
+				Info.NearPos = HitPos + CorrectionPos;
+			}
+		}
+		else
+		{
+			Info.IsHit = true;
+			Info.HitDist = FVector2D::Distance(RayA.Origin, HitPos);
+			Info.NearSideRay = RayB;
+			Info.NearNormal = Normal;
+			Info.NearPos = HitPos + CorrectionPos;
+		}
+		return true;
+	}
+	return false;
+}
