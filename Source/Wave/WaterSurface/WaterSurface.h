@@ -58,6 +58,8 @@ private:
 	UPROPERTY(EditAnywhere)
 		float WaveSpeed = 10.0f;
 	UPROPERTY(EditAnywhere)
+		float WavePower = 1.0f;
+	UPROPERTY(EditAnywhere)
 		float MaxWaveHight = 100.0f;
 	UPROPERTY(EditAnywhere)
 		FLinearColor WaterColor = FLinearColor::Blue;

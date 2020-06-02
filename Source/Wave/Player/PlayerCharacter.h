@@ -52,7 +52,6 @@ private:
 
 	void PauseInput();
 	void CreateHammerCountBarUI();
-	FVector PrevPos;
 
 	AWaterSurface* Water;
 

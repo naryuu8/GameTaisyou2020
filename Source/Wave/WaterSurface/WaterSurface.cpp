@@ -333,7 +333,7 @@ FVector AWaterSurface::GetWavePower(const FVector & worldPos)
 	float x = uL - uR;
 	float y = uT - uB;
 
-	answerVec += FVector(x, y, 0).GetSafeNormal() * (HeightValue / MaxWaveHight) * MaxWaveHight;
+	answerVec += FVector(x, y, 0).GetSafeNormal() * (HeightValue / MaxWaveHight) * MaxWaveHight * WavePower;
 
 	return answerVec;
 }
