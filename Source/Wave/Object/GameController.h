@@ -10,6 +10,7 @@ class UHammerCountUI;
 class UGameOverUI;
 class UResultUI;
 class UTimeCountUI;
+class APlayerCharacter;
 // ゲーム中のクリア条件などを管理するクラス
 
 UCLASS()
@@ -35,6 +36,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Game")
 		int LimitTime = 10;
 private:
+	APlayerCharacter* GetPlayer;//プレイヤー情報
 	// ゲームクリアかどうか
 	bool IsGameClear;
 	//ゲームオーバーかどうか
@@ -43,6 +45,8 @@ private:
 	int GoalCount;
 	//このステージのゴール条件に入る荷物の数
 	int MaxNimotu = 0;
+	//ゲーム上に配置されている荷物の数（リアルタイム更新）
+	int GameMaxNimotu = 0;
 	// シーン上の全てのゴールのポインタを所持する
 	TArray<class AGoal*> GoalArray;
 
@@ -79,6 +83,7 @@ public:
 		FORCEINLINE float GetNormaPercent() const { return NormaPercent; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void SetNormaPercent(const float percent) { NormaPercent = percent; }
+	void MinusGameMaxNimotu() { GameMaxNimotu--; }
 	//データテーブルから対応するステージ番号から
 	//ゲージのパーセントとクリアに必要な荷物数取得（デバッグの時は読み込まない）
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
