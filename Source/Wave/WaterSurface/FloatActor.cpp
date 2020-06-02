@@ -54,12 +54,13 @@ void AFloatActor::Tick(float DeltaTime)
 	// ”g‚ÌŒX‚«‚É‰‚¶‚ÄˆÚ“®‚·‚é
 	FVector WavePower = WaterSurface->GetWavePower(GetActorLocation());
 	FVector MoveVec = WavePower * FloatSpeed * 0.01f;
-	Velocity += MoveVec;
-	if (Velocity.Size() > MinFloatWavePower)
+	
+	if (MoveVec.Size() > MinFloatWavePower)
 	{
-		if(Type == FloatType::Circle) SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, Radius));
-		else if(Type == FloatType::Square) SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, XLength, YLength));
+		Velocity += MoveVec;
 	}
+	if (Type == FloatType::Circle) SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, Radius));
+	else if (Type == FloatType::Square) SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, XLength, YLength));
 	Velocity *= 1.0f - Friction;
 
 	// ”g‚Ì‚‚³‚É‡‚í‚¹‚é

@@ -317,6 +317,7 @@ FVector AWaterSurface::GetWavePower(const FVector & worldPos)
 	int32 WaveX = (worldPos.X - Vertices[0].X) / SplitSpace;
 	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 	float uL = 0.0f, uR = 0.0f, uT = 0.0f, uB = 0.0f;
+	float iL = 0.0f, iR = 0.0f, iT = 0.0f, iB = 0.0f;
 
 	if (WaveX >= 0 && WaveX < SplitPointNum.X && WaveY >= 0 && WaveY < SplitPointNum.Y)
 	{
@@ -324,16 +325,29 @@ FVector AWaterSurface::GetWavePower(const FVector & worldPos)
 		uR = Vertices[CalcIndex(WaveX + 1, WaveY)].Z;
 		uT = Vertices[CalcIndex(WaveX, WaveY - 1)].Z;
 		uB = Vertices[CalcIndex(WaveX, WaveY + 1)].Z;
+
+		iL = Vertices[CalcIndex(WaveX - 1, WaveY - 1)].Z;
+		iR = Vertices[CalcIndex(WaveX + 1, WaveY + 1)].Z;
+		iT = Vertices[CalcIndex(WaveX + 1, WaveY - 1)].Z;
+		iB = Vertices[CalcIndex(WaveX - 1, WaveY + 1)].Z;
 	}
 	float HeightValue = 0.0f;
-	HeightValue = FMath::Max(HeightValue, FMath::Abs(uL));
-	HeightValue = FMath::Max(HeightValue, FMath::Abs(uR));
-	HeightValue = FMath::Max(HeightValue, FMath::Abs(uT));
-	HeightValue = FMath::Max(HeightValue, FMath::Abs(uB));
+	/*HeightValue = FMath::Max(HeightValue, (uL));
+	HeightValue = FMath::Max(HeightValue, (uR));
+	HeightValue = FMath::Max(HeightValue, (uT));
+	HeightValue = FMath::Max(HeightValue, (uB));
+
+	HeightValue = FMath::Max(HeightValue, (iL));
+	HeightValue = FMath::Max(HeightValue, (iR));
+	HeightValue = FMath::Max(HeightValue, (iT));
+	HeightValue = FMath::Max(HeightValue, (iB));*/
+
+	HeightValue = (abs(uL) + abs(uR) + abs(uT) + abs(uB) + abs(iL) + abs(iR) + abs(iT) + abs(iB)) / 8;
+
 	float x = uL - uR;
 	float y = uT - uB;
 
-	answerVec += FVector(x, y, 0).GetSafeNormal() * (HeightValue / MaxWaveHight) * MaxWaveHight * WavePower;
+	answerVec += FVector(x, y, 0).GetSafeNormal() * (HeightValue / MaxWaveHight) * WavePower;
 
 	return answerVec;
 }
