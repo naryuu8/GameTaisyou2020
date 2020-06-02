@@ -6,7 +6,7 @@
 #include "WaterSurface.h"
 #include "Components/StaticMeshComponent.h"
 #include "TimerManager.h"
-
+#include "../Object/GameController.h"
 // Sets default values
 AFloatActor::AFloatActor()
 {
@@ -63,5 +63,14 @@ void AFloatActor::Tick(float DeltaTime)
 
 void AFloatActor::MyDestroy()
 {
+	//自身がゴールに運ぶ荷物だったらゲームコントローラーにゲーム内の荷物が減ったことを通知
+	if (ActorHasTag("Nimotu"))
+	{
+		AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+		if (game)
+		{
+			game->MinusGameMaxNimotu();
+		}
+	}
 	this->Destroy();
 }
