@@ -20,7 +20,7 @@ class WAVE_API UPauseUI : public UUserWidget
 	GENERATED_BODY()
 private:
 	virtual void NativeConstruct() override;
-	int SelectNumber;
+	int SelectNumber = 0;
 	bool IsNoInput;//true時インプットを受け付けない
 protected:
 	//引数で一致する番号と同じセレクト番号になったら色を変える
@@ -58,6 +58,10 @@ public:
 	//フェードインを行いステージ選択画面に戻る
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void StageSelectChenge();
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SelectSE_Play();
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void EnterSE_Play();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsPlayAnimation() const{ return IsPlayAnimation; };
 };

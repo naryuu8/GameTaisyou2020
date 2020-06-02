@@ -151,11 +151,7 @@ void AWaterSurface::Tick(float DeltaTime)
 	// 普通の波にならないよう水流は最後に計算
 	for (auto Actor : FlashFloods)
 	{
-		AFlashFlood* FlashFlood = Cast<AFlashFlood>(Actor);
-		if (FlashFlood)
-		{
-			TickFlashFloodWave(FlashFlood);
-		}
+		TickFlashFloodWave(Actor);
 	}
 
 	UpdateMesh();
@@ -247,10 +243,6 @@ void AWaterSurface::SetSquareLand(FVector SquareLocation, float XLength, float Y
 
 void AWaterSurface::TickFlashFloodWave(AFlashFlood* FlashFlood)
 {
-	float MaxHight = FlashFlood->MaxHight;
-	float Time = FlashFlood->GetCurrentTime();
-	float SwingWight = FlashFlood->SwingWight;
-
 	for (int xi = 1; xi < SplitPointNum.X - 1; ++xi)
 	{
 		for (int yi = 1; yi < SplitPointNum.Y - 1; ++yi)
@@ -258,24 +250,21 @@ void AWaterSurface::TickFlashFloodWave(AFlashFlood* FlashFlood)
 			int index = CalcIndex(xi, yi);
 
 			if (IsLands[index]) continue;
-			if (FlashFlood->GetFloatVec(Vertices[index]) == FVector::ZeroVector) continue;
+			if (!FlashFlood->CheckRange(Vertices[index])) continue;
 
-			// 流れの方向と距離の内積から流れ方向の中心点からの距離を取得
-			FVector DistanceVec = FlashFlood->GetActorLocation() - Vertices[index];
-			float DotDistance = FVector::DotProduct(FlashFlood->FloatVec, DistanceVec);
-
-			// 流れ方向の距離と経過時間から高さを正弦波の計算で算出
-			float Radian = DotDistance * 2 * PI * SwingWight + Time;
-			float NewHight = MaxHight * sin(Radian);
+			float NewHight = FlashFlood->GetHeight(Vertices[index]);
 
 			// 波と水流両方の影響がある場合、高さの高い方を優先
-			Vertices[index].Z = Vertices[index].Z < NewHight ? NewHight : Vertices[index].Z;
+			//Vertices[index].Z = Vertices[index].Z < NewHight ? NewHight : Vertices[index].Z;
 
-			// 高さに応じてカラーを変更
-			VertexColors[index] = FLinearColor::LerpUsingHSV(WaterColor, WaveColor, FMath::Abs(Vertices[index].Z) / MaxWaveHight);
+			// 加算した方が面白いのでこっち！
+			Vertices[index].Z = Vertices[index].Z + NewHight;
 
 			// 高さ制限を適用
 			Vertices[index].Z = FMath::Clamp(Vertices[index].Z, -MaxWaveHight, MaxWaveHight);
+
+			// 高さに応じてカラーを変更
+			VertexColors[index] = FLinearColor::LerpUsingHSV(WaterColor, WaveColor, FMath::Abs(Vertices[index].Z) / MaxWaveHight);
 		}
 	}
 }
@@ -298,10 +287,10 @@ float AWaterSurface::GetWaveHeight(const FVector & worldPos)
 
 	if (WaveX >= 0 && WaveX < SplitPointNum.X && WaveY >= 0 && WaveY < SplitPointNum.Y)
 	{
-		uL = CurrentHeights[CalcIndex(WaveX - 1, WaveY)];
-		uR = CurrentHeights[CalcIndex(WaveX + 1, WaveY)];
-		uT = CurrentHeights[CalcIndex(WaveX, WaveY - 1)];
-		uB = CurrentHeights[CalcIndex(WaveX, WaveY + 1)];
+		uL = Vertices[CalcIndex(WaveX - 1, WaveY)].Z;
+		uR = Vertices[CalcIndex(WaveX + 1, WaveY)].Z;
+		uT = Vertices[CalcIndex(WaveX, WaveY - 1)].Z;
+		uB = Vertices[CalcIndex(WaveX, WaveY + 1)].Z;
 	}
 
 	float result = (uL + uR + uT + uB) * 0.25f;	// 高さの平均を返す
@@ -314,18 +303,11 @@ FVector AWaterSurface::GetWavePower(const FVector & worldPos)
 
 	FVector answerVec = FVector::ZeroVector;
 
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFlashFlood::StaticClass(), FoundActors);
-
-	for (auto Actor : FoundActors)
+	for (auto Actor : FlashFloods)
 	{
-		AFlashFlood* FlashFlood = Cast<AFlashFlood>(Actor);
-		if (FlashFlood)
-		{
-			FVector addVec = FlashFlood->GetFloatVec(worldPos);
-			addVec.Z = 0;
-			answerVec += addVec;
-		}
+		FVector addVec = Actor->GetFloatVec(worldPos);
+		addVec.Z = 0;
+		answerVec += addVec;
 	}
 
 	int32 WaveX = (worldPos.X - Vertices[0].X) / SplitSpace;
@@ -334,10 +316,10 @@ FVector AWaterSurface::GetWavePower(const FVector & worldPos)
 
 	if (WaveX >= 0 && WaveX < SplitPointNum.X && WaveY >= 0 && WaveY < SplitPointNum.Y)
 	{
-		uL = CurrentHeights[CalcIndex(WaveX - 1, WaveY)];
-		uR = CurrentHeights[CalcIndex(WaveX + 1, WaveY)];
-		uT = CurrentHeights[CalcIndex(WaveX, WaveY - 1)];
-		uB = CurrentHeights[CalcIndex(WaveX, WaveY + 1)];
+		uL = Vertices[CalcIndex(WaveX - 1, WaveY)].Z;
+		uR = Vertices[CalcIndex(WaveX + 1, WaveY)].Z;
+		uT = Vertices[CalcIndex(WaveX, WaveY - 1)].Z;
+		uB = Vertices[CalcIndex(WaveX, WaveY + 1)].Z;
 	}
 
 	float x = uL - uR;

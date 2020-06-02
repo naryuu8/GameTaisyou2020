@@ -36,6 +36,7 @@ void UPauseUI::NextSelectState()
 	if (IsPlayAnimation)return;
 	if (IsNoInput)return;
 	SelectNumber++;
+	SelectSE_Play();
 	if (SelectNumber > static_cast<int>(PauseState::STAGESELECT))
 	{
 		SelectNumber = static_cast<int>(PauseState::GAMEBACK);
@@ -47,6 +48,7 @@ void UPauseUI::BackSelectState()
 	if (IsPlayAnimation)return;
 	if (IsNoInput)return;
 	SelectNumber--;
+	SelectSE_Play();
 	if (SelectNumber < 0)
 	{
 		SelectNumber = static_cast<int>(PauseState::STAGESELECT);
@@ -58,6 +60,7 @@ void UPauseUI::SelectStateAction()
 	if (IsPlayAnimation)return;
 	if (IsNoInput)return;
 	IsNoInput = true;
+	EnterSE_Play();
 	switch (SelectNumber)
 	{
 		case static_cast<int>(PauseState::GAMEBACK):

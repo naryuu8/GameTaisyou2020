@@ -18,7 +18,6 @@ AFlashFlood::AFlashFlood()
 void AFlashFlood::BeginPlay()
 {
 	Super::BeginPlay();
-	FloatVec.Normalize();
 }
 
 // Called every frame
@@ -29,13 +28,16 @@ void AFlashFlood::Tick(float DeltaTime)
 	// 時間の計測
 	CurrentTime += (DeltaTime * Speed);
 
-	float XOffset = XLength * 0.5f;
-	float YOffset = YLength * 0.5f;
+	FVector Pos = GetActorLocation();
+	float XOffset = GetActorScale().X * 0.5f * ScaleInterpolation;
+	float YOffset = GetActorScale().Y * 0.5f * ScaleInterpolation;
+	FVector X_Vector = GetActorForwardVector() * XOffset;
+	FVector Y_Vector = GetActorRightVector() * YOffset;
 	// デバッグ用の四角を描画(高さや太さは決め打ち）
-	UKismetSystemLibrary::DrawDebugLine(this, GetActorLocation() + FVector(XOffset, YOffset, 0.0f), GetActorLocation() + FVector(-XOffset, YOffset, 0.0f), FLinearColor::Blue, 0.0f, 3.0f);
-	UKismetSystemLibrary::DrawDebugLine(this, GetActorLocation() + FVector(XOffset, -YOffset, 0.0f), GetActorLocation() + FVector(-XOffset, -YOffset, 0.0f), FLinearColor::Blue, 0.0f, 3.0f);
-	UKismetSystemLibrary::DrawDebugLine(this, GetActorLocation() + FVector(XOffset, YOffset, 0.0f), GetActorLocation() + FVector(XOffset, -YOffset, 0.0f), FLinearColor::Blue, 0.0f, 3.0f);
-	UKismetSystemLibrary::DrawDebugLine(this, GetActorLocation() + FVector(-XOffset, YOffset, 0.0f), GetActorLocation() + FVector(-XOffset, -YOffset, 0.0f), FLinearColor::Blue, 0.0f, 3.0f);
+	UKismetSystemLibrary::DrawDebugLine(this, Pos + X_Vector + Y_Vector, Pos + X_Vector - Y_Vector, FLinearColor::Blue, 0.0f, 3.0f);
+	UKismetSystemLibrary::DrawDebugLine(this, Pos + X_Vector - Y_Vector, Pos - X_Vector - Y_Vector, FLinearColor::Blue, 0.0f, 3.0f);
+	UKismetSystemLibrary::DrawDebugLine(this, Pos - X_Vector - Y_Vector, Pos - X_Vector + Y_Vector, FLinearColor::Blue, 0.0f, 3.0f);
+	UKismetSystemLibrary::DrawDebugLine(this, Pos - X_Vector + Y_Vector, Pos + X_Vector + Y_Vector, FLinearColor::Blue, 0.0f, 3.0f);
 }
 
 bool AFlashFlood::ShouldTickIfViewportsOnly() const
@@ -43,17 +45,42 @@ bool AFlashFlood::ShouldTickIfViewportsOnly() const
 	return true;
 }
 
+bool AFlashFlood::CheckRange(FVector worldPos)
+{
+	FVector2D OtherPos = (FVector2D)worldPos;
+	FVector2D Pos = (FVector2D)GetActorLocation();
+	float XOffset = GetActorScale().X * 0.5f * ScaleInterpolation;
+	float YOffset = GetActorScale().Y * 0.5f * ScaleInterpolation;
+	FVector2D X_Vector = (FVector2D)GetActorForwardVector() * XOffset;
+	FVector2D Y_Vector = (FVector2D)GetActorRightVector() * YOffset;
+	FVector2D A = Pos + X_Vector + Y_Vector;
+	FVector2D B = Pos + X_Vector - Y_Vector;
+	FVector2D C = Pos - X_Vector - Y_Vector;
+	FVector2D D = Pos - X_Vector + Y_Vector;
+
+	if (FVector2D::CrossProduct(B - A, OtherPos - A) > 0) return false;
+	if (FVector2D::CrossProduct(C - B, OtherPos - B) > 0) return false;
+	if (FVector2D::CrossProduct(D - C, OtherPos - C) > 0) return false;
+	if (FVector2D::CrossProduct(A - D, OtherPos - D) > 0) return false;
+
+	// 全ての外積がマイナスの時に範囲内だと分かる
+	return true;
+}
+
 FVector AFlashFlood::GetFloatVec(FVector worldPos)
 {
-	float xp = worldPos.X;
-	float yp = worldPos.Y;
-	float xs = GetActorLocation().X;
-	float ys = GetActorLocation().Y;
+	float Percent = GetHeight(worldPos) / MaxHight;
+	return CheckRange(worldPos) ? GetFloatVector() * Speed * Power * Percent : FVector::ZeroVector;
+}
 
-	if (xp > xs + XLength * 0.5f) return FVector::ZeroVector;
-	if (xp < xs - XLength * 0.5f) return FVector::ZeroVector;
-	if (yp > ys + YLength * 0.5f) return FVector::ZeroVector;
-	if (yp < ys - YLength * 0.5f) return FVector::ZeroVector;
+float AFlashFlood::GetHeight(const FVector & worldPos)
+{
+	// 流れの方向と距離の内積から流れ方向の中心点からの距離を取得
+	FVector2D DistanceVec = FVector2D(GetActorLocation() - worldPos);
+	float DotDistance = FVector2D::DotProduct((FVector2D)GetFloatVector(), DistanceVec);
 
-	return FloatVec * Speed;
+	// 流れ方向の距離と経過時間から高さを正弦波の計算で算出
+	float Radian = DotDistance * 2 * PI * SwingWeight * 0.001f + CurrentTime; // SwingWeightの元の値を調整しやすくするため 0.001f を掛ける
+
+	return FMath::Clamp(MaxHight * (float)sin(Radian), 0.0f, MaxHight);
 }

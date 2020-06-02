@@ -412,3 +412,10 @@ void APlayerCharacter::SetNormaPercent(const float percent)
 	}
 }
 
+void APlayerCharacter::HammerCountBarParent()
+{
+	if (HammerCountBarUI)
+	{
+		HammerCountBarUI->RemoveFromParent();
+	}
+}
