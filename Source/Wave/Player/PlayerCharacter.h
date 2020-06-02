@@ -56,8 +56,11 @@ private:
 
 	AWaterSurface* Water;
 
-	ARaft* CurrentRaft;
-	bool IsRaftRiding;
+	ARaft* CurrentRaft = nullptr;	// 乗っていない時は常にnullptr
+	bool IsInRaft = false;
+	void ResetRaftParam();
+
+	bool IsDeth;	// 場外に出たまたは水に落ちた時
 
 public:
 	APlayerCharacter();
@@ -123,6 +126,8 @@ protected:
 
 	void Move(const FVector & Direction, float Value);
 
+	bool CheckTraceGround(FHitResult & Result, const FVector & Start, float SphereRadius, AActor* Ignore = nullptr);
+
 	//キーを押したときのハンマー攻撃
 	void TriggerHammerAttack(void);
 	//キーを離したときのハンマー攻撃
@@ -151,8 +156,12 @@ private:
 	void WaterAttack(FVector Point, float Power);
 	//ハンマー消費ゲージをマイナス
 	void MinusHammerGauge(const float Power);
-
-	bool IsRide;
+	// プレイヤーから下にレイを飛ばして陸の上かどうか調べる
+	bool CheckGround();
+	// カメラの向きから移動方向を算出
+	FVector GetInputDirection(float VerticalValue, float HolizontalValue);
+	// 移動方向にプレイヤーを向かせる関数
+	void SetLookAt(FVector Direction, float Speed);
 public:
 	//HPバーのノルマ位置をセット
 	void SetNormaPercent(const float percent);

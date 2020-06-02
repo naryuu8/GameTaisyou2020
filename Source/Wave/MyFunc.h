@@ -14,6 +14,15 @@ struct FRay2D
 	FVector2D Direction;
 };
 
+struct FRay2DCastInfo
+{
+	FVector2D NearPos;
+	FVector2D NearNormal;
+	FRay2D NearSideRay;
+	bool IsHit = false;
+	float HitDist = 0.0f;
+};
+
 // 足りない関数を補足するクラス
 //----------------------------------------------------
 // 共通する関数で追加したいものがあればご自由にどうぞ
@@ -37,4 +46,13 @@ public:
 		const FRay2D &seg2,          // 線分2
 		FVector2D* outPos = 0 // 交点（出力）
 	);
+	// 二つのベクトルの反射ベクトルを取得
+	static FVector2D GetReflectVector2D(const FVector2D & A, const FVector2D & B)
+	{
+		return (A - 2.0f * FVector2D::DotProduct(A, B) * B);
+	};
+
+	// レイの交点を調べて距離を取得する関数
+	static bool Check_Ray2D_VS_Ray2D(FRay2DCastInfo & Info, FRay2D RayA, const FRay2D & RayB, const FVector2D & Normal);
+	static bool Check_CircleRay2D_VS_Ray2D(FRay2DCastInfo & Info, FRay2D RayA, float CircleRadius, const FRay2D & RayB, const FVector2D & Normal);
 };

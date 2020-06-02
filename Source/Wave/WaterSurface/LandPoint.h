@@ -44,9 +44,11 @@ public:
 	
 	// 渡された引数の座標と接しているかどうか
 	virtual bool OnGround(const FVector & Pos) { return false; };
+	virtual bool OnGround(const FVector & Pos, float CircleRadius) { return false; };
 	// この地面の外に出ないように移動する際のチェック
 	virtual FVector AdjustMoveInLand(const FVector & Pos, float CircleRadius) { return FVector::ZeroVector; };
-
+	virtual FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius) { return FVector::ZeroVector; };
+	virtual FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen) { return FVector::ZeroVector; };
 private:
 	UPROPERTY(EditAnywhere)
 		TEnumAsByte<ELandType> LandType = ELandType::Grass;

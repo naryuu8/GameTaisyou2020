@@ -14,33 +14,13 @@ class WAVE_API ARaft : public AFloatActor
 {
 	GENERATED_BODY()
 	
+protected:
 public:
+	virtual void DebugDraw() override;
 	virtual void Tick(float DeltaTime) override;
 
-	FVector AdjustMoveOnRaft(FVector actorPos, FVector moveVec);
-
-	bool IsRide(FVector worldPos);
-
+	FVector AdjustMoveOnRaft(const FVector & actorPos, const FVector & moveVec, float CircleRadius);
 	bool IsOnRaft(FVector worldPos);
-
-	float GetRiderZ() { return RiderZ; }
-
-	FVector GetGetOffPos();
-
-	FVector GetMoveVec() { return MoveVec; }
+	bool IsInRaft(const FVector & worldPos, float CircleRadius);
 private:
-	UPROPERTY(EditAnywhere)
-		float RideDirection = 100.0f;
-
-	UPROPERTY(EditAnywhere)
-		float XLength = 50.0f;
-
-	UPROPERTY(EditAnywhere)
-		float YLength = 50.0f;
-
-	UPROPERTY(EditAnywhere)
-		float RiderZ = 50.0f;
-
-	FVector MoveVec;
-	FVector PrevPos;
 };

@@ -20,6 +20,10 @@
 #include "Niagara/Public/NiagaraFunctionLibrary.h"
 #include "../GlobalGameInstance.h"
 #include "../MyFunc.h"
+#include "EngineGlobals.h"
+#include "Runtime/Engine/Classes/Engine/Engine.h"
+
+#define DISPLAY_LOG(fmt, ...) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT(fmt), __VA_ARGS__));
 //////////////////////////////////////////////////////////////////////////
 // APlayerCharacter
 
@@ -80,9 +84,8 @@ void APlayerCharacter::BeginPlay_C()
 
 	Water = Cast<AWaterSurface>(UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass()));
 
-	IsRaftRiding = false;
-
-	IsRide = true;
+	CurrentRaft = nullptr;
+	IsDeth = false;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -99,6 +102,25 @@ void APlayerCharacter::Tick(float DeltaTime)
 		}
 	}
 
+	FVector CurPos = GetActorLocation();
+
+	// 更新の始めにプレイヤーの下を確認する
+	if (CheckGround())
+	{
+		
+	}
+	// もし失敗したらプレイヤーは落下した判定にする
+	else
+	{
+		Water->SetCollisionEnabled(false);	// WaterSurfaceのコリジョンをオフに設定
+
+		if (CurPos.Z < -10.0f) // プレイヤーの座標が一定以下に行った時は死亡
+		{
+			Water->AddPower(FVector(CurPos.X, CurPos.Y, 0.0f), ChargePowerMax);
+			IsDeth = true;
+		}
+	}
+
 	const AInputManager * inputManager = AInputManager::GetInstance();
 	if (inputManager)
 	{
@@ -111,113 +133,76 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 		// 左スティックの倒し具合の割合を算出
 		MoveAmount = FMath::Clamp(FMath::Abs(input->LeftStick.Horizontal) + FMath::Abs(input->LeftStick.Vertical), 0.0f, 1.0f);
-		
 		// カメラから移動する向きを算出
-		FVector Direction;
-		if (FollowCamera != NULL)
-		{
-			FVector V_Direction = FollowCamera->GetActorForwardVector();
-			if (FMath::Abs(V_Direction.Z) > 0.9f) { V_Direction = FollowCamera->GetActorUpVector(); } // カメラが真上にある時にも対応
-			V_Direction.Z = 0.0f; 
-			V_Direction.Normalize();
-
-			FVector H_Direction = FollowCamera->GetActorRightVector();
-			H_Direction.Z = 0.0f; 
-			H_Direction.Normalize();
-
-			Direction = V_Direction * input->LeftStick.Vertical + H_Direction * input->LeftStick.Horizontal;
-			Direction.Normalize();
-		}
-
+		FVector Direction = GetInputDirection(input->LeftStick.Vertical, input->LeftStick.Horizontal);
 		// 進む方向に向きを変える
 		if (MoveAmount > 0.01f)
-		{
-			float angle = FMath::Atan2(Direction.Y, Direction.X);
-			FQuat LookAt = MyFunc::FromAxisAngleToQuaternion(FVector::UpVector, angle);
-			SetActorRotation(FQuat::Slerp(GetActorQuat(), LookAt, 0.1f));
-		}
+			SetLookAt(Direction, 0.15f);
 
-		FVector movedPos = GetActorLocation();
-		if (input->Select.IsPress && IsRide)
-		{
-			IsRide = false;
-
-			if (!IsRaftRiding)
-			{
-				UE_LOG(LogTemp, Log, TEXT("Charenge Ride"));
-				TArray<AActor*> FoundActors;
-				UGameplayStatics::GetAllActorsOfClass(GetWorld(), ARaft::StaticClass(), FoundActors);
-				for (auto Actor : FoundActors)
-				{
-					ARaft* raft = Cast<ARaft>(Actor);
-					if (!raft) continue;
-					UE_LOG(LogTemp, Log, TEXT("Found Raft"));
-					if (!raft->IsRide(movedPos)) continue;
-
-					UE_LOG(LogTemp, Log, TEXT("Ride"));
-					CurrentRaft = raft;
-					IsRaftRiding = true;
-					FVector RidePos = CurrentRaft->GetActorLocation();
-					RidePos.Z = CurrentRaft->GetRiderZ();
-					movedPos = RidePos;
-					PrevPos = RidePos;
-				}
-			}
-			else
-			{
-				FVector GetOffPos = CurrentRaft->GetGetOffPos();
-				if (GetOffPos != FVector::ZeroVector)
-				{
-					UE_LOG(LogTemp, Log, TEXT("Get Off"));
-					GetOffPos.Z = CurrentRaft->GetRiderZ();
-					SetActorLocation(GetOffPos);
-					movedPos = GetOffPos;
-					IsRaftRiding = false;
-				}
-			}
-		}
-
-		if (input->Select.IsRelease)
-		{
-			IsRide = true;
-		}
+		FVector moveForce = Direction * MoveAmount * MoveSpeed;
+		FVector moveDir = moveForce.GetSafeNormal();
 
 		// イカダに乗っている時
-		if (IsRaftRiding)
+		if (CurrentRaft != nullptr)
 		{
-			movedPos = CurrentRaft->GetMoveVec() + movedPos;
-			SetActorLocation(movedPos);
-			if (!CurrentRaft->IsOnRaft(GetActorLocation()))
+			FHitResult HitResult(ForceInit);
+			
+			if (!IsInRaft)
 			{
-				FVector moveVec = movedPos - PrevPos;
-				SetActorLocation(CurrentRaft->AdjustMoveOnRaft(PrevPos, moveVec));
+				if (CurrentRaft->IsInRaft(CurPos, Radius))
+				{
+					IsInRaft = true;
+				}
+				// イカダの上にいるがはみ出ている状態
+				else
+				{
+					// 強制的にイカダの上に移動する
+					FVector SubDirection = CurrentRaft->GetActorLocation() - CurPos;
+					MoveAmount = 1.0f;
+					SetLookAt(SubDirection, 0.5f);
+					Move(SubDirection.GetSafeNormal2D(), MoveSpeed * 0.5f);
+				}
 			}
+			else if (Water->GetLandPoint(CurPos + Direction * Radius * 2.0f) ||			// 陸を見つけた時
+					CheckTraceGround(HitResult, CurPos + Direction * Radius * 2.0f, Radius * 0.3f, CurrentRaft))   // 他のイカダを見つけた時
+			{
+				Move(Direction, MoveSpeed * MoveAmount);
+			}
+			// イカダの上に完全に乗っている状態
 			else
 			{
-				Move(Direction, MoveAmount * MoveSpeed);
+				FVector NextPos = CurrentRaft->AdjustMoveOnRaft(CurPos, moveForce, Radius);
+				float MoveValue = 0.0f;
+				(NextPos - CurPos).ToDirectionAndLength(Direction, MoveValue);
+				Move(Direction, MoveValue);
 			}
 		}
 		// 通常時
 		else
 		{
-			float WaterCheckRadius = Radius * 1.2f;
-			float dist = WaterCheckRadius * 1.3f;
-			FVector CurPos = GetActorLocation();
-			FVector moveForce = Direction * MoveAmount * MoveSpeed;
-			FVector moveDir = moveForce.GetSafeNormal();
-			FVector WaterCheckPos = CurPos + moveDir * dist;
+			// イカダを見つけた時
+			FHitResult HitResult(ForceInit);
+			if (CheckTraceGround(HitResult, CurPos + Direction * Radius * 2.0f, Radius * 0.5f))
+			{
+				Move(Direction, MoveSpeed * MoveAmount);
+			}
+			else
+			{
+				float WaterCheckRadius = Radius * 1.2f;
+				float dist = WaterCheckRadius * 1.3f;
+				FVector WaterCheckPos = CurPos + moveDir * dist;
 
-			UKismetSystemLibrary::DrawDebugCylinder(this, WaterCheckPos - FVector(0, 0, 50), WaterCheckPos - FVector(0, 0, 40), WaterCheckRadius, 64, FLinearColor::Blue, 0.0f, 3.0f);
-			UKismetSystemLibrary::DrawDebugCylinder(this, CurPos + moveForce - FVector(0, 0, 50), CurPos + moveForce - FVector(0, 0, 40), Radius, 64, FLinearColor::Red, 0.0f, 3.0f);
+				// デバッグ描画
+				UKismetSystemLibrary::DrawDebugCylinder(this, WaterCheckPos - FVector(0, 0, 50), WaterCheckPos - FVector(0, 0, 40), WaterCheckRadius, 64, FLinearColor::Blue, 0.0f, 3.0f);
+				UKismetSystemLibrary::DrawDebugCylinder(this, CurPos + moveForce - FVector(0, 0, 50), CurPos + moveForce - FVector(0, 0, 40), Radius, 64, FLinearColor::Red, 0.0f, 3.0f);
 
-			FVector NextPos = Water->AdjustMoveInLand(CurPos, moveForce, Radius, WaterCheckPos, WaterCheckRadius);
-			
-			float MoveValue = 0.0f;
-			(NextPos - CurPos).ToDirectionAndLength(Direction, MoveValue);
-			// 最終的に決定した移動量を加算
-			Move(Direction, MoveValue);
+				FVector NextPos = Water->AdjustMoveInLand(CurPos, moveForce, Radius, WaterCheckPos, WaterCheckRadius);
+				float MoveValue = 0.0f;
+				(NextPos - CurPos).ToDirectionAndLength(Direction, MoveValue);
+				// 最終的に決定した移動量を加算
+				Move(Direction, MoveValue);
+			}
 		}
-		PrevPos = movedPos;
 	}
 
 	if (IsAttackHold)
@@ -248,14 +233,40 @@ void APlayerCharacter::Move(const FVector & Direction, float Value)
 	if (IsPlayAttackAnime)return;
 	if (Value < 0.05f) return;
 
-	//FVector NextPos = GetActorLocation() + Direction * Value;
-	//SetActorLocation(NextPos);
-
 	AddMovementInput(Direction, Value);
 	// 無理やり移動量を調整
-	float FallForce = GetMovementComponent()->Velocity.Z;
-	GetMovementComponent()->Velocity = Direction * Value * 40.0f;
-	GetMovementComponent()->Velocity.Z = FallForce;
+	UPawnMovementComponent * Movement = GetMovementComponent();
+	float FallForce = Movement->Velocity.Z;
+	float MoveScale = Value * 40.0f;
+	// 移動できる量が超えていたら調整
+	if (Movement->Velocity.SizeSquared2D() > MoveScale)
+	{
+		Movement->Velocity = Direction * MoveScale;
+		Movement->Velocity.Z = FallForce;
+	}
+}
+
+bool APlayerCharacter::CheckTraceGround(FHitResult & Result, const FVector & Start, float SphereRadius, AActor* Ignore)
+{
+	FVector End = Start - FVector::UpVector * 10000.0f;
+
+	FCollisionQueryParams TraceParms(FName(TEXT("Player Check Ground")));
+	TraceParms.bTraceComplex = false;			// 複雑な衝突を追跡する必要があるかどうか
+	TraceParms.bReturnPhysicalMaterial = false; // 結果に物理的な資料を含めるかどうか。
+	TraceParms.AddIgnoredActor(this);			// 自分は無視する
+	if(Ignore) TraceParms.AddIgnoredActor(Ignore);
+	ECollisionChannel CollisionChannel = ECC_Vehicle;	// 乗り物設定したコリジョンだけ判定する
+	FCollisionShape SphereCast = FCollisionShape::MakeSphere(SphereRadius); // プレイヤーの大きさの球で判定する
+	if (GetWorld()->SweepSingleByObjectType(Result, Start, End, FQuat::Identity, CollisionChannel, SphereCast, TraceParms))
+		return true;
+
+	return false;
+}
+
+void APlayerCharacter::ResetRaftParam()
+{
+	CurrentRaft = nullptr;
+	IsInRaft = false;
 }
 
 void APlayerCharacter::TriggerHammerAttack(void)
@@ -301,6 +312,68 @@ void APlayerCharacter::MinusHammerGauge(const float Power)
 		HammerHP = 0.0f;
 	}
 	HammerCountBarUI->UpdateGauge(HammerHP);
+}
+
+bool APlayerCharacter::CheckGround()
+{
+	FVector Pos = GetActorLocation();
+	if (!Water->IsInField(Pos)) return false;	// フィールド外に出てもfalse
+
+	FHitResult HitData(ForceInit);
+	if (CheckTraceGround(HitData, Pos, Radius * 0.8f))
+	{
+		ARaft* HitRaft = Cast<ARaft>(HitData.GetActor());
+		// イカダに乗った状態で違うイカダに乗った時
+		if (HitRaft && HitRaft != CurrentRaft)
+			ResetRaftParam();
+		// イカダなら登録しておく
+		CurrentRaft = HitRaft;
+
+		if(CurrentRaft && !Water->GetLandPoint(Pos))
+			Water->SetCollisionEnabled(false);	// 何かの上に乗ってる場合はWaterSurfaceコリジョンをオフにしておく
+
+		//DISPLAY_LOG("HitGroundActor : %s", HitData.GetActor()->GetName().GetCharArray().GetData());
+		return true;
+	}
+	// イカダから降りた時点でイカダで使う変数をリセット
+	ResetRaftParam();
+
+	/// 地面の上に存在していなかったらWaterSurfaceコリジョンをオフにしておく
+	Water->SetCollisionEnabled(true);
+
+	// 下が陸判定ならその時点でtrue
+	if (Water->GetLandPoint(Pos) != nullptr)
+		return true;
+
+	return false;
+}
+
+FVector APlayerCharacter::GetInputDirection(float VerticalValue, float HolizontalValue)
+{
+	if (FollowCamera == NULL) return FVector::ZeroVector;
+
+	FVector Result;
+
+	FVector V_Direction = FollowCamera->GetActorForwardVector();
+	if (FMath::Abs(V_Direction.Z) > 0.9f) { V_Direction = FollowCamera->GetActorUpVector(); } // カメラが真上にある時にも対応
+	V_Direction.Z = 0.0f;
+	V_Direction.Normalize();
+
+	FVector H_Direction = FollowCamera->GetActorRightVector();
+	H_Direction.Z = 0.0f;
+	H_Direction.Normalize();
+
+	Result = V_Direction * VerticalValue + H_Direction * HolizontalValue;
+	Result.Normalize();
+
+	return Result;
+}
+
+void APlayerCharacter::SetLookAt(FVector Direction, float Speed)
+{
+	float angle = FMath::Atan2(Direction.Y, Direction.X);
+	FQuat LookAt = MyFunc::FromAxisAngleToQuaternion(FVector::UpVector, angle);
+	SetActorRotation(FQuat::Slerp(GetActorQuat(), LookAt, Speed));
 }
 
 void APlayerCharacter::PauseInput()

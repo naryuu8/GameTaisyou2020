@@ -46,13 +46,16 @@ void AGoal::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 	}
 
 	if (isGoal) return;
-
-	// 衝突したアクターが荷物ならゴール済みにする
-	isGoal = true;
-	// 衝突した荷物を削除
-	OtherFloat->Destroy();
-	// ここでドアが閉まるアニメーション開始
-	PlayAnimationDoorClose();
+	
+	if (OtherFloat->ActorHasTag("Nimotu"))
+	{
+		// 衝突したアクターが荷物ならゴール済みにする
+		isGoal = true;
+		// 衝突した荷物を削除
+		OtherFloat->Destroy();
+		// ここでドアが閉まるアニメーション開始
+		PlayAnimationDoorClose();
+	}
 }
 
 // Called every frame
