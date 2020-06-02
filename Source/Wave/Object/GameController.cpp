@@ -16,15 +16,15 @@ AGameController::AGameController()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts or when spawned
 void AGameController::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	GetPlayer = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	IsGameClear = false;
+	IsGameOver = false;
 	DataTableLoad();
 	// シーン上のゴールを全て取得
 	TArray<class AActor*> FoundGoals;
@@ -41,17 +41,23 @@ void AGameController::BeginPlay()
 	{
 		GetMaxNimotu();
 	}
+	GameMaxNimotu = MaxNimotu;
 }
 
 // Called every frame
 void AGameController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+	//プレイヤーへのアドレスを取得出来ていなかったら再び貰う
+	if (!GetPlayer)
+	{
+		GetPlayer = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
+		SetNorma();
+	}
 	GoalCount = GetGoalCount();
 	CheckTimeCount();
-	GameOverCheck();
 	GameClearCheck();
+	GameOverCheck();
 	InputGameOverUI();
 	InputResultUI();
 }
@@ -130,13 +136,9 @@ void AGameController::CreateResultUI()
 		if (ResultUI != nullptr)
 		{
 			ResultUI->AddToViewport();
-			APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
-			if (player)
-			{
-				player->HammerCountBarParent();
-				ResultUI->SetResultGaugeAnimeCheckEvent(player->GetMaxHammerHP(),player->GetHammerHP(), NormaPercent);
-				//ResultUI->SetResultGaugeAnimeCheckEvent(100.0f, 80.0f, 30.0f);
-			}
+			GetPlayer->HammerCountBarParent();
+			ResultUI->SetResultGaugeAnimeCheckEvent(GetPlayer->GetMaxHammerHP(),GetPlayer->GetHammerHP(), NormaPercent);
+			//ResultUI->SetResultGaugeAnimeCheckEvent(100.0f, 80.0f, 30.0f);
 			ResultUI->SetResultNowNimotuCheckEvent(GoalCount);
 			//ResultUI->SetResultNowNimotuCheckEvent(3);
 			ResultUI->SetStampAnimeCheckEvent(NormaGoalCount, MaxNimotu);
@@ -198,12 +200,9 @@ void AGameController::InputResultUI()
 
 void AGameController::SetNorma()
 {
+	if (!GetPlayer)return;
 	float percent = NormaPercent * 0.01f;
-	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
-	if (player)
-	{
-		player->SetNormaPercent(percent);
-	}
+	GetPlayer->SetNormaPercent(percent);
 }
 
 int AGameController::GetMaxNimotu()
@@ -229,9 +228,6 @@ int AGameController::GetMaxNimotu()
 void AGameController::GameClearCheck()
 {
 	if (IsGameOver)return;
-	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
-	int GameMaxNimotu = CountGameNimotu();
-	bool islimit = false;
 	auto gameclear = [=]
 	{
 		IsGameClear = true;
@@ -242,7 +238,6 @@ void AGameController::GameClearCheck()
 		}
 	};
 	// ゲームクリア条件
-
 	//①ノルマ以上荷物を入れている時かつハンマーが壊れて残り時間が0になったら
 	if (GoalCount >= NormaGoalCount && GetLimitTimeZero())
 	{
@@ -266,8 +261,6 @@ void AGameController::GameOverCheck()
 	// ゲームオーバー条件
 	//ノルマを1つも達成できなくなったらゲームオーバー
 	int NotExplotionCount = GetNotExplotionCount(); //壊れていない家の数Get
-	int GameMaxNimotu = CountGameNimotu();
-	bool islimit = false;
 	auto gameover = [=] 
 	{ 
 		IsGameOver = true;
@@ -278,7 +271,6 @@ void AGameController::GameOverCheck()
 		}
 	};
 	//①ノルマまで荷物を運んでおらずハンマーが壊れて残り時間が0になったら
-	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	if (GoalCount < NormaGoalCount && GetLimitTimeZero())
 	{
 		gameover();
@@ -288,7 +280,6 @@ void AGameController::GameOverCheck()
 	{
 		gameover();
 	}
-	//どうやってもここからノルマ達成不可能の時ゲームオーバーにする
 	//③ゴールがノルマの荷物より少なくなった時
 	else if (NotExplotionCount < NormaGoalCount && GoalCount < NormaGoalCount)
 	{
@@ -318,8 +309,8 @@ int AGameController::CountGameNimotu()
 void AGameController::CheckTimeCount()
 {
 	//プレイヤーのハンマーHPが0でハンマーを叩き終わったら時間カウント開始と残り時間監視
-	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
-	if (player->GetHammerHP() <= 0.0f && player->GetHammerPower() == 0.0f)
+	//誤差防止のためHPは0.1f以下で0とみなす
+	if (GetPlayer->GetHammerHP() <= 0.1f && GetPlayer->GetHammerPower() == 0.0f)
 	{
 		CreateTimeCountUI();
 	}

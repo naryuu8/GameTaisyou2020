@@ -6,9 +6,12 @@
 #include "WaterSurface.h"
 #include "Components/StaticMeshComponent.h"
 #include "TimerManager.h"
+
 #include "CircleLand.h"
 #include "SquareLand.h"
 #include "../MyFunc.h"
+#include "../Object/GameController.h"
+
 
 // Sets default values
 AFloatActor::AFloatActor()
@@ -211,5 +214,14 @@ FVector AFloatActor::AdjustMove_VS_Square(const FVector & OldPos, FVector MovedP
 
 void AFloatActor::MyDestroy()
 {
+	//自身がゴールに運ぶ荷物だったらゲームコントローラーにゲーム内の荷物が減ったことを通知
+	if (ActorHasTag("Nimotu"))
+	{
+		AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+		if (game)
+		{
+			game->MinusGameMaxNimotu();
+		}
+	}
 	this->Destroy();
 }
