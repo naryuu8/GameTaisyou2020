@@ -7,7 +7,8 @@
 #include "Blueprint/UserWidget.h"
 #include "../UI/HammerCountUI.h"
 #include "../WaterSurface/FloatActor.h"
-
+#include "GameController.h"
+#include "Kismet/GameplayStatics.h"
 // Sets default values
 AGoal::AGoal()
 {
@@ -34,10 +35,19 @@ void AGoal::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 	// 荷物以外は判定しない
 	if (isExplotion) return; //すでに壊れているから
 	if (!OtherFloat) return;
+	AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
 
 	// 衝突したアクターが爆弾の時爆発してゴール済みでもゴールしていないことにする
 	if (OtherFloat->ActorHasTag("Bom"))
 	{
+		if (game)
+		{
+			if (isGoal)
+			{
+				game->MinusGoalCount();
+			}
+			game->MinusNotExplotionCount();
+		}
 		isGoal = false;
 		isExplotion = true;
 		OtherFloat->Destroy();
@@ -51,6 +61,10 @@ void AGoal::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 	{
 		// 衝突したアクターが荷物ならゴール済みにする
 		isGoal = true;
+		if (game)
+		{
+			game->AddGoalCount();
+		}
 		// 衝突した荷物を削除
 		OtherFloat->Destroy();
 		// ここでドアが閉まるアニメーション開始

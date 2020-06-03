@@ -392,12 +392,22 @@ void APlayerCharacter::PauseInput()
 					//ポーズ用のバーを更新するためHPを渡す
 					PauseUI->SetMaxHP(MaxHammerHP);
 					PauseUI->SetHP(HammerHP);
+					AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+					if (game)
+					{
+						game->SetTimeCountPause();
+					}
 				}
 				else if (PauseUI)
 				{
 				if (PauseUI->GetIsPlayAnimation())return;
 				PauseUI->AddToViewport();
 				PauseUI->SetHP(HammerHP);
+				AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+				if (game)
+				{
+					game->SetTimeCountPause();
+				}
 				}
 				//生成してもnullptrだったらエラー文表示
 				if (PauseUI == nullptr)
@@ -412,9 +422,14 @@ void APlayerCharacter::PauseInput()
 		}
 		else if (UGameplayStatics::IsGamePaused(GetWorld()))
 		{
-		if (!PauseUI)return;
-		if (PauseUI->GetIsPlayAnimation())return;
-		PauseUI->EndPlayAnimation();
+			if (!PauseUI)return;
+			if (PauseUI->GetIsPlayAnimation())return;
+			PauseUI->EndPlayAnimation();
+			AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+			if (game)
+			{
+				game->SetTimeCountRePlay();
+			}
 		}
 	}
 	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
