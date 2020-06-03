@@ -43,4 +43,7 @@ public:
 		void InitPlayAnimation();
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void EndPlayAnimation();
+	//ゲームオーバー用プレイヤーモデル生成
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SpawnGameOverPlayer();
 };

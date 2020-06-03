@@ -66,7 +66,6 @@ void APlayerCharacter::BeginPlay_C()
 		FollowCamera = cameraActor;
 		cameraActor->SetFollowTarget(this);
 	}
-
 	//現在のBegibPlayはモデルの都合上こちらで書けないので関数で呼ぶ
 	IsAttackHold = false;
 	IsPlayAttackAnime = false;
@@ -396,26 +395,26 @@ void APlayerCharacter::PauseInput()
 				}
 				else if (PauseUI)
 				{
-					if (PauseUI->GetIsPlayAnimation())return;
-					PauseUI->AddToViewport();
-					PauseUI->SetHP(HammerHP);
+				if (PauseUI->GetIsPlayAnimation())return;
+				PauseUI->AddToViewport();
+				PauseUI->SetHP(HammerHP);
 				}
 				//生成してもnullptrだったらエラー文表示
-				if(PauseUI == nullptr)
+				if (PauseUI == nullptr)
 				{
 					UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"Widget cannot create");
 				}
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"PauseUIClass is nullptr");
+			UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"PauseUIClass is nullptr");
 			}
 		}
 		else if (UGameplayStatics::IsGamePaused(GetWorld()))
 		{
-			if (!PauseUI)return;
-			if (PauseUI->GetIsPlayAnimation())return;
-			PauseUI->EndPlayAnimation();
+		if (!PauseUI)return;
+		if (PauseUI->GetIsPlayAnimation())return;
+		PauseUI->EndPlayAnimation();
 		}
 	}
 	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
@@ -438,7 +437,7 @@ void APlayerCharacter::WaterAttack(FVector Point, float Power)
 {
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
-	
+
 	for (auto Actor : FoundActors)
 	{
 		AWaterSurface* water = Cast<AWaterSurface>(Actor);
@@ -490,4 +489,9 @@ void APlayerCharacter::HammerCountBarParent()
 	{
 		HammerCountBarUI->RemoveFromParent();
 	}
+}
+
+void APlayerCharacter::SetPlayerHiddenInGame()
+{
+	this->SetActorHiddenInGame(true);
 }
