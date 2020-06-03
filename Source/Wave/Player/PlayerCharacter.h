@@ -167,6 +167,9 @@ public:
 	float GetMoveAmount() { return MoveAmount; };
 	//ゲージUIを非表示にする
 	void HammerCountBarParent();
+	//プレイヤーを非表示にする
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+	void SetPlayerHiddenInGame();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	float GetMaxHammerHP() const { return MaxHammerHP; };
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
