@@ -38,7 +38,19 @@ void AFloatActor::Tick(float DeltaTime)
 
 	// メッシュがセットされていなかったら何もしない
 	if (!StaticMeshComponent) return;
-	if (IsFall) return;	// 既に落下した
+	if (IsFall)
+	{
+		Velocity.Z -= 0.5f;
+		//SetActorLocation(GetActorLocation() + Velocity);
+		// 移動と回転
+		FVector RotAxis = FVector::CrossProduct(Velocity, FVector::UpVector);
+		FQuat AddRot = MyFunc::FromAxisAngleToQuaternion(RotAxis, -Velocity.Size() * 0.001f).GetNormalized();
+		AddRot = AddRot * GetActorRotation().Quaternion();
+		SetActorLocationAndRotation(GetActorLocation() + Velocity, AddRot);
+
+		Velocity *= 1.0f - Friction;
+		return;
+	}// 既に落下した
 
 	// 波の傾きに応じて移動する
 	FVector WavePower = WaterSurface->GetWavePower(GetActorLocation());
@@ -48,20 +60,15 @@ void AFloatActor::Tick(float DeltaTime)
 	{
 		Velocity += MoveVec;
 	}
-	if (Type == FloatType::Circle) SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, Radius));
-	else if (Type == FloatType::Square) SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, XLength, YLength));
-	Velocity *= 1.0f - Friction;
-
 	// フィールドの外に出た時
 	// 崖にいる場合は落下
-	FVector CurPos = GetActorLocation();
-	if ((!WaterSurface->IsInField(CurPos)))
+	if ((!WaterSurface->IsInField(GetActorLocation() + Velocity)))
 	{
 		IsFall = true;
-		// 物理演算を使用する
+		/// 物理演算を使用する
 		//StaticMeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_Visibility);
-		//StaticMeshComponent->UpdateCollisionProfile();
-		StaticMeshComponent->SetSimulatePhysics(true);
+		//StaticMeshComponent->SetSimulatePhysics(true);
+		Velocity = Velocity.GetSafeNormal() * 8.0f;
 		// 数秒後にオブジェクトを削除
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
 		FTimerHandle handle;
@@ -69,8 +76,12 @@ void AFloatActor::Tick(float DeltaTime)
 		return;
 	}
 
+	if (Type == FloatType::Circle) SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, Radius));
+	else if (Type == FloatType::Square) SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, XLength, YLength));
+	Velocity *= 1.0f - Friction;
+
 	// 波の高さに合わせる
-	
+	FVector CurPos = GetActorLocation();
 	float Height = WaterSurface->GetWaveHeight(CurPos);
 	if (abs(Height) < WaterSurface->GetMaxWaveHeight())
 	{
