@@ -28,6 +28,10 @@ public:
 	// Sets default values for this actor's properties
 	ALandPoint();
 
+	// 崖にしたければfalse
+	UPROPERTY(EditAnywhere)
+	bool IsLand = true;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -45,6 +49,8 @@ public:
 	// 渡された引数の座標と接しているかどうか
 	virtual bool OnGround(const FVector & Pos) { return false; };
 	virtual bool OnGround(const FVector & Pos, float CircleRadius) { return false; };
+	// 地面の中に完全に入っているか
+	virtual bool InGround(const FVector & Pos, float CircleRadius) { return false; };
 	// この地面の外に出ないように移動する際のチェック
 	virtual FVector AdjustMoveInLand(const FVector & Pos, float CircleRadius) { return FVector::ZeroVector; };
 	virtual FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius) { return FVector::ZeroVector; };

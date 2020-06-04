@@ -5,6 +5,7 @@
 #include "GameCameraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "../InputManager.h"
+#include "../WaterSurface/WaterSurface.h"
 
 
 // Sets default values
@@ -31,8 +32,13 @@ void AGameCameraActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	AWaterSurface * Water = Cast<AWaterSurface>(UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass()));
+	FVector Center = Water->GetCenterPos();
+	SetActorLocation(Center);
 	// 初めの位置をステージの中心として保持しておく
-	FieldCenterPos = GetActorLocation();
+	FieldCenterPos = Center;
+	float Distance = FVector::Dist(Water->GetStartPos(), Center);
+	this->FieldDistance = Distance * 1.2f;
 
 	// カメラのビューポートをセット
 	APlayerController *playerControtller = UGameplayStatics::GetPlayerController(this, 0);

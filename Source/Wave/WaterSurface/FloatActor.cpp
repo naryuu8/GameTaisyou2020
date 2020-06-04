@@ -27,6 +27,8 @@ void AFloatActor::BeginPlay()
 	
 	WaterSurface = Cast<AWaterSurface>((UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass())));
 	StaticMeshComponent = Cast<UStaticMeshComponent>(GetComponentByClass(UStaticMeshComponent::StaticClass()));
+
+	IsFall = false;
 }
 
 // Called every frame
@@ -36,25 +38,12 @@ void AFloatActor::Tick(float DeltaTime)
 
 	// メッシュがセットされていなかったら何もしない
 	if (!StaticMeshComponent) return;
-
-	// フィールドの外に出た時
-	if ((!WaterSurface->IsInField(GetActorLocation())))
-	{
-		// 物理演算を使用する
-		if (!StaticMeshComponent->IsSimulatingPhysics())
-			StaticMeshComponent->SetSimulatePhysics(true);
-
-		// 数秒後にオブジェクトを削除
-		FTimerManager& timerManager = GetWorld()->GetTimerManager();
-		FTimerHandle handle;
-		timerManager.SetTimer(handle, this, &AFloatActor::MyDestroy, 3.0f);
-		return;
-	}
+	if (IsFall) return;	// 既に落下した
 
 	// 波の傾きに応じて移動する
 	FVector WavePower = WaterSurface->GetWavePower(GetActorLocation());
 	FVector MoveVec = WavePower * FloatSpeed * 0.01f;
-	
+
 	if (MoveVec.Size() > MinFloatWavePower)
 	{
 		Velocity += MoveVec;
@@ -63,12 +52,31 @@ void AFloatActor::Tick(float DeltaTime)
 	else if (Type == FloatType::Square) SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, XLength, YLength));
 	Velocity *= 1.0f - Friction;
 
-	// 波の高さに合わせる
+	// フィールドの外に出た時
+	// 崖にいる場合は落下
 	FVector CurPos = GetActorLocation();
-	float Height = WaterSurface->GetWaveHeight(CurPos);
-	Height = FMath::Lerp(CurPos.Z, Height, 0.1f);
+	if ((!WaterSurface->IsInField(CurPos)))
+	{
+		IsFall = true;
+		// 物理演算を使用する
+		//StaticMeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_Visibility);
+		//StaticMeshComponent->UpdateCollisionProfile();
+		StaticMeshComponent->SetSimulatePhysics(true);
+		// 数秒後にオブジェクトを削除
+		FTimerManager& timerManager = GetWorld()->GetTimerManager();
+		FTimerHandle handle;
+		timerManager.SetTimer(handle, this, &AFloatActor::MyDestroy, 3.0f);
+		return;
+	}
 
-	SetActorLocation(FVector(CurPos.X, CurPos.Y, Height));
+	// 波の高さに合わせる
+	
+	float Height = WaterSurface->GetWaveHeight(CurPos);
+	if (abs(Height) < WaterSurface->GetMaxWaveHeight())
+	{
+		Height = FMath::Lerp(CurPos.Z, Height, 0.15f);
+		SetActorLocation(FVector(CurPos.X, CurPos.Y, Height));
+	}
 }
 
 FVector AFloatActor::AdjustMove_VS_Circle(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius)
