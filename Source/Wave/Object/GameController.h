@@ -42,7 +42,9 @@ private:
 	//ゲームオーバーかどうか
 	bool IsGameOver;
 	//ゴールに入った荷物をカウント
-	int GoalCount;
+	int GoalCount = 0;
+	//壊れていない家の数をカウント
+	int NotExplotionCount = 0;
 	//このステージのゴール条件に入る荷物の数
 	int MaxNimotu = 0;
 	//ゲーム上に配置されている荷物の数（リアルタイム更新）
@@ -88,6 +90,14 @@ public:
 	//ゲージのパーセントとクリアに必要な荷物数取得（デバッグの時は読み込まない）
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void DataTableLoad();
+	//タイムカウントアニメが再生されていたら一時停止する
+	void SetTimeCountPause();
+	//タイムカウントアニメが止まっていたら続きから再生する
+	void SetTimeCountRePlay();
+	void AddGoalCount() { GoalCount++; }
+	void MinusGoalCount() { GoalCount--; }
+	void AddNotExplotionCount() { NotExplotionCount++; }
+	void MinusNotExplotionCount() { NotExplotionCount--; }
 private:
 	// ゴール済みの個数を取得
 	int GetGoalCount();

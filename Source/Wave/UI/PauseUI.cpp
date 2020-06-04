@@ -3,6 +3,7 @@
 
 #include "PauseUI.h"
 #include "Kismet/GameplayStatics.h"
+#include "../Object/GameController.h"
 
 void UPauseUI::NativeConstruct()
 {
@@ -70,8 +71,15 @@ void UPauseUI::SelectStateAction()
 	switch (SelectNumber)
 	{
 		case static_cast<int>(PauseState::GAMEBACK):
+		{
 			EndPlayAnimation();
+			AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+			if (game)
+			{
+				game->SetTimeCountRePlay();
+			}
 			break;
+		}
 		case static_cast<int>(PauseState::RESTART) :
 			Retry();
 			break;
