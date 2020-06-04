@@ -36,6 +36,8 @@ void AFloatActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!WaterSurface) return;
+
 	if (IsFall)
 	{
 		Velocity.Z -= 0.5f;
