@@ -15,7 +15,7 @@ ALandPoint::ALandPoint()
 void ALandPoint::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	IsUse = true;
 }
 
 // Called every frame

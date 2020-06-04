@@ -36,8 +36,6 @@ void AFloatActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// メッシュがセットされていなかったら何もしない
-	if (!StaticMeshComponent) return;
 	if (IsFall)
 	{
 		Velocity.Z -= 0.5f;
