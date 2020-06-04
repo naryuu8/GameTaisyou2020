@@ -9,6 +9,14 @@
 class ALandPoint;
 class AFlashFlood;
 
+enum class VertexType
+{
+	Water,	// 水
+	Land,	// 陸
+	Cliff,	// 崖
+	None
+};
+
 UCLASS()
 class WAVE_API AWaterSurface : public AProceduralMeshActor
 {
@@ -21,22 +29,27 @@ public:
 	void AddPower(FVector worldPos, float pawer);
 	FVector GetWavePower(const FVector & worldPos);
 	float GetWaveHeight(const FVector & worldPos);	// 波の高さを取得
+	float GetMaxWaveHeight() { return MaxWaveHight; };	// 波の最大高さを取得
 	float GetWaveSpeed() { return WaveSpeed; }
 	FVector AdjustMoveInField(const FVector & worldPos, float circleRadius);
 	FVector AdjustMoveInWater(const AActor * Object, FVector& moveVec, float circleRadius);
 	FVector AdjustMoveInWater(const AActor * Object, FVector& moveVec, float XLen, float YLen);
 	FVector AdjustMoveInLand(const FVector & worldPos, const FVector & moveVec, float circleRadius, const FVector & WaterCheckPos, float WaterCheckRadius);
 	bool IsInWater(FVector worldPos);
-	bool IsLand(FVector worldPos);
+	bool IsInLand(FVector worldPos);
+	VertexType GetVertexType(FVector worldPos);
 	bool IsInField(FVector worldPos);	// ステージ外かどうか調べる
+	bool IsInField(FVector worldPos, float CircleRadius);	// ステージ外かどうか調べる
 	FVector GetGetOffPos(FVector WorldPos, float Radius);	// 筏から降りれる場所を取得
-	ALandPoint * GetLandPoint(const FVector & WorldPos);	// 指定した座標に接している地面を取得
-	ALandPoint * GetLandPoint(const FVector & WorldPos, float Radius);	// 指定した座標に接している地面を取得
-
+	ALandPoint * GetLandPoint(const FVector & WorldPos, bool IsLand = true);	// 指定した座標に接している地面を取得
+	ALandPoint * GetLandPoint(const FVector & WorldPos, float Radius, bool IsLand = true);	// 指定した座標に接している地面を取得
+	FVector GetCenterPos();
+	FVector GetStartPos() { return StartPoint->GetActorLocation(); };
 private:
 	void CreateWave(int32 x, int32 y, float pawer);
-	void SetCircleLand(FVector CirclePostion, float Radius);
-	void SetSquareLand(FVector SquareLocation, float XLength, float YLength);
+	void SetCircleLand(FVector CirclePostion, float Radius, bool isLand);
+	void SetSquareLand(FVector SquareLocation, float XLength, float YLength, bool isLand);
+	void SetLand(int X, int Y, float Z, bool isLand);
 
 	void TickFlashFloodWave(AFlashFlood* FlashFlood);
 
@@ -66,7 +79,7 @@ private:
 	UPROPERTY(EditAnywhere)
 		FLinearColor WaveColor = FLinearColor::White;
 
-	TArray<bool> IsLands;
+	TArray<VertexType> VertexTypes;
 
 	TArray<float> CurrentHeights;
 	TArray<float> PrevHeights;

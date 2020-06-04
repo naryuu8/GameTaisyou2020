@@ -25,6 +25,13 @@ bool ACircleLand::OnGround(const FVector & Pos, float CircleRadius)
 	return Dist.SizeSquared() < Radius * Radius;
 }
 
+bool ACircleLand::InGround(const FVector & Pos, float CircleRadius)
+{
+	FVector Dist = GetActorLocation() - Pos;
+	Dist -= Dist.GetSafeNormal() * CircleRadius;
+	return Dist.SizeSquared() < Radius * Radius;
+}
+
 FVector ACircleLand::AdjustMoveInLand(const FVector & Pos, float CircleRadius)
 {
 	FVector Result = Pos;

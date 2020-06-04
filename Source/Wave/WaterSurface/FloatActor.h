@@ -54,6 +54,8 @@ protected:
 		float XLength = 200.0f;
 	UPROPERTY(EditAnywhere)
 		float YLength = 200.0f;
+
+	bool IsFall = false;
 public:	
 	FVector Velocity;
 
