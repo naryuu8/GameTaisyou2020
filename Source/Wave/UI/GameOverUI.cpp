@@ -4,14 +4,6 @@
 #include "GameOverUI.h"
 #include "../GlobalGameInstance.h"
 #include "Kismet/GameplayStatics.h"
-FSlateColor UGameOverUI::SelectTextColor(const GameOverState state)
-{
-	if (SelectNumber == static_cast<int>(state))
-	{
-		return FSlateColor(FLinearColor(1.0f, 0.0f, 0.0f, 1.0f));
-	}
-	return FSlateColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
-}
 
 ESlateVisibility UGameOverUI::GetGameOverTextVisibility()
 {
