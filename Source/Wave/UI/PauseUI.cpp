@@ -3,6 +3,7 @@
 
 #include "PauseUI.h"
 #include "Kismet/GameplayStatics.h"
+#include "../Object/GameController.h"
 
 void UPauseUI::NativeConstruct()
 {
@@ -12,15 +13,6 @@ void UPauseUI::NativeConstruct()
 	InitPlayAnimation();
 	SelectNumber = static_cast<int>(PauseState::GAMEBACK);
 	UGameplayStatics::SetGamePaused(GetWorld(),true);
-}
-
-FSlateColor UPauseUI::SelectTextColor(const PauseState state)
-{
-	if (SelectNumber == static_cast<int>(state))
-	{
-		return FSlateColor(FLinearColor(1.0f, 0.0f, 0.0f, 1.0f));
-	}
-	return FSlateColor(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 ESlateVisibility UPauseUI::GetPauseTextVisibility()
@@ -70,8 +62,15 @@ void UPauseUI::SelectStateAction()
 	switch (SelectNumber)
 	{
 		case static_cast<int>(PauseState::GAMEBACK):
+		{
 			EndPlayAnimation();
+			AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+			if (game)
+			{
+				game->SetTimeCountRePlay();
+			}
 			break;
+		}
 		case static_cast<int>(PauseState::RESTART) :
 			Retry();
 			break;

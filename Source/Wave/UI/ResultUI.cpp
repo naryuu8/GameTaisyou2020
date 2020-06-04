@@ -11,15 +11,6 @@ void UResultUI::NativeConstruct()
 	State = ResultState::RESULT_ANIME;
 }
 
-FSlateColor UResultUI::SelectTextColor(const ResultSelectState state)
-{
-	if (SelectNumber == static_cast<int>(state))
-	{
-		return FSlateColor(FLinearColor(1.0f, 0.0f, 0.0f, 1.0f));
-	}
-	return FSlateColor(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f));
-}
-
 void UResultUI::NextSelectState()
 {
 	if (State != ResultState::INPUT)return;

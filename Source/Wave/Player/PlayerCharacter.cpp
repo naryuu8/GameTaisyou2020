@@ -1,6 +1,5 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 #include "PlayerCharacter.h"
-#include "HeadMountedDisplayFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -115,6 +114,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		{
 			Water->AddPower(FVector(CurPos.X, CurPos.Y, 0.0f), ChargePowerMax);
 			IsDeth = true;
+			PlayerDeth();
 		}
 	}
 
@@ -215,6 +215,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 		}
 		
 	}
+	else
+	{
+		//MinusHammerGauge(-ChargeSpeed);
+	}
 
 	//カメラにレイを飛ばして当たらなければアウトライン適用
 	ACharacter* myCharacter = this;
@@ -305,10 +309,10 @@ void APlayerCharacter::MinusHammerGauge(const float Power)
 {
 	if (!HammerCountBarUI)return;
 	HammerHP -= ChargeSpeed;
-	if (HammerHP < 0.0f)
+	/*if (HammerHP < 0.0f)
 	{
 		HammerHP = 0.0f;
-	}
+	}*/
 	HammerCountBarUI->UpdateGauge(HammerHP);
 }
 
@@ -392,12 +396,22 @@ void APlayerCharacter::PauseInput()
 					//ポーズ用のバーを更新するためHPを渡す
 					PauseUI->SetMaxHP(MaxHammerHP);
 					PauseUI->SetHP(HammerHP);
+					AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+					if (game)
+					{
+						game->SetTimeCountPause();
+					}
 				}
 				else if (PauseUI)
 				{
 				if (PauseUI->GetIsPlayAnimation())return;
 				PauseUI->AddToViewport();
 				PauseUI->SetHP(HammerHP);
+				AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+				if (game)
+				{
+					game->SetTimeCountPause();
+				}
 				}
 				//生成してもnullptrだったらエラー文表示
 				if (PauseUI == nullptr)
@@ -412,9 +426,14 @@ void APlayerCharacter::PauseInput()
 		}
 		else if (UGameplayStatics::IsGamePaused(GetWorld()))
 		{
-		if (!PauseUI)return;
-		if (PauseUI->GetIsPlayAnimation())return;
-		PauseUI->EndPlayAnimation();
+			if (!PauseUI)return;
+			if (PauseUI->GetIsPlayAnimation())return;
+			PauseUI->EndPlayAnimation();
+			AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+			if (game)
+			{
+				game->SetTimeCountRePlay();
+			}
 		}
 	}
 	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;

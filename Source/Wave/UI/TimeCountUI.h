@@ -26,9 +26,10 @@ protected:
 		FText CountText;
 public:
 	void SetTimeCount(const int time) { TimeCount = time; }
-	//ˆø”‚Å“n‚µ‚½ŠÔˆÈ‰º‚É‚È‚Á‚½‚çF‚ğ•Ï‚¦‚é
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		FSlateColor TimeTextColor(const int chenge_time);
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsCountZero() const { return IsCountZero; }
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void AnimationPause();
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void AnimationRePlay();
 };

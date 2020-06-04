@@ -49,7 +49,7 @@ void AWaterSurface::BeginPlay()
 		}
 	}
 
-	IsLands.Init(false, Vertices.Num());
+	VertexTypes.Init(VertexType::Water, Vertices.Num());
 
 	// メンバの頂点データなどからメッシュを生成
 	CreateMesh();
@@ -62,23 +62,44 @@ void AWaterSurface::BeginPlay()
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALandPoint::StaticClass(), FoundActors);
 	
+	// 初めに地面だけをセット
 	for (auto Actor : FoundActors)
 	{
 		// 結構処理に使うのでメンバに登録しておく
-		LandPointActors.Add(Cast<ALandPoint>(Actor));
+		ALandPoint * LandPoint = Cast<ALandPoint>(Actor);
+		LandPointActors.Add(LandPoint);
+		if (!LandPoint->IsLand) continue;
 
 		// 円形の地形の初期化
 		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
 		if (CircleLand)
 		{
-			SetCircleLand(CircleLand->GetActorLocation(), CircleLand->GetRadius());
+			SetCircleLand(CircleLand->GetActorLocation(), CircleLand->GetRadius(), CircleLand->IsLand);
 			continue;
 		}
 		// 矩形の地形の初期化
 		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
 		if (SquareLand)
 		{
-			SetSquareLand(SquareLand->GetActorLocation(), SquareLand->GetXLength(), SquareLand->GetYLength());
+			SetSquareLand(SquareLand->GetActorLocation(), SquareLand->GetXLength(), SquareLand->GetYLength(), SquareLand->IsLand);
+		}
+	}
+	// 次に崖をセット
+	for (auto Actor : LandPointActors)
+	{
+		if (Actor->IsLand) continue;
+		// 円形の地形の初期化
+		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
+		if (CircleLand)
+		{
+			SetCircleLand(CircleLand->GetActorLocation(), CircleLand->GetRadius(), CircleLand->IsLand);
+			continue;
+		}
+		// 矩形の地形の初期化
+		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
+		if (SquareLand)
+		{
+			SetSquareLand(SquareLand->GetActorLocation(), SquareLand->GetXLength(), SquareLand->GetYLength(), SquareLand->IsLand);
 		}
 	}
 
@@ -132,21 +153,22 @@ void AWaterSurface::Tick(float DeltaTime)
 		for (int yi = 1; yi < SplitPointNum.Y - 1; ++yi)
 		{
 			int32 index = CalcIndex(xi, yi);
-			if (IsLands[index] && 
-				abs(NewHeights[index]) > abs(CurrentHeights[index]))
+			if (VertexTypes[index] != VertexType::Water/* ||
+				abs(NewHeights[index]) > abs(CurrentHeights[index])*/)
 				continue;
 
 			PrevHeights[index] = CurrentHeights[index];
 			CurrentHeights[index] = NewHeights[index];
 
-			if (!IsLands[index])
+			//if (VertexTypes[index] == VertexType::Water)
 			{
 				Vertices[index].Z = CurrentHeights[index];
 				// 高さに応じてカラーを変更
-				VertexColors[index] = FLinearColor::LerpUsingHSV(WaterColor, WaveColor, FMath::Abs(Vertices[index].Z) / MaxWaveHight);
+				float Progress = FMath::Clamp(FMath::Abs(Vertices[index].Z) / (MaxWaveHight * 0.5f), 0.0f, 1.0f);
+				VertexColors[index] = FLinearColor::LerpUsingHSV(WaterColor, WaveColor, Progress);
+				// 高さ制限を適用
+				Vertices[index].Z = FMath::Clamp(Vertices[index].Z, -MaxWaveHight, MaxWaveHight);
 			}
-			// 高さ制限を適用
-			Vertices[index].Z = FMath::Clamp(Vertices[index].Z, -MaxWaveHight, MaxWaveHight);
 		}
 	}
 
@@ -174,6 +196,7 @@ void AWaterSurface::CreateWave(int32 x, int32 y, float power)
 		for (int yi = 1; yi < SplitPointNum.Y - 1; ++yi)
 		{
 			int index = CalcIndex(xi, yi);
+			if (VertexTypes[index] != VertexType::Water) continue;
 			float value = 0.0f;
 
 			FVector2D v = FVector2D(xi, yi);
@@ -196,11 +219,11 @@ int32 AWaterSurface::CalcIndex(int32 x, int32 y)
 	return index;
 }
 
-void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius)
+void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius, bool isLand)
 {
-	for (int xi = 1; xi < SplitPointNum.X - 1; ++xi)
+	for (int xi = 0; xi < SplitPointNum.X; ++xi)
 	{
-		for (int yi = 1; yi < SplitPointNum.Y - 1; ++yi)
+		for (int yi = 0; yi < SplitPointNum.Y; ++yi)
 		{
 			int32 index = CalcIndex(xi, yi);
 			float xp = Vertices[index].X;
@@ -209,20 +232,17 @@ void AWaterSurface::SetCircleLand(FVector CirclePostion, float Radius)
 			float yc = CirclePostion.Y;
 			if ((xp - xc)*(xp - xc) + (yp - yc)*(yp - yc) <= Radius * Radius)
 			{
-				IsLands[index] = true;
-				Vertices[index].Z = CirclePostion.Z;
-				UV0[index] = FVector2D((xi / SplitPointNum.X) * 0.5f + 0.5f, (yi / SplitPointNum.Y));
-				VertexColors[index] = FLinearColor::Black;
+				SetLand(xi, yi, CirclePostion.Z, isLand);
 			}
 		}
 	}
 }
 
-void AWaterSurface::SetSquareLand(FVector SquareLocation, float XLength, float YLength)
+void AWaterSurface::SetSquareLand(FVector SquareLocation, float XLength, float YLength, bool isLand)
 {
-	for (int xi = 1; xi < SplitPointNum.X - 1; ++xi)
+	for (int xi = 0; xi < SplitPointNum.X; ++xi)
 	{
-		for (int yi = 1; yi < SplitPointNum.Y - 1; ++yi)
+		for (int yi = 0; yi < SplitPointNum.Y; ++yi)
 		{
 			int32 index = CalcIndex(xi, yi);
 			float xp = Vertices[index].X;
@@ -235,12 +255,40 @@ void AWaterSurface::SetSquareLand(FVector SquareLocation, float XLength, float Y
 			if (yp > ys + YLength * 0.5f) continue;
 			if (yp < ys - YLength * 0.5f) continue;
 
-			IsLands[index] = true;
-			Vertices[index].Z = SquareLocation.Z;
-			UV0[index] = FVector2D((xi / SplitPointNum.X) * 0.5f + 0.5f, (yi / SplitPointNum.Y));
-			VertexColors[index] = FLinearColor::Black;
+			SetLand(xi, yi, SquareLocation.Z, isLand);
 		}
 	}
+}
+
+void AWaterSurface::SetLand(int X, int Y, float Z, bool isLand)
+{
+	int32 index = CalcIndex(X, Y);
+	if (isLand)
+	{
+		Vertices[index].Z = Z;
+		VertexColors[index] = FLinearColor::Black;
+		VertexTypes[index] = VertexType::Land;
+	}
+	// 既に地面の時は地面優先
+	else if (VertexTypes[index] == VertexType::Water)
+	{
+		FLinearColor CliffColor = WaterColor + FLinearColor::White * 0.03f;
+		Vertices[index].Z = -10000.0f;
+		VertexTypes[index] = VertexType::Cliff;
+		VertexColors[index] = CliffColor;
+
+		// 周囲の色も変化させる
+		VertexColors[CalcIndex(X + 1, Y + 0)] = CliffColor;
+		VertexColors[CalcIndex(X + 1, Y + 1)] = CliffColor;
+		VertexColors[CalcIndex(X + 1, Y - 1)] = CliffColor;
+		VertexColors[CalcIndex(X - 1, Y + 0)] = CliffColor;
+		VertexColors[CalcIndex(X - 1, Y + 1)] = CliffColor;
+		VertexColors[CalcIndex(X - 1, Y - 1)] = CliffColor;
+		VertexColors[CalcIndex(X + 0, Y - 1)] = CliffColor;
+		VertexColors[CalcIndex(X + 0, Y + 1)] = CliffColor;
+	}
+	
+	UV0[index] = FVector2D((X / SplitPointNum.X) * 0.5f + 0.5f, (Y / SplitPointNum.Y));
 }
 
 void AWaterSurface::TickFlashFloodWave(AFlashFlood* FlashFlood)
@@ -251,7 +299,7 @@ void AWaterSurface::TickFlashFloodWave(AFlashFlood* FlashFlood)
 		{
 			int index = CalcIndex(xi, yi);
 
-			if (IsLands[index]) continue;
+			if (VertexTypes[index] != VertexType::Water) continue;
 			if (!FlashFlood->CheckRange(Vertices[index])) continue;
 
 			float NewHight = FlashFlood->GetHeight(Vertices[index]);
@@ -321,15 +369,15 @@ FVector AWaterSurface::GetWavePower(const FVector & worldPos)
 
 	if (WaveX >= 0 && WaveX < SplitPointNum.X && WaveY >= 0 && WaveY < SplitPointNum.Y)
 	{
-		uL = Vertices[CalcIndex(WaveX - 1, WaveY)].Z;
-		uR = Vertices[CalcIndex(WaveX + 1, WaveY)].Z;
-		uT = Vertices[CalcIndex(WaveX, WaveY - 1)].Z;
-		uB = Vertices[CalcIndex(WaveX, WaveY + 1)].Z;
+		uL = (VertexTypes[CalcIndex(WaveX - 1, WaveY)] == VertexType::Water) ? Vertices[CalcIndex(WaveX - 1, WaveY)].Z : 0.0f;
+		uR = (VertexTypes[CalcIndex(WaveX + 1, WaveY)] == VertexType::Water) ? Vertices[CalcIndex(WaveX + 1, WaveY)].Z : 0.0f;
+		uT = (VertexTypes[CalcIndex(WaveX, WaveY - 1)] == VertexType::Water) ? Vertices[CalcIndex(WaveX, WaveY - 1)].Z : 0.0f;
+		uB = (VertexTypes[CalcIndex(WaveX, WaveY + 1)] == VertexType::Water) ? Vertices[CalcIndex(WaveX, WaveY + 1)].Z : 0.0f;
 
-		iL = Vertices[CalcIndex(WaveX - 1, WaveY - 1)].Z;
-		iR = Vertices[CalcIndex(WaveX + 1, WaveY + 1)].Z;
-		iT = Vertices[CalcIndex(WaveX + 1, WaveY - 1)].Z;
-		iB = Vertices[CalcIndex(WaveX - 1, WaveY + 1)].Z;
+		iL = (VertexTypes[CalcIndex(WaveX - 1, WaveY - 1)] == VertexType::Water) ? Vertices[CalcIndex(WaveX - 1, WaveY - 1)].Z : 0.0f;
+		iR = (VertexTypes[CalcIndex(WaveX + 1, WaveY + 1)] == VertexType::Water) ? Vertices[CalcIndex(WaveX + 1, WaveY + 1)].Z : 0.0f;
+		iT = (VertexTypes[CalcIndex(WaveX + 1, WaveY - 1)] == VertexType::Water) ? Vertices[CalcIndex(WaveX + 1, WaveY - 1)].Z : 0.0f;
+		iB = (VertexTypes[CalcIndex(WaveX - 1, WaveY + 1)] == VertexType::Water) ? Vertices[CalcIndex(WaveX - 1, WaveY + 1)].Z : 0.0f;
 	}
 	float HeightValue = 0.0f;
 	/*HeightValue = FMath::Max(HeightValue, (uL));
@@ -399,7 +447,7 @@ FVector AWaterSurface::AdjustMoveInLand(const FVector & worldPos, const FVector 
 		for (int yi = 0; yi < SplitPointNum.Y; ++yi)
 		{
 			int index = CalcIndex(xi, yi);
-			if (IsLands[index]) continue;	// 地上なら距離を測る必要がないので次へ
+			if (VertexTypes[index] == VertexType::Land) continue;	// 地上なら距離を測る必要がないので次へ
 
 			float xp = Vertices[index].X;
 			float yp = Vertices[index].Y;
@@ -444,6 +492,8 @@ FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector& moveVec
 	// 地形と当たり判定
 	for (auto Actor : LandPointActors)
 	{
+		if (!Actor->IsLand) continue;
+
 		movedPos = Actor->AdjustMoveOutWater(actorPos, movedPos, moveVec, circleRadius);
 	}
 	
@@ -469,6 +519,7 @@ FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector & moveVe
 	// 地形と当たり判定
 	for (auto Actor : LandPointActors)
 	{
+		if (!Actor->IsLand) continue;
 		movedPos = Actor->AdjustMoveOutWater(actorPos, movedPos, moveVec, XLen, YLen);
 	}
 
@@ -487,10 +538,10 @@ bool AWaterSurface::IsInWater(FVector worldPos)
 	if (index <= 1) return false;
 	if (index >= Vertices.Num() - 1) return false;
 
-	return !IsLands[index];
+	return VertexTypes[index] == VertexType::Water;
 }
 
-bool AWaterSurface::IsLand(FVector worldPos)
+bool AWaterSurface::IsInLand(FVector worldPos)
 {
 	if (!IsInField(worldPos)) return false;
 
@@ -502,18 +553,46 @@ bool AWaterSurface::IsLand(FVector worldPos)
 	if (index <= 1) return false;
 	if (index >= Vertices.Num() - 1) return false;
 
-	return IsLands[index];
+	return VertexTypes[index] == VertexType::Land;
+}
+
+VertexType AWaterSurface::GetVertexType(FVector worldPos)
+{
+	int32 WaveX = (worldPos.X - Vertices[0].X) / SplitSpace;
+	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
+
+	int index = CalcIndex(WaveX, WaveY);
+
+	if (index >= Vertices.Num()) return VertexType::None;
+
+	return VertexTypes[index];
 }
 
 bool AWaterSurface::IsInField(FVector worldPos)
 {
+	VertexType type = GetVertexType(worldPos);
+	if (type == VertexType::Cliff ||
+		type == VertexType::None)
+		return false;
+
 	FVector2D Origin = FVector2D(Vertices[0].X, Vertices[0].Y);
 	FVector2D End = FVector2D(Vertices[Vertices.Num() - 1].X, Vertices[Vertices.Num() - 1].Y);
 
-	return  Origin.X <= worldPos.X && 
-			End.X >= worldPos.X && 
-			Origin.Y <= worldPos.Y && 
-			End.Y >= worldPos.Y;
+	return Origin.X <= worldPos.X && End.X >= worldPos.X &&
+		   Origin.Y <= worldPos.Y && End.Y >= worldPos.Y;
+}
+
+bool AWaterSurface::IsInField(FVector worldPos, float CircleRadius)
+{
+	ALandPoint * CliffPoint = GetLandPoint(worldPos, false);
+	if(CliffPoint && CliffPoint->InGround(worldPos, CircleRadius))
+		return false;
+
+	FVector2D Origin = FVector2D(Vertices[0].X, Vertices[0].Y);
+	FVector2D End = FVector2D(Vertices[Vertices.Num() - 1].X, Vertices[Vertices.Num() - 1].Y);
+
+	return Origin.X <= worldPos.X + CircleRadius && End.X >= worldPos.X - CircleRadius &&
+		Origin.Y <= worldPos.Y + CircleRadius && End.Y >= worldPos.Y - CircleRadius;
 }
 
 FVector AWaterSurface::GetGetOffPos(FVector WorldPos, float Radius)
@@ -522,7 +601,7 @@ FVector AWaterSurface::GetGetOffPos(FVector WorldPos, float Radius)
 	{
 		for (int yi = 1; yi < SplitPointNum.Y - 1; ++yi)
 		{
-			if (!IsLands[CalcIndex(xi, yi)]) continue;
+			if (VertexTypes[CalcIndex(xi, yi)] != VertexType::Land) continue;
 
 			float xp = Vertices[CalcIndex(xi, yi)].X;
 			float yp = Vertices[CalcIndex(xi, yi)].Y;
@@ -539,10 +618,12 @@ FVector AWaterSurface::GetGetOffPos(FVector WorldPos, float Radius)
 }
 
 // 引数の座標の位置にある地面を取得
-ALandPoint * AWaterSurface::GetLandPoint(const FVector & WorldPos)
+ALandPoint * AWaterSurface::GetLandPoint(const FVector & WorldPos, bool IsLand)
 {
 	for (auto Actor : LandPointActors)
 	{
+		if (Actor->IsLand != IsLand) continue;
+
 		if (Actor->OnGround(WorldPos))
 		{
 			return Actor;
@@ -551,14 +632,21 @@ ALandPoint * AWaterSurface::GetLandPoint(const FVector & WorldPos)
 	return nullptr;
 }
 
-ALandPoint * AWaterSurface::GetLandPoint(const FVector & WorldPos, float Radius)
+ALandPoint * AWaterSurface::GetLandPoint(const FVector & WorldPos, float Radius, bool IsLand)
 {
 	for (auto Actor : LandPointActors)
 	{
+		if (Actor->IsLand != IsLand) continue;
+
 		if (Actor->OnGround(WorldPos, Radius))
 		{
 			return Actor;
 		}
 	}
 	return nullptr;
+}
+
+FVector AWaterSurface::GetCenterPos()
+{
+	return (StartPoint->GetActorLocation() + EndPoint->GetActorLocation()) * 0.5f;
 }

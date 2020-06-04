@@ -42,6 +42,7 @@ void AGameController::BeginPlay()
 		GetMaxNimotu();
 	}
 	GameMaxNimotu = MaxNimotu;
+	NotExplotionCount = GetNotExplotionCount(); //壊れていない家の数Get
 }
 
 // Called every frame
@@ -54,7 +55,6 @@ void AGameController::Tick(float DeltaTime)
 		GetPlayer = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 		SetNorma();
 	}
-	GoalCount = GetGoalCount();
 	CheckTimeCount();
 	GameClearCheck();
 	GameOverCheck();
@@ -260,7 +260,6 @@ void AGameController::GameOverCheck()
 	if (IsGameClear)return;
 	// ゲームオーバー条件
 	//ノルマを1つも達成できなくなったらゲームオーバー
-	int NotExplotionCount = GetNotExplotionCount(); //壊れていない家の数Get
 	auto gameover = [=] 
 	{ 
 		IsGameOver = true;
@@ -323,4 +322,20 @@ bool AGameController::GetLimitTimeZero()
 		return TimeCountUI->GetIsCountZero();
 	}
 	return false;
+}
+
+void AGameController::SetTimeCountPause()
+{
+	if (TimeCountUI)
+	{
+		TimeCountUI->AnimationPause();
+	}
+}
+
+void AGameController::SetTimeCountRePlay()
+{
+	if (TimeCountUI)
+	{
+		TimeCountUI->AnimationRePlay();
+	}
 }

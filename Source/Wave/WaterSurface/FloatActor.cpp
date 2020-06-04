@@ -27,6 +27,8 @@ void AFloatActor::BeginPlay()
 	
 	WaterSurface = Cast<AWaterSurface>((UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass())));
 	StaticMeshComponent = Cast<UStaticMeshComponent>(GetComponentByClass(UStaticMeshComponent::StaticClass()));
+
+	IsFall = false;
 }
 
 // Called every frame
@@ -36,14 +38,37 @@ void AFloatActor::Tick(float DeltaTime)
 
 	// メッシュがセットされていなかったら何もしない
 	if (!StaticMeshComponent) return;
-
-	// フィールドの外に出た時
-	if ((!WaterSurface->IsInField(GetActorLocation())))
+	if (IsFall)
 	{
-		// 物理演算を使用する
-		if (!StaticMeshComponent->IsSimulatingPhysics())
-			StaticMeshComponent->SetSimulatePhysics(true);
+		Velocity.Z -= 0.5f;
+		//SetActorLocation(GetActorLocation() + Velocity);
+		// 移動と回転
+		FVector RotAxis = FVector::CrossProduct(Velocity, FVector::UpVector);
+		FQuat AddRot = MyFunc::FromAxisAngleToQuaternion(RotAxis, -Velocity.Size() * 0.001f).GetNormalized();
+		AddRot = AddRot * GetActorRotation().Quaternion();
+		SetActorLocationAndRotation(GetActorLocation() + Velocity, AddRot);
 
+		Velocity *= 1.0f - Friction;
+		return;
+	}// 既に落下した
+
+	// 波の傾きに応じて移動する
+	FVector WavePower = WaterSurface->GetWavePower(GetActorLocation());
+	FVector MoveVec = WavePower * FloatSpeed * 0.01f;
+
+	if (MoveVec.Size() > MinFloatWavePower)
+	{
+		Velocity += MoveVec;
+	}
+	// フィールドの外に出た時
+	// 崖にいる場合は落下
+	if ((!WaterSurface->IsInField(GetActorLocation() + Velocity)))
+	{
+		IsFall = true;
+		/// 物理演算を使用する
+		//StaticMeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_Visibility);
+		//StaticMeshComponent->SetSimulatePhysics(true);
+		Velocity = Velocity.GetSafeNormal() * 8.0f;
 		// 数秒後にオブジェクトを削除
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
 		FTimerHandle handle;
@@ -51,14 +76,6 @@ void AFloatActor::Tick(float DeltaTime)
 		return;
 	}
 
-	// 波の傾きに応じて移動する
-	FVector WavePower = WaterSurface->GetWavePower(GetActorLocation());
-	FVector MoveVec = WavePower * FloatSpeed * 0.01f;
-	
-	if (MoveVec.Size() > MinFloatWavePower)
-	{
-		Velocity += MoveVec;
-	}
 	if (Type == FloatType::Circle) SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, Radius));
 	else if (Type == FloatType::Square) SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, XLength, YLength));
 	Velocity *= 1.0f - Friction;
@@ -66,9 +83,11 @@ void AFloatActor::Tick(float DeltaTime)
 	// 波の高さに合わせる
 	FVector CurPos = GetActorLocation();
 	float Height = WaterSurface->GetWaveHeight(CurPos);
-	Height = FMath::Lerp(CurPos.Z, Height, 0.1f);
-
-	SetActorLocation(FVector(CurPos.X, CurPos.Y, Height));
+	if (abs(Height) < WaterSurface->GetMaxWaveHeight())
+	{
+		Height = FMath::Lerp(CurPos.Z, Height, 0.15f);
+		SetActorLocation(FVector(CurPos.X, CurPos.Y, Height));
+	}
 }
 
 FVector AFloatActor::AdjustMove_VS_Circle(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius)
