@@ -40,5 +40,5 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		TArray<FSaveDataStruct> Save;
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		FORCEINLINE FSaveDataStruct GetSaveData(const int number) const;
+		FSaveDataStruct GetSaveData(const int number) const;
 };

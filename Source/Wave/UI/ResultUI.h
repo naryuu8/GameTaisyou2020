@@ -32,9 +32,7 @@ private:
 	virtual void NativeConstruct() override;
 	int SelectNumber = 0;
 protected:
-	//引数で一致する番号と同じセレクト番号になったら色を変える
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		FSlateColor SelectTextColor(const ResultSelectState state);
+
 public:
 	void NextSelectState();
 	void BackSelectState();
@@ -74,4 +72,6 @@ public:
 		void SetStageSelectState();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	ResultState GetResultState() const { return State; };
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	int GetSelectNumber() const { return SelectNumber; };
 };

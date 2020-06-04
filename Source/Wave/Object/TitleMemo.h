@@ -43,5 +43,5 @@ public:
 	void FadeStart();
 	int GetStageNumber() { return MyStageNumber; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
-	FORCEINLINE UUserWidget* GetUserWidgetObject2(UWidgetComponent* widget)const;
+		UUserWidget* GetUserWidgetObject2(UWidgetComponent* widget)const;
 };
