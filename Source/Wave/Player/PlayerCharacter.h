@@ -23,6 +23,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Camera)
 		class AGameCameraActor* FollowCamera;
 	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool IsDeth;	// 場外に出たまたは水に落ちた時
+
 private:
 	// ポーズUI　エディタで指定する
 	UPROPERTY(EditAnywhere)
@@ -59,8 +62,6 @@ private:
 	bool IsInRaft = false;
 	void ResetRaftParam();
 
-	bool IsDeth;	// 場外に出たまたは水に落ちた時
-
 public:
 	APlayerCharacter();
 
@@ -89,6 +90,8 @@ public:
 		void OutLineDraw();
 	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
 		void OutLineNotDraw();
+	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
+		void PlayerDeth();
 
 	static FORCEINLINE bool Trace(
 		UWorld* World,

@@ -369,15 +369,15 @@ FVector AWaterSurface::GetWavePower(const FVector & worldPos)
 
 	if (WaveX >= 0 && WaveX < SplitPointNum.X && WaveY >= 0 && WaveY < SplitPointNum.Y)
 	{
-		uL = Vertices[CalcIndex(WaveX - 1, WaveY)].Z;
-		uR = Vertices[CalcIndex(WaveX + 1, WaveY)].Z;
-		uT = Vertices[CalcIndex(WaveX, WaveY - 1)].Z;
-		uB = Vertices[CalcIndex(WaveX, WaveY + 1)].Z;
+		uL = (VertexTypes[CalcIndex(WaveX - 1, WaveY)] == VertexType::Water) ? Vertices[CalcIndex(WaveX - 1, WaveY)].Z : 0.0f;
+		uR = (VertexTypes[CalcIndex(WaveX + 1, WaveY)] == VertexType::Water) ? Vertices[CalcIndex(WaveX + 1, WaveY)].Z : 0.0f;
+		uT = (VertexTypes[CalcIndex(WaveX, WaveY - 1)] == VertexType::Water) ? Vertices[CalcIndex(WaveX, WaveY - 1)].Z : 0.0f;
+		uB = (VertexTypes[CalcIndex(WaveX, WaveY + 1)] == VertexType::Water) ? Vertices[CalcIndex(WaveX, WaveY + 1)].Z : 0.0f;
 
-		iL = Vertices[CalcIndex(WaveX - 1, WaveY - 1)].Z;
-		iR = Vertices[CalcIndex(WaveX + 1, WaveY + 1)].Z;
-		iT = Vertices[CalcIndex(WaveX + 1, WaveY - 1)].Z;
-		iB = Vertices[CalcIndex(WaveX - 1, WaveY + 1)].Z;
+		iL = (VertexTypes[CalcIndex(WaveX - 1, WaveY - 1)] == VertexType::Water) ? Vertices[CalcIndex(WaveX - 1, WaveY - 1)].Z : 0.0f;
+		iR = (VertexTypes[CalcIndex(WaveX + 1, WaveY + 1)] == VertexType::Water) ? Vertices[CalcIndex(WaveX + 1, WaveY + 1)].Z : 0.0f;
+		iT = (VertexTypes[CalcIndex(WaveX + 1, WaveY - 1)] == VertexType::Water) ? Vertices[CalcIndex(WaveX + 1, WaveY - 1)].Z : 0.0f;
+		iB = (VertexTypes[CalcIndex(WaveX - 1, WaveY + 1)] == VertexType::Water) ? Vertices[CalcIndex(WaveX - 1, WaveY + 1)].Z : 0.0f;
 	}
 	float HeightValue = 0.0f;
 	/*HeightValue = FMath::Max(HeightValue, (uL));
