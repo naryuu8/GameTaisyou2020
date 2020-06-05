@@ -19,8 +19,6 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float MaxHammerHP;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
-		float GaugeHP;
-	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float MaxChargePowerMax;//プレイヤーがチャージできる最大量
 	//プレイヤークリア時のHP
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
@@ -72,6 +70,4 @@ public:
 		void SetMaxChargePowerMax(const float charge) { MaxChargePowerMax = charge; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE bool GetIsGaugeAnimeEnd() const { return IsGaugeAnimeEnd; }
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		FORCEINLINE	float GetGaugeHP() const { return GaugeHP; };
 };

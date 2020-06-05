@@ -70,7 +70,6 @@ void APlayerCharacter::BeginPlay_C()
 	IsAttackHold = false;
 	IsPlayAttackAnime = false;
 	HammerPower = 0.0f;
-	//HammerHP = 0.0f;
 	HammerHP = MaxHammerHP;
 	if (!AnimInst)
 	{
@@ -229,7 +228,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 	else
 	{
 		ChageDestroyEmmiter();
-		//MinusHammerGauge(-ChargeSpeed);
 	}
 
 	ChageUpDateEmmiter(CurPos);
@@ -304,7 +302,6 @@ void APlayerCharacter::ReleaseHammerAttack(void)
 	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInst->HummerAttackEvent();
 	IsAttackHold = false;
-	HammerCountBarUI->ReflectionGauge();
 }
 
 void APlayerCharacter::HummerAttackEnd()
@@ -320,6 +317,7 @@ void APlayerCharacter::HummerAttackEnd()
 		// カメラシェイク
 		if(FollowCamera) FollowCamera->EventCameraShake(HammerPower);
 	}
+	//最大溜め状態だったら点滅アニメを停止
 	if (HammerPower >= ChargePowerMax)
 	{
 		HammerCountBarUI->PouseGaugeAnimation();
@@ -356,7 +354,6 @@ void APlayerCharacter::MinusHammerGauge(const float Power)
 	}
 
 	HammerCountBarUI->UpdateGauge(HammerHP);
-	//HammerCountBarUI->UpdateDamageGauge(HammerHP);
 	HammerCountBarUI->UpdateCoolTime(CoolTime);
 }
 
@@ -534,19 +531,6 @@ void APlayerCharacter::CreateHammerCountBarUI()
 
 }
 
-void APlayerCharacter::SetNormaPercent(const float percent)
-{
-	if (HammerCountBarUI)
-	{
-		HammerCountBarUI->SetNormaPercent(percent);
-	}
-	else
-	{
-		CreateHammerCountBarUI();
-		HammerCountBarUI->SetNormaPercent(percent);
-	}
-}
-
 void APlayerCharacter::HammerCountBarParent()
 {
 	if (HammerCountBarUI)
@@ -576,10 +560,6 @@ void APlayerCharacter::UpdateGaugeHP()
 		if (CoolTime <= 0.0f)
 		{
 			HammerHP += ChargeSpeed * HpHealSpped;
-			//if (HammerHP < 0.0f)
-			//{
-			//	HammerHP = 0.0f;
-			//}
 			if (HammerHP > MaxHammerHP)
 			{
 				HammerHP = MaxHammerHP;
