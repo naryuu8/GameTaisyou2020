@@ -429,6 +429,9 @@ void APlayerCharacter::SetLookAt(FVector Direction, float Speed)
 
 void APlayerCharacter::PauseInput()
 {
+	AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+	//ゲーム終了条件を満たしていたらポーズを開けないようにする
+	if (game->GetIsClear() || game->GetIsGameOver())return;
 	const AInputManager * inputManager = AInputManager::GetInstance();
 	if (!inputManager)return;
 	const InputState * input = inputManager->GetState();
@@ -445,7 +448,6 @@ void APlayerCharacter::PauseInput()
 					//ポーズ用のバーを更新するためHPを渡す
 					PauseUI->SetMaxHP(MaxHammerHP);
 					PauseUI->SetHP(HammerHP);
-					AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
 					if (game)
 					{
 						game->SetTimeCountPause();
@@ -456,7 +458,6 @@ void APlayerCharacter::PauseInput()
 				if (PauseUI->GetIsPlayAnimation())return;
 				PauseUI->AddToViewport();
 				PauseUI->SetHP(HammerHP);
-				AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
 				if (game)
 				{
 					game->SetTimeCountPause();
@@ -478,7 +479,6 @@ void APlayerCharacter::PauseInput()
 			if (!PauseUI)return;
 			if (PauseUI->GetIsPlayAnimation())return;
 			PauseUI->EndPlayAnimation();
-			AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
 			if (game)
 			{
 				game->SetTimeCountRePlay();
