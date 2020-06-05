@@ -39,16 +39,16 @@ private:
 		float MaxHammerHP = 100.0f;
 	//1フレーム毎に溜めるハンマーパワー
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-		float ChargeSpeed = 0.3f;
+		float ChargeSpeed = 0.7f;
 	// 一回で溜められる最大パワー
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-		float ChargePowerMax = 20.0f;
+		float ChargePowerMax = 100.0f;
 	// CoolTime回復時間倍率（高いほど早い）
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-		float CoolTimeHealSpped = 0.5f;
+		float CoolTimeHealSpped = 0.8f;
 	// HP回復時間（高いほど早い）
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-		float HpHealSpped = 0.4f;
+		float HpHealSpped = 0.9f;
 	// 溜めている力をカウント
 	float ChargeCount= 0.0f;
 	//叩けない時間
