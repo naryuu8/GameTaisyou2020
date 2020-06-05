@@ -134,22 +134,29 @@ FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos
 {
 	FVector2D MyPos = (FVector2D)GetActorLocation();
 	float MyXLen = GetXLength() * 0.5f;
-	float MyYLen = GetXLength() * 0.5f;
+	float MyYLen = GetYLength() * 0.5f;
 	XLen = XLen * 0.5f;
-	XLen = XLen * 0.5f;
-	float X01 = MovedPos.X + XLen - MyPos.X - MyXLen;
-	float X02 = MyPos.X + MyXLen - MovedPos.X - XLen;
+	YLen = YLen * 0.5f;
+	// 埋まっている量を計算
+	float X_Left = MovedPos.X + XLen - (MyPos.X - MyXLen);
+	float X_Right = MyPos.X + MyXLen - (MovedPos.X - XLen);
+	float Y_Down = MovedPos.Y + YLen - (MyPos.Y - MyYLen);
+	float Y_Up = MyPos.Y + MyYLen - (MovedPos.Y - YLen);
 
-	float Y01 = MovedPos.Y + YLen - MyPos.Y - MyYLen;
-	float Y02 = MyPos.Y + MyYLen - MovedPos.Y - YLen;
-
-	if (!((X01 > 0 && X02 > 0) && (Y01 > 0 && Y02 > 0)))
+	if (!((X_Left > 0 && X_Right > 0) && (Y_Down > 0 && Y_Up > 0)))
 		return MovedPos;
 
-	if (X01 >= X02)
-	{
+	// 押し出す量を計算
+	FVector2D PushVec = FVector2D::ZeroVector;
+	PushVec.X = (MoveVec.X > 0) ? -X_Left : X_Right;	// true:左側にいる時, false:右側にいる時
+	PushVec.Y = (MoveVec.Y > 0) ? -Y_Down : Y_Up;		// true:下側にいる時, false:上側にいる時
 
-	}
+	// 押し出す量が大きい方向は無効にする
+	(FMath::Abs(PushVec.X) >= FMath::Abs(PushVec.Y)) ? PushVec.X = 0.0f : PushVec.Y = 0.0f;
+	MovedPos += FVector(PushVec, 0.0f);
+
+	// 反射方向を計算
+	MoveVec = FVector(MyFunc::GetReflectVector2D((FVector2D)MoveVec, PushVec.GetSafeNormal()), 0.0f);
 
 	return MovedPos;
 }
