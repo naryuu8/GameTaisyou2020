@@ -69,7 +69,7 @@ void APlayerCharacter::BeginPlay_C()
 	IsAttackHold = false;
 	IsPlayAttackAnime = false;
 	HammerPower = 0.0f;
-	HammerHP = MaxHammerHP;
+	HammerHP = 0.0f;
 	if (!AnimInst)
 	{
 		AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
@@ -202,15 +202,19 @@ void APlayerCharacter::Tick(float DeltaTime)
 			}
 		}
 	}
-
+	UpdateGaugeHP();
 	if (IsAttackHold)
 	{
 		// 溜められる最大値以上はいかない
 		if (HammerPower < ChargePowerMax)
 		{
 			//ハンマーを溜めていたら力を足す
-			HammerPower += ChargeSpeed;
-			HammerPower = FMath::Min(HammerPower, ChargePowerMax);
+			//体力が最大の時に溜めていたら加算しない
+			if (MaxHammerHP > HammerHP)
+			{
+				HammerPower += ChargeSpeed;
+				HammerPower = FMath::Min(HammerPower, ChargePowerMax);
+			}
 			MinusHammerGauge(HammerPower);
 		}
 		
@@ -274,6 +278,9 @@ void APlayerCharacter::ResetRaftParam()
 void APlayerCharacter::TriggerHammerAttack(void)
 {
 	if (IsPlayAttackAnime)return;
+	//クールタイムがあるときと最大HPとHPが同じなら構えれない
+	if (MaxHammerHP == HammerHP)return;
+	if (CoolTime != 0.0f)return;
 	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInst->HummerChergeEvent();
 	IsAttackHold = true;
@@ -303,17 +310,38 @@ void APlayerCharacter::HummerAttackEnd()
 		if(FollowCamera) FollowCamera->EventCameraShake(HammerPower);
 	}
 	HammerPower = 0.0f;
+	ChargeCount = 0.0f;
 }
 
 void APlayerCharacter::MinusHammerGauge(const float Power)
 {
 	if (!HammerCountBarUI)return;
-	HammerHP -= ChargeSpeed;
-	/*if (HammerHP < 0.0f)
-	{
-		HammerHP = 0.0f;
-	}*/
+	if (ChargeCount < ChargePowerMax)
+	{//最大溜め時はクールタイムを加算しない
+		//更に現在のHPがMAXHPより下だったら加算
+		if (MaxHammerHP > HammerHP)
+		{
+			CoolTime += ChargeSpeed;
+			if (CoolTime >= ChargePowerMax)
+			{
+				CoolTime = ChargePowerMax;
+			}
+			HammerHP += ChargeSpeed;
+			if (HammerHP >= MaxHammerHP)
+			{
+				HammerHP = MaxHammerHP;
+			}
+			ChargeCount += ChargeSpeed;
+			if (ChargeCount >= ChargePowerMax)
+			{
+				ChargeCount = ChargePowerMax;
+			}
+		}
+	}
+
 	HammerCountBarUI->UpdateGauge(HammerHP);
+	HammerCountBarUI->UpdateDamageGauge(HammerHP);
+	HammerCountBarUI->UpdateCoolTime(CoolTime);
 }
 
 bool APlayerCharacter::CheckGround()
@@ -476,6 +504,7 @@ void APlayerCharacter::CreateHammerCountBarUI()
 		HammerCountBarUI = CreateWidget<UHammerCountBarUI>(GetWorld(), HammerCountBarUIClass);
 		HammerCountBarUI->AddToViewport();
 		HammerCountBarUI->SetMaxHammerHP(MaxHammerHP);
+		HammerCountBarUI->SetMaxChargePowerMax(ChargePowerMax);
 		//生成してもnullptrだったらエラー文表示
 		if (HammerCountBarUI == nullptr)
 		{
@@ -513,4 +542,30 @@ void APlayerCharacter::HammerCountBarParent()
 void APlayerCharacter::SetPlayerHiddenInGame()
 {
 	this->SetActorHiddenInGame(true);
+}
+
+void APlayerCharacter::UpdateGaugeHP()
+{
+	if (IsPlayAttackAnime)return;
+	if (IsAttackHold)return;
+	if (HammerPower > 0.0f)return;
+	CoolTime -= ChargeSpeed * CoolTimeHealSpped;
+
+	if (CoolTime < 0.0f)
+	{
+		CoolTime = 0.0f;
+	}
+	if (HammerCountBarUI)
+	{
+		if (CoolTime <= 0.0f)
+		{
+			HammerHP -= ChargeSpeed * HpHealSpped;
+			if (HammerHP < 0.0f)
+			{
+				HammerHP = 0.0f;
+			}
+			HammerCountBarUI->UpdateGauge(HammerHP);
+		}
+		HammerCountBarUI->UpdateCoolTime(CoolTime);
+	}
 }

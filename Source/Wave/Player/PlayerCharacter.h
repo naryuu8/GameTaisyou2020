@@ -39,10 +39,20 @@ private:
 		float MaxHammerHP = 100.0f;
 	//1フレーム毎に溜めるハンマーパワー
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-		float ChargeSpeed = 0.1f;
+		float ChargeSpeed = 0.3f;
 	// 一回で溜められる最大パワー
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 		float ChargePowerMax = 20.0f;
+	// CoolTime回復時間倍率（高いほど早い）
+	UPROPERTY(EditAnywhere, Category = "Parameter")
+		float CoolTimeHealSpped = 0.5f;
+	// HP回復時間（高いほど早い）
+	UPROPERTY(EditAnywhere, Category = "Parameter")
+		float HpHealSpped = 0.4f;
+	// 溜めている力をカウント
+	float ChargeCount= 0.0f;
+	//叩けない時間
+	float CoolTime = 0.0f;
 	// 波を起こす力
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 		float HammerPowerValue = 1.0f;
@@ -55,7 +65,7 @@ private:
 
 	void PauseInput();
 	void CreateHammerCountBarUI();
-
+	void UpdateGaugeHP();
 	AWaterSurface* Water;
 
 	ARaft* CurrentRaft = nullptr;	// 乗っていない時は常にnullptr
@@ -179,6 +189,8 @@ public:
 		FORCEINLINE	float GetHammerHP() const { return HammerHP; };
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	float GetHammerPower() const { return HammerPower; };
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	float GetChargeCount() const { return ChargeCount; };
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsAttackHold() const { return IsAttackHold; };
 };

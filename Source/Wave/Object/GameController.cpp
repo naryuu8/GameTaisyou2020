@@ -311,7 +311,7 @@ void AGameController::CheckTimeCount()
 	//Œë·–hŽ~‚Ì‚½‚ßHP‚Í0.1fˆÈ‰º‚Å0‚Æ‚Ý‚È‚·
 	if (GetPlayer->GetHammerHP() <= 0.1f && GetPlayer->GetHammerPower() == 0.0f)
 	{
-		CreateTimeCountUI();
+	//	CreateTimeCountUI();
 	}
 }
 
