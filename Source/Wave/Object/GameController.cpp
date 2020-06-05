@@ -115,6 +115,7 @@ void AGameController::CreateGameOverUI()
 		if (GameOverUI != nullptr)
 		{
 			GameOverUI->AddToViewport();
+			GetPlayer->SetNoTick();
 		}
 		else
 		{
@@ -157,7 +158,7 @@ void AGameController::CreateResultUI()
 void AGameController::InputGameOverUI()
 {
 	if (!IsGameOver)return;
-	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
+	//if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
 	if (!GameOverUI)return;
 	if (GameOverUI->GetIsPlayAnimation())return;
 	const AInputManager * inputManager = AInputManager::GetInstance();
@@ -347,4 +348,13 @@ void AGameController::SetTimeCountRePlay()
 	{
 		TimeCountUI->AnimationRePlay();
 	}
+}
+
+bool AGameController::GetIsGameOverUI()
+{
+	if (GameOverUI)
+	{
+		return true;
+	}
+	return false;
 }
