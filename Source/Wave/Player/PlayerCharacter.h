@@ -64,7 +64,8 @@ private:
 	ARaft* CurrentRaft = nullptr;	// èÊÇ¡ÇƒÇ¢Ç»Ç¢éûÇÕèÌÇ…nullptr
 	bool IsInRaft = false;
 	void ResetRaftParam();
-
+	bool OldAttackFrame = false;
+	int  FreasTime = 0;
 public:
 	APlayerCharacter();
 
@@ -102,6 +103,8 @@ public:
 		void ChageDestroyEmmiter();
 	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
 		void ChageUpDateEmmiter(FVector pos);
+	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
+		void ImpactEmmiterCreate();
 
 
 	static FORCEINLINE bool Trace(

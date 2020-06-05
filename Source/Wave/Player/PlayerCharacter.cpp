@@ -47,6 +47,8 @@ APlayerCharacter::APlayerCharacter()
 	//ポーズ中でもTickが来るようにする
 	SetTickableWhenPaused(true);
 
+	OldAttackFrame = false;
+	FreasTime = 0;
 }
 
 //void APlayerCharacter::BeginPlay()
@@ -118,6 +120,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 			PlayerDeth();
 		}
 	}
+
+
 
 	const AInputManager * inputManager = AInputManager::GetInstance();
 	if (inputManager)
@@ -223,7 +227,15 @@ void APlayerCharacter::Tick(float DeltaTime)
 		//MinusHammerGauge(-ChargeSpeed);
 	}
 
+
+
+	if(OldAttackFrame && IsPlayAttackAnime && FreasTime > 60) ImpactEmmiterCreate(), FreasTime = 0;
+	OldAttackFrame = IsPlayAttackAnime;
+	if (IsPlayAttackAnime) FreasTime++;
+	else FreasTime = 0;
 	ChageUpDateEmmiter(CurPos);
+
+
 
 	//カメラにレイを飛ばして当たらなければアウトライン適用
 	ACharacter* myCharacter = this;
