@@ -2,7 +2,7 @@
 
 
 #include "DestructionObject.h"
-
+#include "Kismet/GameplayStatics.h"
 // Sets default values
 ADestructionObject::ADestructionObject()
 {

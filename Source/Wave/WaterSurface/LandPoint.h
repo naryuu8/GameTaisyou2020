@@ -55,7 +55,13 @@ public:
 	virtual FVector AdjustMoveInLand(const FVector & Pos, float CircleRadius) { return FVector::ZeroVector; };
 	virtual FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius) { return FVector::ZeroVector; };
 	virtual FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen) { return FVector::ZeroVector; };
+
+	void SetIsUse(bool isUse) { IsUse = isUse; }
+	bool GetIsUse() { return IsUse; }
+
 private:
 	UPROPERTY(EditAnywhere)
 		TEnumAsByte<ELandType> LandType = ELandType::Grass;
+
+	bool IsUse = true; // falseÇ…Ç∑ÇÈÇ±Ç∆Ç≈ó§Ç≈Ç»Ç≠Ç∑ÇÈÇ±Ç∆Ç™Ç≈Ç´ÇÈÅiã¥ÇÃèàóùÇ…égÇ§Åj
 };

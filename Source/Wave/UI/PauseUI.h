@@ -23,9 +23,6 @@ private:
 	int SelectNumber = 0;
 	bool IsNoInput;//true時インプットを受け付けない
 protected:
-	//引数で一致する番号と同じセレクト番号になったら色を変える
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		FSlateColor SelectTextColor(const PauseState state);
 	//アニメーション再生中はポーズテキストを表示しない
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		ESlateVisibility GetPauseTextVisibility();

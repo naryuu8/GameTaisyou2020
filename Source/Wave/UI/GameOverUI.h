@@ -27,9 +27,6 @@ public:
 		bool IsPlayAnimation;//アニメーション再生中ならtrue
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsPlayAnimation() const { return IsPlayAnimation; }
-	//引数で一致する番号と同じセレクト番号になったら色を変える
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		FSlateColor SelectTextColor(const GameOverState state);
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		ESlateVisibility GetGameOverTextVisibility();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
