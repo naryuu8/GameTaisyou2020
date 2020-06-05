@@ -18,6 +18,10 @@ private:
 protected:
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float MaxHammerHP;
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		float GaugeHP;
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		float MaxChargePowerMax;//プレイヤーがチャージできる最大量
 	//プレイヤークリア時のHP
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float ClearHammerHP;
@@ -39,12 +43,23 @@ public:
 	//現在のHPを受け取り減ってるゲージを表示する
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void UpdateGauge(const float HammerHP);
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void UpdateDamageGauge(const float HammerHP);
 	//現在のHPを受け取り減ってるゲージを表示する(ポーズの時は赤ゲージを表示しないようにする
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void UpdatePauseGauge(const float HammerHP);
+	//クールタイム時間を受け取りアイコンに反映させる
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void UpdateCoolTime(const float time);
 	//ダメージゲージを減らすのを開始するイベント
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void ReflectionGauge();
+	//最大溜め時ゲージを点滅させる
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void PlayGaugeAnimation();
+	//ゲージ点滅アニメ停止
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void PouseGaugeAnimation();
 	//毎フレーム減らすゲージ量を計算し返す
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		float DownGauge(const float DamageX,const float HpX);
@@ -54,5 +69,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void SetMaxHammerHP(const float hp) { MaxHammerHP = hp; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void SetMaxChargePowerMax(const float charge) { MaxChargePowerMax = charge; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE bool GetIsGaugeAnimeEnd() const { return IsGaugeAnimeEnd; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	float GetGaugeHP() const { return GaugeHP; };
 };
