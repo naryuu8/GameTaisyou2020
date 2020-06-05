@@ -20,6 +20,7 @@
 #include "../GlobalGameInstance.h"
 #include "../MyFunc.h"
 #include "EngineGlobals.h"
+#include "Components/CapsuleComponent.h"
 #include "Runtime/Engine/Classes/Engine/Engine.h"
 
 #define DISPLAY_LOG(fmt, ...) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT(fmt), __VA_ARGS__));
@@ -46,7 +47,6 @@ APlayerCharacter::APlayerCharacter()
 	BaseLookUpRate = 45.f;
 	//ポーズ中でもTickが来るようにする
 	SetTickableWhenPaused(true);
-
 }
 
 //void APlayerCharacter::BeginPlay()
@@ -57,6 +57,11 @@ APlayerCharacter::APlayerCharacter()
 
 void APlayerCharacter::BeginPlay_C()
 {
+	// 自身のカプセルコリジョンの大きさを取得
+	UCapsuleComponent * Collision = Cast<UCapsuleComponent>(GetComponentByClass(UCapsuleComponent::StaticClass()));
+	if (Collision)
+		this->CollisionRadius = Collision->GetScaledCapsuleRadius();
+
 	// シーン上のゲームカメラを検索する
 	AGameCameraActor* cameraActor;
 	cameraActor = Cast<AGameCameraActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameCameraActor::StaticClass()));
@@ -98,6 +103,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 			return;
 		}
 	}
+	// 死亡時は何もできない
+	if (IsDeth) return;
 
 	FVector CurPos = GetActorLocation();
 
@@ -116,6 +123,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 			Water->AddPower(FVector(CurPos.X, CurPos.Y, 0.0f), ChargePowerMax);
 			IsDeth = true;
 			PlayerDeth();
+			UCapsuleComponent * Collision = Cast<UCapsuleComponent>(GetComponentByClass(UCapsuleComponent::StaticClass()));
+			if (Collision)Collision->SetActive(false);
+			return;
 		}
 	}
 
@@ -127,7 +137,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		else if (input->Attack.IsRelease) ReleaseHammerAttack();
 
 		float MoveSpeed = 10.0f;
-		if (AnimInst->GetIsCharge()) MoveSpeed *= 0.5f;
+		if (AnimInst->GetIsCharge()) MoveSpeed *= 0.3f;
 
 		// 左スティックの倒し具合の割合を算出
 		MoveAmount = FMath::Clamp(FMath::Abs(input->LeftStick.Horizontal) + FMath::Abs(input->LeftStick.Vertical), 0.0f, 1.0f);
@@ -147,7 +157,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			
 			if (!IsInRaft)
 			{
-				if (CurrentRaft->IsInRaft(CurPos, Radius))
+				if (CurrentRaft->IsInRaft(CurPos, CollisionRadius))
 				{
 					IsInRaft = true;
 				}
@@ -161,15 +171,15 @@ void APlayerCharacter::Tick(float DeltaTime)
 					Move(SubDirection.GetSafeNormal2D(), MoveSpeed * 0.5f);
 				}
 			}
-			else if (Water->GetLandPoint(CurPos + Direction * Radius * 2.0f) ||			// 陸を見つけた時
-					CheckTraceGround(HitResult, CurPos + Direction * Radius * 2.0f, Radius * 0.3f, CurrentRaft))   // 他のイカダを見つけた時
+			else if (Water->GetLandPoint(CurPos + Direction * CollisionRadius * 2.0f, CollisionRadius * 0.5f) ||			// 陸を見つけた時
+					CheckTraceGround(HitResult, CurPos + Direction * CollisionRadius * 2.0f, CollisionRadius * 0.3f, CurrentRaft))   // 他のイカダを見つけた時
 			{
 				Move(Direction, MoveSpeed * MoveAmount);
 			}
 			// イカダの上に完全に乗っている状態
 			else
 			{
-				FVector NextPos = CurrentRaft->AdjustMoveOnRaft(CurPos, moveForce, Radius);
+				FVector NextPos = CurrentRaft->AdjustMoveOnRaft(CurPos, moveForce, CollisionRadius);
 				float MoveValue = 0.0f;
 				(NextPos - CurPos).ToDirectionAndLength(Direction, MoveValue);
 				Move(Direction, MoveValue);
@@ -180,22 +190,22 @@ void APlayerCharacter::Tick(float DeltaTime)
 		{
 			// イカダを見つけた時
 			FHitResult HitResult(ForceInit);
-			if (CheckTraceGround(HitResult, CurPos + Direction * Radius * 2.0f, Radius * 0.5f))
+			if (CheckTraceGround(HitResult, CurPos + Direction * CollisionRadius * 2.0f, CollisionRadius * 0.5f))
 			{
 				Move(Direction, MoveSpeed * MoveAmount);
 			}
 			// 地上にいる時
 			else
 			{
-				float WaterCheckRadius = Radius * 1.2f;
+				float WaterCheckRadius = CollisionRadius * 1.2f;
 				float dist = WaterCheckRadius * 1.3f;
 				FVector WaterCheckPos = CurPos + moveDir * dist;
 
 				// デバッグ描画
 				UKismetSystemLibrary::DrawDebugCylinder(this, WaterCheckPos - FVector(0, 0, 50), WaterCheckPos - FVector(0, 0, 40), WaterCheckRadius, 64, FLinearColor::Blue, 0.0f, 3.0f);
-				UKismetSystemLibrary::DrawDebugCylinder(this, CurPos + moveForce - FVector(0, 0, 50), CurPos + moveForce - FVector(0, 0, 40), Radius, 64, FLinearColor::Red, 0.0f, 3.0f);
+				UKismetSystemLibrary::DrawDebugCylinder(this, CurPos + moveForce - FVector(0, 0, 50), CurPos + moveForce - FVector(0, 0, 40), CollisionRadius, 64, FLinearColor::Red, 0.0f, 3.0f);
 
-				FVector NextPos = Water->AdjustMoveInLand(CurPos, moveForce, Radius, WaterCheckPos, WaterCheckRadius);
+				FVector NextPos = Water->AdjustMoveInLand(CurPos, moveForce, CollisionRadius, WaterCheckPos, WaterCheckRadius);
 				float MoveValue = 0.0f;
 				(NextPos - CurPos).ToDirectionAndLength(Direction, MoveValue);
 				// 最終的に決定した移動量を加算
@@ -204,6 +214,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		}
 	}
 
+	// チャージ中
 	if (IsAttackHold)
 	{
 		ChageCreateEmmiter();
@@ -327,7 +338,7 @@ bool APlayerCharacter::CheckGround()
 	if (!Water->IsInField(Pos)) return false;	// フィールド外に出てもfalse
 
 	FHitResult HitData(ForceInit);
-	if (CheckTraceGround(HitData, Pos, Radius * 0.8f))
+	if (CheckTraceGround(HitData, Pos, CollisionRadius * 0.8f))
 	{
 		ARaft* HitRaft = Cast<ARaft>(HitData.GetActor());
 		// イカダに乗った状態で違うイカダに乗った時

@@ -288,6 +288,9 @@ void AWaterSurface::SetLand(int X, int Y, float Z, VertexType Type)
 		UV0[index] = FVector2D((X / SplitPointNum.X) * 0.5f + 0.5f, (Y / SplitPointNum.Y));
 		break;
 	case VertexType::Cliff:
+		// 既に崖か陸に設定済みなら何もしない
+		if (VertexTypes[index] != VertexType::Water) return;
+
 		FLinearColor CliffColor = WaterColor + FLinearColor::White * 0.03f;
 		Vertices[index].Z = -10000.0f;
 		VertexTypes[index] = VertexType::Cliff;
@@ -463,7 +466,7 @@ FVector AWaterSurface::AdjustMoveInLand(const FVector & worldPos, const FVector 
 	movedPos = AdjustMoveInField(movedPos, circleRadius);
 
 	// 移動先がプレイヤーが乗れるだけの地面があれば移動成功
-	if (GetLandPoint(movedPos, circleRadius) != nullptr) 
+	if (GetLandPointInside(movedPos, circleRadius) != nullptr) 
 		return movedPos;
 
 	// フィールドのメッシュ全体を検索
@@ -664,6 +667,20 @@ ALandPoint * AWaterSurface::GetLandPoint(const FVector & WorldPos, float Radius,
 		if (Actor->IsLand != IsLand) continue;
 
 		if (Actor->OnGround(WorldPos, Radius))
+		{
+			return Actor;
+		}
+	}
+	return nullptr;
+}
+
+ALandPoint * AWaterSurface::GetLandPointInside(const FVector & WorldPos, float Radius, bool IsLand)
+{
+	for (auto Actor : LandPointActors)
+	{
+		if (Actor->IsLand != IsLand) continue;
+
+		if (Actor->InGround(WorldPos, Radius))
 		{
 			return Actor;
 		}

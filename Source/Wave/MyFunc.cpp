@@ -58,6 +58,61 @@ bool MyFunc::ColSegments(const FRay2D & seg1, const FRay2D & seg2, FVector2D * o
 	return true;
 }
 
+bool MyFunc::Check_Ray2D_VS_Circle(FRay2DCastInfo & Info, const FRay2D & Ray, const FVector2D & CirclePos, float CircleRadius)
+{
+	FVector2D RayEnd = Ray.Origin + Ray.Direction;
+	// ベクトル A = CirclePos - Ray.Origin;
+	// ベクトル S = RayEnd - Ray.Origin;
+	// 距離 d = |A|sinθ;
+	// 内積 A×S = |A||S|sinθ;
+	// d = |A×S| / |S|;
+	FVector2D A = CirclePos - Ray.Origin;
+	FVector2D B = CirclePos - RayEnd;
+	FVector2D S = Ray.Direction;
+	float d = abs(FVector2D::CrossProduct(A, S.GetSafeNormal())/* / S.Size()*/);
+	if (d > CircleRadius) return false;
+
+	auto SetHitInfo = [&Info](const FVector2D & Pos, float Dist, const FVector2D & Nromal)
+	{
+		if (!Info.IsHit)
+		{
+			Info.NearPos = Pos;
+			Info.HitDist = Dist;
+			Info.NearNormal = Nromal;
+		}
+		else if (Info.HitDist > Dist)
+		{
+			Info.NearPos = Pos;
+			Info.HitDist = Dist;
+			Info.NearNormal = Nromal;
+		}
+		Info.IsHit = true;
+	};
+
+	// 線分の間に存在する
+	float DotAS = FVector2D::DotProduct(A, S.GetSafeNormal());
+	if (DotAS * FVector2D::DotProduct(B, -S) >= 0)
+	{
+		FVector2D HitPos = Ray.Origin + DotAS * S.GetSafeNormal();
+		SetHitInfo(HitPos, d, (HitPos - CirclePos).GetSafeNormal());
+		return true;
+	}
+	// 線分の外側に存在する
+	float Dist = A.Size();
+	if (Dist <= CircleRadius)
+	{
+		SetHitInfo(Ray.Origin, Dist, -A.GetSafeNormal());
+		return true;
+	}
+	Dist = B.Size();
+	if (Dist <= CircleRadius)
+	{
+		SetHitInfo(RayEnd, Dist, -B.GetSafeNormal());
+	}
+
+	return Info.IsHit;
+}
+
 bool MyFunc::Check_Ray2D_VS_Ray2D(FRay2DCastInfo & Info, FRay2D RayA, const FRay2D & RayB, const FVector2D & Normal)
 {
 	FVector2D HitPos;

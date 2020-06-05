@@ -47,8 +47,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 		float HammerPowerValue = 1.0f;
 	// ƒvƒŒƒCƒ„[‚Ì“–‚½‚è”»’è‚Ì”¼Œa
-	UPROPERTY(EditAnywhere, Category = "Parameter")
-		float Radius = 100.0f;
+	//UPROPERTY(EditAnywhere, Category = "Parameter")
+		float CollisionRadius = 0.0f;
 
 	//UPROPERTY(EditAnywhere, Category = "Effect")
 	//	bool  Now = 100.0f;
