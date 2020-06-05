@@ -8,6 +8,7 @@
 
 class ALandPoint;
 class AFlashFlood;
+class ABreakSquareLand;
 
 enum class VertexType
 {
@@ -45,13 +46,15 @@ public:
 	ALandPoint * GetLandPoint(const FVector & WorldPos, float Radius, bool IsLand = true);	// 指定した座標に接している地面を取得
 	FVector GetCenterPos();
 	FVector GetStartPos() { return StartPoint->GetActorLocation(); };
+	void SetSquareLand(FVector SquareLocation, float XLength, float YLength, VertexType Type);
 private:
 	void CreateWave(int32 x, int32 y, float pawer);
 	void SetCircleLand(FVector CirclePostion, float Radius, VertexType Type);
-	void SetSquareLand(FVector SquareLocation, float XLength, float YLength, VertexType Type);
 	void SetLand(int X, int Y, float Z, VertexType Type);
 
 	void TickFlashFloodWave(AFlashFlood* FlashFlood);
+
+	void HammerBreakLand(const FVector & worldPos);
 
 	int32 CalcIndex(int32 x, int32 y);
 
@@ -87,4 +90,5 @@ private:
 
 	TArray<ALandPoint*> LandPointActors;	// 衝突処理などに使うのでメンバにする
 	TArray<AFlashFlood*> FlashFloods;		// 水流の計算に使うのでメンバにする
+	TArray<ABreakSquareLand*> BreakLands;	// ハンマーで床壊すときに使う
 };

@@ -2,6 +2,7 @@
 
 
 #include "BreakFloatActor.h"
+#include "../WaterSurface/FloatActor.h"
 
 ABreakFloatActor::ABreakFloatActor()
 {
@@ -14,10 +15,9 @@ ABreakFloatActor::ABreakFloatActor()
 
 void ABreakFloatActor::BeginPlay()
 {
-	SphereComp->OnComponentBeginOverlap.AddUniqueDynamic(this, &ABreakFloatActor::OnOverlapBegin);
-	IsExplotion = false;
-
 	Super::BeginPlay();
+	IsExplotion = false;
+	SphereComp->OnComponentBeginOverlap.AddUniqueDynamic(this, &ABreakFloatActor::OnOverlapBegin);
 }
 
 // Called every frame
