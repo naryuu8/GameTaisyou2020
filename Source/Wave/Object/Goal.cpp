@@ -36,7 +36,8 @@ void AGoal::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 	if (isExplotion) return; //すでに壊れているから
 	if (!OtherFloat) return;
 	AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
-
+	//ゲーム終了条件を満たしていたら当たり判定を行わない
+	if (game->GetIsClear() || game->GetIsGameOver())return;
 	// 衝突したアクターが爆弾の時爆発してゴール済みでもゴールしていないことにする
 	if (OtherFloat->ActorHasTag("Bom"))
 	{

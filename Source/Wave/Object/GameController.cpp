@@ -10,6 +10,7 @@
 #include "../InputManager.h"
 #include "../Player/PlayerCharacter.h"
 #include "../WaterSurface/FloatActor.h"
+#include "TimerManager.h"
 // Sets default values
 
 AGameController::AGameController()
@@ -53,7 +54,6 @@ void AGameController::Tick(float DeltaTime)
 	if (!GetPlayer)
 	{
 		GetPlayer = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
-		SetNorma();
 	}
 	CheckTimeCount();
 	GameClearCheck();
@@ -200,9 +200,6 @@ void AGameController::InputResultUI()
 
 void AGameController::SetNorma()
 {
-	if (!GetPlayer)return;
-	float percent = NormaPercent * 0.01f;
-	GetPlayer->SetNormaPercent(percent);
 }
 
 int AGameController::GetMaxNimotu()
@@ -230,12 +227,11 @@ void AGameController::GameClearCheck()
 	if (IsGameOver)return;
 	auto gameclear = [=]
 	{
+		//指定の時間後ゲームクリアにする
 		IsGameClear = true;
-		CreateResultUI();
-		if (TimeCountUI)
-		{
-			TimeCountUI->RemoveFromParent();
-		}
+		FTimerManager& timerManager = GetWorld()->GetTimerManager();
+		FTimerHandle handle;
+		timerManager.SetTimer(handle, this, &AGameController::GameClear, 2.8f);
 	};
 	// ゲームクリア条件
 	//①ノルマ以上荷物を入れている時かつハンマーが壊れて残り時間が0になったら
@@ -263,11 +259,10 @@ void AGameController::GameOverCheck()
 	auto gameover = [=] 
 	{ 
 		IsGameOver = true;
-		CreateGameOverUI();
-		if (TimeCountUI)
-		{
-			TimeCountUI->RemoveFromParent();
-		}
+		//指定の時間後ゲームオーバーにする
+		FTimerManager& timerManager = GetWorld()->GetTimerManager();
+		FTimerHandle handle;
+		timerManager.SetTimer(handle, this, &AGameController::GameOver,3.0f);
 	};
 	//①ノルマまで荷物を運んでおらずハンマーが壊れて残り時間が0になったら
 	if (GoalCount < NormaGoalCount && GetLimitTimeZero())
@@ -276,13 +271,32 @@ void AGameController::GameOverCheck()
 	}
 	//②荷物がノルマ数達成できないほど無くなった時(ゴールに入った荷物と合わせる)
 	else if (GameMaxNimotu + GoalCount < NormaGoalCount)
-	{
-		gameover();
+	{//このゲームオーバーの時はTimerを使わない
+		IsGameOver = true;
+		GameOver();
 	}
 	//③ゴールがノルマの荷物より少なくなった時
 	else if (NotExplotionCount < NormaGoalCount && GoalCount < NormaGoalCount)
 	{
 		gameover();
+	}
+}
+
+void AGameController::GameClear()
+{
+	CreateResultUI();
+	if (TimeCountUI)
+	{
+		TimeCountUI->RemoveFromParent();
+	}
+}
+
+void AGameController::GameOver()
+{
+	CreateGameOverUI();
+	if (TimeCountUI)
+	{
+		TimeCountUI->RemoveFromParent();
 	}
 }
 
@@ -307,12 +321,7 @@ int AGameController::CountGameNimotu()
 
 void AGameController::CheckTimeCount()
 {
-	//プレイヤーのハンマーHPが0でハンマーを叩き終わったら時間カウント開始と残り時間監視
-	//誤差防止のためHPは0.1f以下で0とみなす
-	if (GetPlayer->GetHammerHP() <= 0.1f && GetPlayer->GetHammerPower() == 0.0f)
-	{
-		CreateTimeCountUI();
-	}
+
 }
 
 bool AGameController::GetLimitTimeZero()
