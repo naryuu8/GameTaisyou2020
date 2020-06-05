@@ -80,7 +80,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void SetMaxNimotu(const int num) { MaxNimotu = num; };
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		FORCEINLINE int GetMaxNimotu();
+		int GetMaxNimotu();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE float GetNormaPercent() const { return NormaPercent; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")

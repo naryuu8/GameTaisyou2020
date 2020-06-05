@@ -47,9 +47,9 @@ public:
 	FVector GetStartPos() { return StartPoint->GetActorLocation(); };
 private:
 	void CreateWave(int32 x, int32 y, float pawer);
-	void SetCircleLand(FVector CirclePostion, float Radius, bool isLand);
-	void SetSquareLand(FVector SquareLocation, float XLength, float YLength, bool isLand);
-	void SetLand(int X, int Y, float Z, bool isLand);
+	void SetCircleLand(FVector CirclePostion, float Radius, VertexType Type);
+	void SetSquareLand(FVector SquareLocation, float XLength, float YLength, VertexType Type);
+	void SetLand(int X, int Y, float Z, VertexType Type);
 
 	void TickFlashFloodWave(AFlashFlood* FlashFlood);
 

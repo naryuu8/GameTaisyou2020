@@ -15,15 +15,6 @@ void UPauseUI::NativeConstruct()
 	UGameplayStatics::SetGamePaused(GetWorld(),true);
 }
 
-FSlateColor UPauseUI::SelectTextColor(const PauseState state)
-{
-	if (SelectNumber == static_cast<int>(state))
-	{
-		return FSlateColor(FLinearColor(1.0f, 0.0f, 0.0f, 1.0f));
-	}
-	return FSlateColor(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f));
-}
-
 ESlateVisibility UPauseUI::GetPauseTextVisibility()
 {
 	if (IsPlayAnimation || IsScoreCheck)
