@@ -62,7 +62,7 @@ public:
 	FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius) override;
 	FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen) override;
 
-private:
+protected:
 	UPROPERTY(EditAnywhere)
 		float XLength = 100.0f;
 	UPROPERTY(EditAnywhere)

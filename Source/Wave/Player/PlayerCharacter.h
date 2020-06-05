@@ -60,6 +60,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 		float Radius = 100.0f;
 
+	//UPROPERTY(EditAnywhere, Category = "Effect")
+	//	bool  Now = 100.0f;
+
 	float HammerHP;
 	float MoveAmount;	// à⁄ìÆó ÇÃäÑçá
 
@@ -102,6 +105,14 @@ public:
 		void OutLineNotDraw();
 	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
 		void PlayerDeth();
+
+	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
+		void ChageCreateEmmiter();
+	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
+		void ChageDestroyEmmiter();
+	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
+		void ChageUpDateEmmiter(FVector pos);
+
 
 	static FORCEINLINE bool Trace(
 		UWorld* World,

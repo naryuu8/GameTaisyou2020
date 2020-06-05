@@ -46,6 +46,7 @@ APlayerCharacter::APlayerCharacter()
 	BaseLookUpRate = 45.f;
 	//ポーズ中でもTickが来るようにする
 	SetTickableWhenPaused(true);
+
 }
 
 //void APlayerCharacter::BeginPlay()
@@ -205,6 +206,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	UpdateGaugeHP();
 	if (IsAttackHold)
 	{
+		ChageCreateEmmiter();
 		// 溜められる最大値以上はいかない
 		if (HammerPower < ChargePowerMax)
 		{
@@ -221,8 +223,11 @@ void APlayerCharacter::Tick(float DeltaTime)
 	}
 	else
 	{
+		ChageDestroyEmmiter();
 		//MinusHammerGauge(-ChargeSpeed);
 	}
+
+	ChageUpDateEmmiter(CurPos);
 
 	//カメラにレイを飛ばして当たらなければアウトライン適用
 	ACharacter* myCharacter = this;
