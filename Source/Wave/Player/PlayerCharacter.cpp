@@ -21,6 +21,7 @@
 #include "../MyFunc.h"
 #include "EngineGlobals.h"
 #include "Runtime/Engine/Classes/Engine/Engine.h"
+#include "GameFramework/PlayerController.h"
 
 #define DISPLAY_LOG(fmt, ...) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT(fmt), __VA_ARGS__));
 //////////////////////////////////////////////////////////////////////////
@@ -316,6 +317,13 @@ void APlayerCharacter::HummerAttackEnd()
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, AttackEffect, AttackPoint, GetActorRotation(), FVector::OneVector * AttackEffectScale, true);
 		// カメラシェイク
 		if(FollowCamera) FollowCamera->EventCameraShake(HammerPower);
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+		if (PlayerController)
+		{//コントローラー振動　引数1:強さ(0.0-1.0)引数2:時間 残りの引数:コントローラーのどの部分を振動させるか？（全部trueで全体を振動)
+			//振動の強さを求める
+			float power = ChargeCount / ChargePowerMax;
+			PlayerController->PlayDynamicForceFeedback(power, 0.35f, true, true, true, true);
+		}	
 	}
 	//最大溜め状態だったら点滅アニメを停止
 	if (HammerPower >= ChargePowerMax)
