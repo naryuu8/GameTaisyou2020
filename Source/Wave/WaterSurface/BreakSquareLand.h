@@ -35,6 +35,6 @@ protected:
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void BreakAnime();
 
-private:
+public:
 	void Break();
 };

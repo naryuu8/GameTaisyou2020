@@ -10,6 +10,7 @@
 #include "SquareLand.h"
 #include "FlashFlood.h"
 #include "FloatActor.h"
+#include "BreakSquareLand.h"
 #include "../MyFunc.h"
 
 AWaterSurface::AWaterSurface() : AProceduralMeshActor()
@@ -112,6 +113,15 @@ void AWaterSurface::BeginPlay()
 	}
 
 
+	TArray<AActor*> FoundBreakLand;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABreakSquareLand::StaticClass(), FoundFlashFloods);
+	for (auto Actor : FoundFlashFloods)
+	{
+		// Œ‹\ˆ—‚Ég‚¤‚Ì‚Åƒƒ“ƒo‚É“o˜^‚µ‚Ä‚¨‚­
+		FoundBreakLand.Add(Cast<ABreakSquareLand>(Actor));
+	}
+
+
 	if (Material)
 	{
 		Mesh->SetMaterial(0, Material);
@@ -125,23 +135,6 @@ void AWaterSurface::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	float DeltaSpeed = WaveSpeed / 60;	
-
-	// —¤”»’è‚ªÁ‚¦‚é—¤‚ª‚ ‚ê‚ÎÁ‚·
-	for (auto Actor : LandPointActors)
-	{
-		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
-		if (CircleLand)
-		{
-			if(!CircleLand->GetIsUse())SetCircleLand(CircleLand->GetActorLocation(), CircleLand->GetRadius(), VertexType::Water);
-			continue;
-		}
-		
-		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
-		if (SquareLand)
-		{
-			if (!SquareLand->GetIsUse())SetSquareLand(SquareLand->GetActorLocation(), SquareLand->GetXLength(), SquareLand->GetYLength(), VertexType::Water);
-		}
-	}
 
 	float c = 2.0f;
 	float mul = DeltaSpeed * DeltaSpeed * c * c / (SplitPointNum.X * SplitPointNum.Y) * (SplitPointNum.X * SplitPointNum.Y);
@@ -348,8 +341,17 @@ void AWaterSurface::AddPower(FVector worldPos, float power)
 	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 	float HeightPower = FMath::Abs(worldPos.Z);
 	HeightPower = (HeightPower > MaxWaveHight) ? 0.0f : (MaxWaveHight - HeightPower) / MaxWaveHight;
+	
+	HammerBreakLand(worldPos);
 
 	CreateWave(WaveX, WaveY, power * HeightPower);
+}
+
+void AWaterSurface::HammerBreakLand(const FVector & worldPos)
+{
+	ABreakSquareLand* BreakLand = Cast<ABreakSquareLand>(GetLandPoint(worldPos, true));
+	if (!BreakLand)return;
+	BreakLand->Break();
 }
 
 float AWaterSurface::GetWaveHeight(const FVector & worldPos)
