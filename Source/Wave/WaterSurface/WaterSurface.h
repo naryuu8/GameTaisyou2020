@@ -8,6 +8,7 @@
 
 class ALandPoint;
 class AFlashFlood;
+class ABreakSquareLand;
 
 enum class VertexType
 {
@@ -53,6 +54,8 @@ private:
 
 	void TickFlashFloodWave(AFlashFlood* FlashFlood);
 
+	void HammerBreakLand(const FVector & worldPos);
+
 	int32 CalcIndex(int32 x, int32 y);
 
 private:
@@ -87,4 +90,5 @@ private:
 
 	TArray<ALandPoint*> LandPointActors;	// 衝突処理などに使うのでメンバにする
 	TArray<AFlashFlood*> FlashFloods;		// 水流の計算に使うのでメンバにする
+	TArray<ABreakSquareLand*> BreakLands;	// ハンマーで床壊すときに使う
 };

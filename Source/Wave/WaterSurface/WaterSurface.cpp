@@ -10,6 +10,7 @@
 #include "SquareLand.h"
 #include "FlashFlood.h"
 #include "FloatActor.h"
+#include "BreakSquareLand.h"
 #include "../MyFunc.h"
 
 AWaterSurface::AWaterSurface() : AProceduralMeshActor()
@@ -109,6 +110,15 @@ void AWaterSurface::BeginPlay()
 	{
 		// 結構処理に使うのでメンバに登録しておく
 		FlashFloods.Add(Cast<AFlashFlood>(Actor));
+	}
+
+
+	TArray<AActor*> FoundBreakLand;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABreakSquareLand::StaticClass(), FoundFlashFloods);
+	for (auto Actor : FoundFlashFloods)
+	{
+		// 結構処理に使うのでメンバに登録しておく
+		FoundBreakLand.Add(Cast<ABreakSquareLand>(Actor));
 	}
 
 
@@ -348,8 +358,17 @@ void AWaterSurface::AddPower(FVector worldPos, float power)
 	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 	float HeightPower = FMath::Abs(worldPos.Z);
 	HeightPower = (HeightPower > MaxWaveHight) ? 0.0f : (MaxWaveHight - HeightPower) / MaxWaveHight;
+	
+	HammerBreakLand(worldPos);
 
 	CreateWave(WaveX, WaveY, power * HeightPower);
+}
+
+void AWaterSurface::HammerBreakLand(const FVector & worldPos)
+{
+	ABreakSquareLand* BreakLand = Cast<ABreakSquareLand>(GetLandPoint(worldPos, true));
+	if (!BreakLand)return;
+	BreakLand->Break();
 }
 
 float AWaterSurface::GetWaveHeight(const FVector & worldPos)

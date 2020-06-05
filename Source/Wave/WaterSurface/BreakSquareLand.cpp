@@ -35,12 +35,12 @@ void ABreakSquareLand::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 	if (OtherFloat->ActorHasTag("Bom"))
 	{
 		Break();
-		BreakAnime();
 		OtherFloat->Destroy();
 	}
 }
 
 void ABreakSquareLand::Break()
 {
+	BreakAnime();
 	SetIsUse(false);
 }
