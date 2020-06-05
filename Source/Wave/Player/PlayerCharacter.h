@@ -114,7 +114,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
 		void ChageUpDateEmmiter(FVector pos);
 	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
-		void ImpactEmmiterCreate();
+		void ImpactEmmiterCreate(float FreasTimes);
 
 
 	static FORCEINLINE bool Trace(

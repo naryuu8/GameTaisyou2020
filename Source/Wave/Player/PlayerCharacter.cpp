@@ -236,11 +236,16 @@ void APlayerCharacter::Tick(float DeltaTime)
 	}
 
 
-
-	if(OldAttackFrame && IsPlayAttackAnime && FreasTime > 60) ImpactEmmiterCreate(), FreasTime = 0;
+	
+	if (!OldAttackFrame && IsPlayAttackAnime)
+	{
+		ImpactEmmiterCreate(FreasTime);
+		FreasTime = 0;
+	}
 	OldAttackFrame = IsPlayAttackAnime;
-	if (IsPlayAttackAnime) FreasTime++;
-	else FreasTime = 0;
+	if (IsAttackHold) FreasTime++;
+	
+
 	ChageUpDateEmmiter(CurPos);
 
 
