@@ -446,14 +446,14 @@ void APlayerCharacter::SetLookAt(FVector Direction, float Speed)
 
 void APlayerCharacter::PauseInput()
 {
-	AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
-	//ゲーム終了条件を満たしていたらポーズを開けないようにする
-	if (game->GetIsClear() || game->GetIsGameOver())return;
 	const AInputManager * inputManager = AInputManager::GetInstance();
 	if (!inputManager)return;
 	const InputState * input = inputManager->GetState();
 	if (input->Pause.IsPress)
 	{//ポーズ中でなければポーズ画面を開き、ポーズ中だったらポーズ画面を閉じる
+		AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+		//ゲーム終了条件を満たしていたらポーズを開けないようにする
+		if (game->GetIsClear() || game->GetIsGameOver())return;
 		if (!UGameplayStatics::IsGamePaused(GetWorld()))
 		{
 			if (PauseUIClass != nullptr)
@@ -562,6 +562,12 @@ void APlayerCharacter::HammerCountBarParent()
 	{
 		HammerCountBarUI->RemoveFromParent();
 	}
+}
+
+void APlayerCharacter::SetNoTick()
+{
+	this->SetActorTickEnabled(false);
+	MoveAmount = 0.0f;
 }
 
 void APlayerCharacter::SetPlayerHiddenInGame()

@@ -65,7 +65,6 @@ private:
 
 	float HammerHP;
 	float MoveAmount;	// 移動量の割合
-
 	void PauseInput();
 	void CreateHammerCountBarUI();
 	void UpdateGaugeHP();
@@ -192,6 +191,8 @@ public:
 	float GetMoveAmount() { return MoveAmount; };
 	//ゲージUIを非表示にする
 	void HammerCountBarParent();
+	//TickをOFFにする
+	void SetNoTick();
 	//プレイヤーを非表示にする
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 	void SetPlayerHiddenInGame();

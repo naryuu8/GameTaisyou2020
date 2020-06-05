@@ -85,6 +85,8 @@ public:
 		FORCEINLINE float GetNormaPercent() const { return NormaPercent; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void SetNormaPercent(const float percent) { NormaPercent = percent; }
+	//ゲームオーバーUIを生成していたらtrue
+	bool GetIsGameOverUI();
 	void MinusGameMaxNimotu() { GameMaxNimotu--; }
 	//データテーブルから対応するステージ番号から
 	//ゲージのパーセントとクリアに必要な荷物数取得（デバッグの時は読み込まない）
