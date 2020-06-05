@@ -3,6 +3,8 @@
 
 #include "BreakSquareLand.h"
 
+#include "Kismet/GameplayStatics.h"
+#include "../WaterSurface/WaterSurface.h"
 #include "../WaterSurface/FloatActor.h"
 
 // Sets default values
@@ -42,5 +44,11 @@ void ABreakSquareLand::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 void ABreakSquareLand::Break()
 {
 	BreakAnime();
+	TArray<AWaterSurface*> WaterSurface;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), WaterSurface);
+	for (auto Actor : WaterSurface)
+	{
+		Actor->SetSquareLand(GetActorLocation(), XLength, YLength, VertexType::Water);
+	}
 	SetIsUse(false);
 }

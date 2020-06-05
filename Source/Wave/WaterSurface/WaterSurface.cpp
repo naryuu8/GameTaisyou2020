@@ -136,23 +136,6 @@ void AWaterSurface::Tick(float DeltaTime)
 
 	float DeltaSpeed = WaveSpeed / 60;	
 
-	// —¤”»’è‚ªÁ‚¦‚é—¤‚ª‚ ‚ê‚ÎÁ‚·
-	for (auto Actor : LandPointActors)
-	{
-		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
-		if (CircleLand)
-		{
-			if(!CircleLand->GetIsUse())SetCircleLand(CircleLand->GetActorLocation(), CircleLand->GetRadius(), VertexType::Water);
-			continue;
-		}
-		
-		ASquareLand* SquareLand = Cast<ASquareLand>(Actor);
-		if (SquareLand)
-		{
-			if (!SquareLand->GetIsUse())SetSquareLand(SquareLand->GetActorLocation(), SquareLand->GetXLength(), SquareLand->GetYLength(), VertexType::Water);
-		}
-	}
-
 	float c = 2.0f;
 	float mul = DeltaSpeed * DeltaSpeed * c * c / (SplitPointNum.X * SplitPointNum.Y) * (SplitPointNum.X * SplitPointNum.Y);
 	for (int xi = 1; xi < SplitPointNum.X - 1; ++xi)

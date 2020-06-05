@@ -46,10 +46,10 @@ public:
 	ALandPoint * GetLandPoint(const FVector & WorldPos, float Radius, bool IsLand = true);	// Žw’è‚µ‚½À•W‚ÉÚ‚µ‚Ä‚¢‚é’n–Ê‚ðŽæ“¾
 	FVector GetCenterPos();
 	FVector GetStartPos() { return StartPoint->GetActorLocation(); };
+	void SetSquareLand(FVector SquareLocation, float XLength, float YLength, VertexType Type);
 private:
 	void CreateWave(int32 x, int32 y, float pawer);
 	void SetCircleLand(FVector CirclePostion, float Radius, VertexType Type);
-	void SetSquareLand(FVector SquareLocation, float XLength, float YLength, VertexType Type);
 	void SetLand(int X, int Y, float Z, VertexType Type);
 
 	void TickFlashFloodWave(AFlashFlood* FlashFlood);
