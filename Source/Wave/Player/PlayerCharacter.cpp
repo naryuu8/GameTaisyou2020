@@ -70,7 +70,8 @@ void APlayerCharacter::BeginPlay_C()
 	IsAttackHold = false;
 	IsPlayAttackAnime = false;
 	HammerPower = 0.0f;
-	HammerHP = 0.0f;
+	//HammerHP = 0.0f;
+	HammerHP = MaxHammerHP;
 	if (!AnimInst)
 	{
 		AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
@@ -211,13 +212,17 @@ void APlayerCharacter::Tick(float DeltaTime)
 		if (HammerPower < ChargePowerMax)
 		{
 			//ハンマーを溜めていたら力を足す
-			//体力が最大の時に溜めていたら加算しない
-			if (MaxHammerHP > HammerHP)
+			//体力がほぼ0なら溜めても加算しない
+			if (HammerHP > 0.1f)
 			{
 				HammerPower += ChargeSpeed;
 				HammerPower = FMath::Min(HammerPower, ChargePowerMax);
 			}
 			MinusHammerGauge(HammerPower);
+		}
+		else
+		{//最大溜め時はゲージを点滅させる
+			HammerCountBarUI->PlayGaugeAnimation();
 		}
 		
 	}
@@ -284,7 +289,8 @@ void APlayerCharacter::TriggerHammerAttack(void)
 {
 	if (IsPlayAttackAnime)return;
 	//クールタイムがあるときと最大HPとHPが同じなら構えれない
-	if (MaxHammerHP == HammerHP)return;
+	//if (MaxHammerHP == HammerHP)return;
+	if (HammerHP <= 0.0f)return;
 	if (CoolTime != 0.0f)return;
 	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInst->HummerChergeEvent();
@@ -314,6 +320,10 @@ void APlayerCharacter::HummerAttackEnd()
 		// カメラシェイク
 		if(FollowCamera) FollowCamera->EventCameraShake(HammerPower);
 	}
+	if (HammerPower >= ChargePowerMax)
+	{
+		HammerCountBarUI->PouseGaugeAnimation();
+	}
 	HammerPower = 0.0f;
 	ChargeCount = 0.0f;
 }
@@ -324,14 +334,15 @@ void APlayerCharacter::MinusHammerGauge(const float Power)
 	if (ChargeCount < ChargePowerMax)
 	{//最大溜め時はクールタイムを加算しない
 		//更に現在のHPがMAXHPより下だったら加算
-		if (MaxHammerHP > HammerHP)
+		//if (MaxHammerHP > HammerHP)
+		if (HammerHP > 0.0f)
 		{
 			CoolTime += ChargeSpeed;
 			if (CoolTime >= ChargePowerMax)
 			{
 				CoolTime = ChargePowerMax;
 			}
-			HammerHP += ChargeSpeed;
+			HammerHP -= ChargeSpeed;
 			if (HammerHP >= MaxHammerHP)
 			{
 				HammerHP = MaxHammerHP;
@@ -345,7 +356,7 @@ void APlayerCharacter::MinusHammerGauge(const float Power)
 	}
 
 	HammerCountBarUI->UpdateGauge(HammerHP);
-	HammerCountBarUI->UpdateDamageGauge(HammerHP);
+	//HammerCountBarUI->UpdateDamageGauge(HammerHP);
 	HammerCountBarUI->UpdateCoolTime(CoolTime);
 }
 
@@ -564,10 +575,14 @@ void APlayerCharacter::UpdateGaugeHP()
 	{
 		if (CoolTime <= 0.0f)
 		{
-			HammerHP -= ChargeSpeed * HpHealSpped;
-			if (HammerHP < 0.0f)
+			HammerHP += ChargeSpeed * HpHealSpped;
+			//if (HammerHP < 0.0f)
+			//{
+			//	HammerHP = 0.0f;
+			//}
+			if (HammerHP > MaxHammerHP)
 			{
-				HammerHP = 0.0f;
+				HammerHP = MaxHammerHP;
 			}
 			HammerCountBarUI->UpdateGauge(HammerHP);
 		}
