@@ -54,6 +54,12 @@ public:
 	//ダメージゲージを減らすのを開始するイベント
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void ReflectionGauge();
+	//最大溜め時ゲージを点滅させる
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void PlayGaugeAnimation();
+	//ゲージ点滅アニメ停止
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void PouseGaugeAnimation();
 	//毎フレーム減らすゲージ量を計算し返す
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		float DownGauge(const float DamageX,const float HpX);
