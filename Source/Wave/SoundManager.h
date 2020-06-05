@@ -26,7 +26,7 @@ public:
 
 	//@brief 音声を再生する
 	//@param Index [in] 再生する音声のインデックス
-	void PlaySound(int Index);
+	void PlaySound(FString fileName);
 
 	//@brief 音声を再生する
 	//@param Index [in] 再生する音声のインデックス

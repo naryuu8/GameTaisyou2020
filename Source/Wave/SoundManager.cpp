@@ -1,3 +1,4 @@
+#include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
 #include "SoundManager.h"
 
 //インスタンスへのアドレス
@@ -12,7 +13,7 @@ ASoundManager::ASoundManager()
 }
 
 void ASoundManager::BeginPlay() {
-	if (AudioComponent.Num() == SoundList.Num())
+/*	if (AudioComponent.Num() == SoundList.Num())
 	{
 		return;
 	}
@@ -26,16 +27,29 @@ void ASoundManager::BeginPlay() {
 		auto NewAudioComponent = NewObject<UAudioComponent>(this, AudioCompName);
 
 		AudioComponent.Add(NewAudioComponent);
-	}
+	}*/
+	
+	static ConstructorHelpers::FObjectFinder< USoundBase >find_sound(TEXT("SoundCue'/Main/Sound/SE/enter_se_Cue'"));
+	
+	auto NewAudioComponent = NewObject<UAudioComponent>(this);
+	NewAudioComponent->Sound = find_sound.Object;
+	AudioComponent.Add(NewAudioComponent);
 }
 
-void ASoundManager::PlaySound(int Index)
+void ASoundManager::PlaySound(FString fileName)
 {
-	if (Index < 0 || Index >= SoundList.Num()) return;//リストに存在しないインデックスなら再生しない
-	if (SoundList.GetData()[Index] == nullptr) return;//サウンドが設定されていないなら再生しない
+//	if (SoundList.GetData()[Index] == nullptr) return;//サウンドが設定されていないなら再生しない
 
-	AudioComponent[Index]->Sound = SoundList.GetData()[Index];//サウンド設定
-	AudioComponent[Index]->Play();//サウンドを再生する
+//	USoundBase* sound;
+	for (int i = 0; i < AudioComponent.Num(); i++) {
+		if (!AudioComponent[i]->IsPlaying()) {
+//			static ConstructorHelpers::FObjectFinder< USoundBase >sound(TEXT("SoundCue'/Main/Sound/SE/enter_se_Cue'"));
+
+		}
+	//		AudioComponent[i]->Play();
+	}
+//	AudioComponent[Index]->Sound = SoundList.GetData()[Index];//サウンド設定
+//	AudioComponent[Index]->Play();//サウンドを再生する
 }
 
 void ASoundManager::Play3DSound(int Index,UWorld* world,FVector vector)
@@ -61,7 +75,7 @@ ASoundManager* ASoundManager::GetInstance()
 void ASoundManager::SafePlaySound(int Index)
 {
 	if (!SoundManagerInstance) return;
-	SoundManagerInstance->PlaySound(Index);
+	//SoundManagerInstance->PlaySound(Index);
 }
 
 void ASoundManager::SafePlay3DSound(int Index,UWorld* world, FVector vector)
