@@ -53,7 +53,6 @@ void AGameController::Tick(float DeltaTime)
 	if (!GetPlayer)
 	{
 		GetPlayer = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
-		SetNorma();
 	}
 	CheckTimeCount();
 	GameClearCheck();
@@ -200,9 +199,6 @@ void AGameController::InputResultUI()
 
 void AGameController::SetNorma()
 {
-	if (!GetPlayer)return;
-	float percent = NormaPercent * 0.01f;
-	GetPlayer->SetNormaPercent(percent);
 }
 
 int AGameController::GetMaxNimotu()
@@ -307,12 +303,7 @@ int AGameController::CountGameNimotu()
 
 void AGameController::CheckTimeCount()
 {
-	//プレイヤーのハンマーHPが0でハンマーを叩き終わったら時間カウント開始と残り時間監視
-	//誤差防止のためHPは0.1f以下で0とみなす
-	if (GetPlayer->GetHammerHP() <= 0.1f && GetPlayer->GetHammerPower() == 0.0f)
-	{
-	//	CreateTimeCountUI();
-	}
+
 }
 
 bool AGameController::GetLimitTimeZero()

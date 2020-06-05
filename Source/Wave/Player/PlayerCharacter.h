@@ -186,8 +186,6 @@ private:
 	// 移動方向にプレイヤーを向かせる関数
 	void SetLookAt(FVector Direction, float Speed);
 public:
-	//HPバーのノルマ位置をセット
-	void SetNormaPercent(const float percent);
 	float GetMoveAmount() { return MoveAmount; };
 	//ゲージUIを非表示にする
 	void HammerCountBarParent();
