@@ -22,13 +22,16 @@ void ASoundManager::PlaySound(TCHAR* fileName)
 	for (int i = 0; i < AudioComponent.Num(); i++) {
 		if (!AudioComponent[i]->IsPlaying()) {
 			AudioComponent[i]->Sound = LoadObject<USoundBase>(NULL,fileName, NULL, LOAD_None, NULL);
-			AudioComponent[i]->Play();			
+			AudioComponent[i]->Play();
+			break;
 		}
-		else {
+		
+		if(AudioComponent.Num() == i + 1){
 			auto NewAudioComponent = NewObject<UAudioComponent>(this);
 			NewAudioComponent->Sound = LoadObject<USoundBase>(NULL, fileName, NULL, LOAD_None, NULL);
 			NewAudioComponent->Play();
 			AudioComponent.Add(NewAudioComponent);
+			break;
 		}
 	}
 }

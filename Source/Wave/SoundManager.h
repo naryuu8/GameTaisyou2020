@@ -9,7 +9,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "SoundManager.generated.h"
 
-UENUM(BlueprintType)
 
 
 UCLASS()
