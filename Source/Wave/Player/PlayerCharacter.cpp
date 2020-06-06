@@ -44,13 +44,8 @@ APlayerCharacter::APlayerCharacter()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-	BaseTurnRate = 45.f;
-	BaseLookUpRate = 45.f;
 	//ポーズ中でもTickが来るようにする
 	SetTickableWhenPaused(true);
-
-	OldAttackFrame = false;
-	FreasTime = 0;
 }
 
 void APlayerCharacter::BeginPlay_C()
@@ -59,6 +54,10 @@ void APlayerCharacter::BeginPlay_C()
 	UCapsuleComponent * Collision = Cast<UCapsuleComponent>(GetComponentByClass(UCapsuleComponent::StaticClass()));
 	if (Collision)
 		this->CollisionRadius = Collision->GetScaledCapsuleRadius();
+
+	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	// ハンマーで叩いた時に呼ばれる関数を登録
+	AnimInst->AttackEndCallBack.BindUObject(this, &APlayerCharacter::HummerAttackEnd);
 
 	// シーン上のゲームカメラを検索する
 	AGameCameraActor* cameraActor;
@@ -69,17 +68,9 @@ void APlayerCharacter::BeginPlay_C()
 		FollowCamera = cameraActor;
 		cameraActor->SetFollowTarget(this);
 	}
-	//現在のBegibPlayはモデルの都合上こちらで書けないので関数で呼ぶ
-	IsAttackHold = false;
-	IsPlayAttackAnime = false;
 	HammerPower = 0.0f;
 	HammerHP = MaxHammerHP;
-	if (!AnimInst)
-	{
-		AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-		// ハンマーで叩いた時に呼ばれる関数を登録
-		AnimInst->AttackEndCallBack.BindUObject(this, &APlayerCharacter::HummerAttackEnd);
-	}
+
 	CreateHammerCountBarUI();
 	Water = Cast<AWaterSurface>(UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass()));
 
@@ -89,10 +80,8 @@ void APlayerCharacter::BeginPlay_C()
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
-	//アタックアニメが再生中か確認
-	IsPlayAttackAnime = AnimInst->GetIsAttackAnime();
 	//アタックアニメ中はポーズを開けないようにする
-	if (!IsPlayAttackAnime && !IsAttackHold)
+	if (!AnimInst->IsAttack && !AnimInst->IsCharge)
 	{
 		PauseInput();
 		if (UGameplayStatics::IsGamePaused(GetWorld()))
@@ -136,7 +125,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		else if (input->Attack.IsRelease) ReleaseHammerAttack();
 
 		float MoveSpeed = 10.0f;
-		if (AnimInst->GetIsCharge()) MoveSpeed *= 0.3f;
+		if (AnimInst->IsCharge) MoveSpeed *= 0.3f;
 
 		// 左スティックの倒し具合の割合を算出
 		MoveAmount = FMath::Clamp(FMath::Abs(input->LeftStick.Horizontal) + FMath::Abs(input->LeftStick.Vertical), 0.0f, 1.0f);
@@ -211,50 +200,47 @@ void APlayerCharacter::Tick(float DeltaTime)
 				Move(Direction, MoveValue);
 			}
 		}
-	}
 
-	// チャージ中
-	UpdateGaugeHP();
-	if (IsAttackHold)
-	{
-		ChageCreateEmmiter();
-		// 溜められる最大値以上はいかない
-		if (HammerPower < ChargePowerMax)
+		// チャージ中
+		UpdateGaugeHP();
+		if (AnimInst->IsChargeAnim())
 		{
-			//ハンマーを溜めていたら力を足す
-			//体力がほぼ0なら溜めても加算しない
-			if (HammerHP > 0.1f)
+			// キャンセルが押された時
+			if (input->AttackCancel.IsPress)
 			{
-				HammerPower += ChargeSpeed;
-				HammerPower = FMath::Min(HammerPower, ChargePowerMax);
+				AnimInst->IsCharge = false;
+				HammerHP += HammerPower;
+				HammerPower = 0.0f;
+				ChargeCount = 0.0f;
 			}
-			MinusHammerGauge(HammerPower);
+			else
+			{
+				ChageCreateEmmiter();
+				// 溜められる最大値以上はいかない
+				if (HammerPower < ChargePowerMax)
+				{
+					//ハンマーを溜めていたら力を足す
+					//体力がほぼ0なら溜めても加算しない
+					if (HammerHP > 0.1f)
+					{
+						HammerPower += ChargeSpeed;
+						HammerPower = FMath::Min(HammerPower, ChargePowerMax);
+					}
+					MinusHammerGauge(HammerPower);
+				}
+				else
+				{//最大溜め時はゲージを点滅させる
+					HammerCountBarUI->PlayGaugeAnimation();
+				}
+			}
 		}
 		else
-		{//最大溜め時はゲージを点滅させる
-			HammerCountBarUI->PlayGaugeAnimation();
+		{
+			ChageDestroyEmmiter();
 		}
-		
-	}
-	else
-	{
-		ChageDestroyEmmiter();
-	}
+	}// !InputManager	
 
-
-	
-	if (!OldAttackFrame && IsPlayAttackAnime)
-	{
-		ImpactEmmiterCreate(FreasTime);
-		FreasTime = 0;
-	}
-	OldAttackFrame = IsPlayAttackAnime;
-	if (IsAttackHold) FreasTime++;
-	
-
-	ChageUpDateEmmiter(CurPos);
-
-
+	ChageUpDateEmmiter();
 
 	//カメラにレイを飛ばして当たらなければアウトライン適用
 	ACharacter* myCharacter = this;
@@ -268,7 +254,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 void APlayerCharacter::Move(const FVector & Direction, float Value)
 {
-	if (IsPlayAttackAnime)return;
+	if (AnimInst->IsAttack)return;
 	if (Value < 0.05f) return;
 
 	AddMovementInput(Direction, Value);
@@ -309,24 +295,22 @@ void APlayerCharacter::ResetRaftParam()
 
 void APlayerCharacter::TriggerHammerAttack(void)
 {
-	if (IsPlayAttackAnime)return;
+	if (AnimInst->IsAttack || AnimInst->IsCharge)return;
 	//クールタイムがあるときと最大HPとHPが同じなら構えれない
 	//if (MaxHammerHP == HammerHP)return;
 	if (HammerHP <= 0.0f)return;
 	//赤いバーがあるときも構えれないようにする
-	if (HammerCountBarUI->GetIsDamage())return;
-	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-	AnimInst->HummerChergeEvent();
-	IsAttackHold = true;
+	//if (HammerCountBarUI->GetIsDamage())return;
+	
+	AnimInst->IsCharge = true;
 	HammerCountBarUI->FirstEvent();
 }
 
 void APlayerCharacter::ReleaseHammerAttack(void)
 {
-	if (!IsAttackHold) return;
-	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-	AnimInst->HummerAttackEvent();
-	IsAttackHold = false;
+	if (!AnimInst->IsCharge) return;
+	AnimInst->IsAttack = true;
+	AnimInst->IsCharge = false;
 }
 
 void APlayerCharacter::HummerAttackEnd()
@@ -338,7 +322,8 @@ void APlayerCharacter::HummerAttackEnd()
 		// 波を起こす
 		WaterAttack(AttackPoint, HammerPower * HammerPowerValue);
 		// エフェクトを生成
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, AttackEffect, AttackPoint, GetActorRotation(), FVector::OneVector * AttackEffectScale, true);
+		ImpactEmmiterCreate(AttackPoint);
+		//UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, AttackEffect, AttackPoint, GetActorRotation(), FVector::OneVector * AttackEffectScale, true);
 		// カメラシェイク
 		if(FollowCamera) FollowCamera->EventCameraShake(HammerPower);
 		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
@@ -578,8 +563,7 @@ void APlayerCharacter::SetPlayerHiddenInGame()
 
 void APlayerCharacter::UpdateGaugeHP()
 {
-	if (IsPlayAttackAnime)return;
-	if (IsAttackHold)return;
+	if (AnimInst->IsCharge || AnimInst->IsAttack)return;
 	if (HammerPower > 0.0f)return;
 	if (HammerCountBarUI)
 	{
