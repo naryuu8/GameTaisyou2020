@@ -522,6 +522,8 @@ FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector& moveVec
 	{
 		if (!Actor->IsLand) continue;
 
+		if (!Actor->GetIsUse()) continue;
+
 		movedPos = Actor->AdjustMoveOutWater(actorPos, movedPos, moveVec, circleRadius);
 	}
 	
@@ -548,6 +550,8 @@ FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector & moveVe
 	for (auto Actor : LandPointActors)
 	{
 		if (!Actor->IsLand) continue;
+
+		if (!Actor->GetIsUse()) continue;
 		movedPos = Actor->AdjustMoveOutWater(actorPos, movedPos, moveVec, XLen, YLen);
 	}
 
