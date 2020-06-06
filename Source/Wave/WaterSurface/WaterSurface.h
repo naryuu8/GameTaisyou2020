@@ -44,6 +44,7 @@ public:
 	FVector GetGetOffPos(FVector WorldPos, float Radius);	// 筏から降りれる場所を取得
 	ALandPoint * GetLandPoint(const FVector & WorldPos, bool IsLand = true);	// 指定した座標に接している地面を取得
 	ALandPoint * GetLandPoint(const FVector & WorldPos, float Radius, bool IsLand = true);	// 指定した座標に接している地面を取得
+	ALandPoint * GetLandPointInside(const FVector & WorldPos, float Radius, bool IsLand = true);	// 指定した座標に完全に入ってる地面を取得
 	FVector GetCenterPos();
 	FVector GetStartPos() { return StartPoint->GetActorLocation(); };
 	void SetSquareLand(FVector SquareLocation, float XLength, float YLength, VertexType Type);

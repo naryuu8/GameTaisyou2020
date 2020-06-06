@@ -41,11 +41,9 @@ public:
 	static void DisplayDebugMessage(const FColor DisplayColor,FString message);
 
 	// 線分の衝突
-	static bool ColSegments(
-		const FRay2D &seg1,          // 線分1
-		const FRay2D &seg2,          // 線分2
-		FVector2D* outPos = 0 // 交点（出力）
-	);
+	static bool ColSegments(const FRay2D &seg1, const FRay2D &seg2,	FVector2D* outPos = nullptr);
+	// 線分と円の衝突
+	static bool Check_Ray2D_VS_Circle(FRay2DCastInfo & Info, const FRay2D &Ray, const FVector2D & CirclePos, float CircleRadius);
 	// 二つのベクトルの反射ベクトルを取得
 	static FVector2D GetReflectVector2D(const FVector2D & A, const FVector2D & B)
 	{
@@ -54,5 +52,6 @@ public:
 
 	// レイの交点を調べて距離を取得する関数
 	static bool Check_Ray2D_VS_Ray2D(FRay2DCastInfo & Info, FRay2D RayA, const FRay2D & RayB, const FVector2D & Normal);
+	// 適当に作ったからバグあり
 	static bool Check_CircleRay2D_VS_Ray2D(FRay2DCastInfo & Info, FRay2D RayA, float CircleRadius, const FRay2D & RayB, const FVector2D & Normal);
 };

@@ -15,3 +15,15 @@ float UHammerCountBarUI::DownGauge(const float DamageX, const float HpX)
 	float AddBar = NowHp * GAUGE_SPEED;
 	return DamageX - AddBar;
 }
+
+float UHammerCountBarUI::DownGaugeTime(const float DamageX, const float HpX, const float Speed)
+{
+	if (!IsDamageDown)
+	{//ゲージが初めて下がる時の差分を得る
+		NowHp = DamageX - HpX;
+		IsDamageDown = true;
+	}
+	//1フレームで減らす量を計算
+	//float AddBar = NowHp * Speed;
+	return DamageX - Speed;
+}
