@@ -11,6 +11,7 @@ class UGameOverUI;
 class UResultUI;
 class UTimeCountUI;
 class APlayerCharacter;
+class UNimotuCountUI;
 // ゲーム中のクリア条件などを管理するクラス
 
 UCLASS()
@@ -59,9 +60,12 @@ private:
 		TSubclassOf<UGameOverUI> GameOverUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UResultUI> ResultUIClass;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UNimotuCountUI> NimotuCountUIClass;
 	UTimeCountUI* TimeCountUI = nullptr;
 	UGameOverUI* GameOverUI = nullptr;
 	UResultUI* ResultUI = nullptr;
+	UNimotuCountUI* NimotuCountUI = nullptr;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -87,7 +91,7 @@ public:
 		void SetNormaPercent(const float percent) { NormaPercent = percent; }
 	//ゲームオーバーUIを生成していたらtrue
 	bool GetIsGameOverUI();
-	void MinusGameMaxNimotu() { GameMaxNimotu--; }
+	void MinusGameMaxNimotu();
 	//データテーブルから対応するステージ番号から
 	//ゲージのパーセントとクリアに必要な荷物数取得（デバッグの時は読み込まない）
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
@@ -96,8 +100,8 @@ public:
 	void SetTimeCountPause();
 	//タイムカウントアニメが止まっていたら続きから再生する
 	void SetTimeCountRePlay();
-	void AddGoalCount() { GoalCount++; }
-	void MinusGoalCount() { GoalCount--; }
+	void AddGoalCount();
+	void MinusGoalCount();
 	void AddNotExplotionCount() { NotExplotionCount++; }
 	void MinusNotExplotionCount() { NotExplotionCount--; }
 private:
@@ -105,6 +109,7 @@ private:
 	void CreateTimeCountUI();
 	void CreateGameOverUI();
 	void CreateResultUI();
+	void CreateNimotuCountUI();
 	void InputGameOverUI();
 	void InputResultUI();
 	//ゲージのノルマ設定

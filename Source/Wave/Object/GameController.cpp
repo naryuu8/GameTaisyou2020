@@ -7,6 +7,7 @@
 #include "../UI/TimeCountUI.h"
 #include "../UI/GameOverUI.h"
 #include "../UI/ResultUI.h"
+#include "../UI/NimotuCountUI.h"
 #include "../InputManager.h"
 #include "../Player/PlayerCharacter.h"
 #include "../WaterSurface/FloatActor.h"
@@ -52,6 +53,9 @@ void AGameController::BeginPlay()
 		GetMaxNimotu();
 	}
 	GameMaxNimotu = MaxNimotu;
+
+	//NotExplotionCount = GetNotExplotionCount(); //壊れていない家の数Get
+	CreateNimotuCountUI();
 }
 
 // Called every frame
@@ -138,6 +142,31 @@ void AGameController::CreateResultUI()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("ResultUIClass : %s"), L"UIClass is nullptr");
+	}
+}
+
+void AGameController::CreateNimotuCountUI()
+{
+	if (NimotuCountUI)return;
+	if (NimotuCountUIClass != nullptr)
+	{
+		NimotuCountUI = CreateWidget<UNimotuCountUI>(GetWorld(), NimotuCountUIClass);
+		if (NimotuCountUI != nullptr)
+		{
+			NimotuCountUI->AddToViewport();
+			NimotuCountUI->SetStageNimotu(GameMaxNimotu);
+			NimotuCountUI->SetStageInNimotu(GoalCount);
+			NimotuCountUI->SetNormaNimotu(NormaGoalCount);
+			NimotuCountUI->SetMaxNimotu(MaxNimotu);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("NimotuCountUIClass : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("NimotuCountUIClass : %s"), L"UIClass is nullptr");
 	}
 }
 
@@ -343,4 +372,35 @@ bool AGameController::GetIsGameOverUI()
 		return true;
 	}
 	return false;
+}
+
+void AGameController::AddGoalCount()
+{
+	GoalCount++; 
+	//現在ノルマと同じ数を入れていたらアニメーション再生
+	if (NormaGoalCount == GoalCount)
+	{
+		NimotuCountUI->NormaInAnimation();
+	}
+	NimotuCountUI->NimotuInAnimation();
+	NimotuCountUI->SetStageInNimotu(GoalCount);
+}
+
+void AGameController::MinusGoalCount()
+{ 
+	//現在ノルマと同じ数を入れていたらノルマ以下の荷物になったことを示すアニメーション再生
+	if (NormaGoalCount == GoalCount)
+	{
+		NimotuCountUI->NormaNoAnimation();
+	}
+	GoalCount--;
+	NimotuCountUI->NimotuInAnimation();
+	NimotuCountUI->SetStageInNimotu(GoalCount);
+}
+
+void AGameController::MinusGameMaxNimotu()
+{ 
+	GameMaxNimotu--;
+	NimotuCountUI->SetStageNimotu(GameMaxNimotu);
+	NimotuCountUI->GameNimotuAnimation();
 }
