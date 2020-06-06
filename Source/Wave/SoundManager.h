@@ -10,9 +10,7 @@
 #include "SoundManager.generated.h"
 
 UENUM(BlueprintType)
-enum class SoundData : uint8 {
-	MT_Explosion UMETA(DisplaName = "SoundCue'/Game/Main/Sound/hammer_sougen_Cue.hammer_sougen_Cue'"),
-};
+
 
 UCLASS()
 class WAVE_API ASoundManager : public AActor
@@ -20,10 +18,7 @@ class WAVE_API ASoundManager : public AActor
 	GENERATED_BODY()
 private:
 	UPROPERTY(EditAnywhere)
-		TArray <UAudioComponent*> AudioComponent;
-	
-	UPROPERTY(EditAnywhere, category = "SoundSetList")
-	TArray <USoundBase*> SoundList;//再生する音声のリスト
+		TArray <UAudioComponent*> AudioComponent;	
 public:	
 
 	ASoundManager();
@@ -32,28 +27,14 @@ public:
 
 	//@brief 音声を再生する
 	//@param Index [in] 再生する音声のインデックス
-	void PlaySound(FString fileName);
-
-	//@brief 音声を再生する
-	//@param Index [in] 再生する音声のインデックス
-	void Play3DSound(int Index, UWorld* world, FVector vector);
-
-	//@brief 音声を停止する
-	//@param Index [in] 停止する音声のインデックス
-	void StopSound(int Index);
+	void PlaySound(TCHAR* fileName);
 
 	//@brief 再生可能かチェックを行い、可能なら音声を再生する
 	//@param Index [in] 再生する音声のインデックス
-	static void SafePlaySound(int Index);
+	static void SafePlaySound(TCHAR* fileName);
 
-	//@brief 停止可能かチェックを行い、可能なら音声を停止する
-	//@param Index [in] 停止する音声のインデックス
-	static void SafeStopSound(int Index);
-
-		
-	static void SafePlay3DSound(int Index, UWorld* world, FVector vector);
-
-	static UAudioComponent* CreateAudioComponent();
+	//指定した音声(Cue)が入っているUAudioComponentを返す
+	static UAudioComponent* CreateAudioComponent(TCHAR* fileName);
 
 	//@brief サウンドマネージャを取得する
 	//@return サウンドマネージャへのアドレス
