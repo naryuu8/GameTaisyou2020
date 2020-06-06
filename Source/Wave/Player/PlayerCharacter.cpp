@@ -81,7 +81,6 @@ void APlayerCharacter::BeginPlay_C()
 		AnimInst->AttackEndCallBack.BindUObject(this, &APlayerCharacter::HummerAttackEnd);
 	}
 	CreateHammerCountBarUI();
-
 	Water = Cast<AWaterSurface>(UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass()));
 
 	CurrentRaft = nullptr;

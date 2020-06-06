@@ -55,7 +55,11 @@ protected:
 	UPROPERTY(EditAnywhere)
 		float YLength = 200.0f;
 
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void SetDeth() { IsDeth; };
+
 	bool IsFall = false;
+	bool IsDeth = false;
 public:	
 	FVector Velocity;
 
@@ -70,8 +74,9 @@ public:
 	float GetYLength() { return YLength; }
 	//FloatType GetType() { return Type; }
 
+	bool GetIsDeth() { return IsDeth; };
+
 protected:
 	AWaterSurface* WaterSurface;
-	UStaticMeshComponent* StaticMeshComponent;
 private:
 };
