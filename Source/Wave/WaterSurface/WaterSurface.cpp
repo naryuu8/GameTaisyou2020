@@ -680,6 +680,8 @@ ALandPoint * AWaterSurface::GetLandPointInside(const FVector & WorldPos, float R
 	{
 		if (Actor->IsLand != IsLand) continue;
 
+		if (!Actor->GetIsUse()) continue;
+
 		if (Actor->InGround(WorldPos, Radius))
 		{
 			return Actor;
