@@ -1,4 +1,3 @@
-#include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
 #include "SoundManager.h"
 
 //インスタンスへのアドレス
@@ -13,27 +12,15 @@ ASoundManager::ASoundManager()
 }
 
 void ASoundManager::BeginPlay() {
-/*	if (AudioComponent.Num() == SoundList.Num())
-	{
-		return;
-	}
 
-	for (const auto& Cue : SoundList)
-	{
-		FString CueName = Cue->GetName();
-		FName AudioCompName(*CueName);
-
-		// create AudioComponent
-		auto NewAudioComponent = NewObject<UAudioComponent>(this, AudioCompName);
-
-		AudioComponent.Add(NewAudioComponent);
-	}*/
-	
-	static ConstructorHelpers::FObjectFinder< USoundBase >find_sound(TEXT("SoundCue'/Main/Sound/SE/enter_se_Cue'"));
-	
 	auto NewAudioComponent = NewObject<UAudioComponent>(this);
-	NewAudioComponent->Sound = find_sound.Object;
+//	UE_LOG(LogTemp, Log, TEXT("SoundCue'/Game/Main/Sound/hammer_sougen_Cue.hammer_sougen_Cue'"));
+	//UE_LOG(LogTemp, Log,SoundData::MT_Explosion);
+	FName s = "SoundCue'/Game/Main/Sound/hammer_sougen_Cue.hammer_sougen_Cue'";
+	NewAudioComponent->Sound = LoadObject<USoundBase>(NULL,TEXT("SoundCue'/Game/Main/Sound/hammer_sougen_Cue.hammer_sougen_Cue'"), NULL, LOAD_None, NULL);
+//	UE_LOG(LogTemp, Log, TEXT("Log...= %s"), static_cast<TCHAR>(SoundData::MT_Explosion));
 	AudioComponent.Add(NewAudioComponent);
+
 }
 
 void ASoundManager::PlaySound(FString fileName)
@@ -43,6 +30,10 @@ void ASoundManager::PlaySound(FString fileName)
 //	USoundBase* sound;
 	for (int i = 0; i < AudioComponent.Num(); i++) {
 		if (!AudioComponent[i]->IsPlaying()) {
+//			FString s = FString::FromInt(static_cast<int>(SoundData::MT_Explosion));
+
+			AudioComponent[i]->Sound = LoadObject<USoundBase>(NULL,static_cast<TCHAR>(SoundData::MT_Explosion), NULL, LOAD_None, NULL);
+
 //			static ConstructorHelpers::FObjectFinder< USoundBase >sound(TEXT("SoundCue'/Main/Sound/SE/enter_se_Cue'"));
 
 		}

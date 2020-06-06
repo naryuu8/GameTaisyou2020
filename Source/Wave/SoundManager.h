@@ -4,9 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
 #include "Runtime/Engine/Classes/Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "SoundManager.generated.h"
+
+UENUM(BlueprintType)
+enum class SoundData : uint8 {
+	MT_Explosion UMETA(DisplaName = "SoundCue'/Game/Main/Sound/hammer_sougen_Cue.hammer_sougen_Cue'"),
+};
 
 UCLASS()
 class WAVE_API ASoundManager : public AActor
@@ -47,7 +53,12 @@ public:
 		
 	static void SafePlay3DSound(int Index, UWorld* world, FVector vector);
 
+	static UAudioComponent* CreateAudioComponent();
+
 	//@brief サウンドマネージャを取得する
 	//@return サウンドマネージャへのアドレス
 	static ASoundManager* GetInstance();
+
+
+
 };
