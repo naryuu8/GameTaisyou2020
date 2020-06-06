@@ -35,10 +35,10 @@ bool ASquareLand::OnGround(const FVector & Pos, float CircleRadius)
 	float XLen = GetXLength() * 0.5f;
 	float YLen = GetYLength() * 0.5f;
 
-	return  SquarePos.X - XLen < Pos.X - CircleRadius &&
-			SquarePos.X + XLen > Pos.X + CircleRadius &&
-			SquarePos.Y - YLen < Pos.Y - CircleRadius &&
-			SquarePos.Y + YLen > Pos.Y + CircleRadius;
+	return  SquarePos.X - XLen < Pos.X + CircleRadius &&
+			SquarePos.X + XLen > Pos.X - CircleRadius &&
+			SquarePos.Y - YLen < Pos.Y + CircleRadius &&
+			SquarePos.Y + YLen > Pos.Y - CircleRadius;
 }
 
 bool ASquareLand::InGround(const FVector & Pos, float CircleRadius)
@@ -81,51 +81,34 @@ FVector ASquareLand::AdjustMoveInLand(const FVector & Pos, float CircleRadius)
 
 FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius)
 {
-	FVector2D SquarePos = FVector2D(GetActorLocation().X, GetActorLocation().Y);
+	FVector2D SquarePos = FVector2D(GetActorLocation());
 	float XLen = GetXLength() * 0.5f;
 	float YLen = GetYLength() * 0.5f;
 
-	float XDistance = (SquarePos.X - MovedPos.X);
-	float YDistance = (SquarePos.Y - MovedPos.Y);
-	float JudgXDistance = CircleRadius + XLen;
-	float JudgYDistance = CircleRadius + YLen;
-
-	float X_Deff = JudgXDistance - fabs(XDistance);
-	float Y_Deff = JudgYDistance - fabs(YDistance);
-
-	if (X_Deff < 0 || Y_Deff < 0) return MovedPos;
-
-	// 衝突している
-
 	FRay2DCastInfo Info;
 	FVector2D VecA, VecB, VecC, VecD;
-	// レイの交点を調べて距離を取得する関数
-	VecA = SquarePos + FVector2D(XLen, YLen);
-	VecB = SquarePos + FVector2D(-XLen, YLen);
-	VecC = SquarePos + FVector2D(-XLen, -YLen);
-	VecD = SquarePos + FVector2D(XLen, -YLen);
-
-	FRay2D PosToMovedPos = FRay2D(OldPos, MovedPos - OldPos);
-	MyFunc::Check_CircleRay2D_VS_Ray2D(Info, PosToMovedPos, CircleRadius, FRay2D(VecA, VecB - VecA), FVector2D(0.0f, 1.0f));
-	MyFunc::Check_CircleRay2D_VS_Ray2D(Info, PosToMovedPos, CircleRadius, FRay2D(VecB, VecC - VecB), FVector2D(-1.0f, 0.0f));
-	MyFunc::Check_CircleRay2D_VS_Ray2D(Info, PosToMovedPos, CircleRadius, FRay2D(VecC, VecD - VecC), FVector2D(0.0f, -1.0f));
-	MyFunc::Check_CircleRay2D_VS_Ray2D(Info, PosToMovedPos, CircleRadius, FRay2D(VecD, VecA - VecD), FVector2D(1.0f, 0.0f));
-
-	// 辺に衝突していた時
-	if (Info.IsHit)
+	VecA = (FVector2D)SquarePos + FVector2D(XLen, YLen);
+	VecB = (FVector2D)SquarePos + FVector2D(-XLen, YLen);
+	VecC = (FVector2D)SquarePos + FVector2D(-XLen, -YLen);
+	VecD = (FVector2D)SquarePos + FVector2D(XLen, -YLen);
+	MyFunc::Check_Ray2D_VS_Circle(Info, FRay2D(VecA, VecB - VecA), (FVector2D)MovedPos, CircleRadius);
+	MyFunc::Check_Ray2D_VS_Circle(Info, FRay2D(VecB, VecC - VecB), (FVector2D)MovedPos, CircleRadius);
+	MyFunc::Check_Ray2D_VS_Circle(Info, FRay2D(VecC, VecD - VecC), (FVector2D)MovedPos, CircleRadius);
+	MyFunc::Check_Ray2D_VS_Circle(Info, FRay2D(VecD, VecA - VecD), (FVector2D)MovedPos, CircleRadius);
+	if (!Info.IsHit)
 	{
-		// 衝突点に位置を修正
-		MovedPos = FVector(Info.NearPos, MovedPos.Z);
-		// 反射ベクトルを算出
-		FVector2D Ref = (PosToMovedPos.Direction - 2.0f * FVector2D::DotProduct(PosToMovedPos.Direction, Info.NearNormal) * Info.NearNormal);
-		MoveVec = FVector(Ref, 0.0f);
+		// 完全に埋まっている場合
+		if (VecA.X > MovedPos.X && VecC.X < MovedPos.X &&
+			VecA.Y > MovedPos.Y && VecC.Y < MovedPos.Y)
+			return OldPos;
+
+		return MovedPos;
 	}
-	// 既に埋まっている状態
-	else
-	{
-		// X軸の押し出し（ないとは思うけど一応埋まり防止用）
-		MovedPos.X += (XDistance > 0) ? -X_Deff : X_Deff;
-	}
+
+	// 衝突している
+	float PushValue = (CircleRadius - Info.HitDist);
+	MovedPos += FVector(-Info.NearNormal * PushValue, 0.0f);
+	MoveVec = FVector(MyFunc::GetReflectVector2D((FVector2D)MoveVec, -Info.NearNormal), 0.0f);
 
 	return MovedPos;
 }
@@ -134,22 +117,29 @@ FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos
 {
 	FVector2D MyPos = (FVector2D)GetActorLocation();
 	float MyXLen = GetXLength() * 0.5f;
-	float MyYLen = GetXLength() * 0.5f;
+	float MyYLen = GetYLength() * 0.5f;
 	XLen = XLen * 0.5f;
-	XLen = XLen * 0.5f;
-	float X01 = MovedPos.X + XLen - MyPos.X - MyXLen;
-	float X02 = MyPos.X + MyXLen - MovedPos.X - XLen;
+	YLen = YLen * 0.5f;
+	// 埋まっている量を計算
+	float X_Left = MovedPos.X + XLen - (MyPos.X - MyXLen);
+	float X_Right = MyPos.X + MyXLen - (MovedPos.X - XLen);
+	float Y_Down = MovedPos.Y + YLen - (MyPos.Y - MyYLen);
+	float Y_Up = MyPos.Y + MyYLen - (MovedPos.Y - YLen);
 
-	float Y01 = MovedPos.Y + YLen - MyPos.Y - MyYLen;
-	float Y02 = MyPos.Y + MyYLen - MovedPos.Y - YLen;
-
-	if (!((X01 > 0 && X02 > 0) && (Y01 > 0 && Y02 > 0)))
+	if (!((X_Left > 0 && X_Right > 0) && (Y_Down > 0 && Y_Up > 0)))
 		return MovedPos;
 
-	if (X01 >= X02)
-	{
+	// 押し出す量を計算
+	FVector2D PushVec = FVector2D::ZeroVector;
+	PushVec.X = (MoveVec.X > 0) ? -X_Left : X_Right;	// true:左側にいる時, false:右側にいる時
+	PushVec.Y = (MoveVec.Y > 0) ? -Y_Down : Y_Up;		// true:下側にいる時, false:上側にいる時
 
-	}
+	// 押し出す量が大きい方向は無効にする
+	(FMath::Abs(PushVec.X) >= FMath::Abs(PushVec.Y)) ? PushVec.X = 0.0f : PushVec.Y = 0.0f;
+	MovedPos += FVector(PushVec, 0.0f);
+
+	// 反射方向を計算
+	MoveVec = FVector(MyFunc::GetReflectVector2D((FVector2D)MoveVec, PushVec.GetSafeNormal()), 0.0f);
 
 	return MovedPos;
 }

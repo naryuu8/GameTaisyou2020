@@ -45,27 +45,24 @@ private:
 		float ChargePowerMax = 100.0f;
 	// CoolTime回復時間倍率（高いほど早い）
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-		float CoolTimeHealSpped = 0.8f;
+		float CoolTimeHealSpped = 14.0f;
 	// HP回復時間（高いほど早い）
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-		float HpHealSpped = 0.9f;
+		float HpHealSpped = 0.8f;
 	// 溜めている力をカウント
 	float ChargeCount= 0.0f;
-	//叩けない時間
-	float CoolTime = 0.0f;
 	// 波を起こす力
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 		float HammerPowerValue = 1.0f;
 	// プレイヤーの当たり判定の半径
-	UPROPERTY(EditAnywhere, Category = "Parameter")
-		float Radius = 100.0f;
+	//UPROPERTY(EditAnywhere, Category = "Parameter")
+		float CollisionRadius = 0.0f;
 
 	//UPROPERTY(EditAnywhere, Category = "Effect")
 	//	bool  Now = 100.0f;
 
 	float HammerHP;
 	float MoveAmount;	// 移動量の割合
-
 	void PauseInput();
 	void CreateHammerCountBarUI();
 	void UpdateGaugeHP();
@@ -74,7 +71,8 @@ private:
 	ARaft* CurrentRaft = nullptr;	// 乗っていない時は常にnullptr
 	bool IsInRaft = false;
 	void ResetRaftParam();
-
+	bool OldAttackFrame = false;
+	int  FreasTime = 0;
 public:
 	APlayerCharacter();
 
@@ -112,6 +110,8 @@ public:
 		void ChageDestroyEmmiter();
 	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
 		void ChageUpDateEmmiter(FVector pos);
+	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
+		void ImpactEmmiterCreate(float FreasTimes);
 
 
 	static FORCEINLINE bool Trace(
@@ -186,11 +186,11 @@ private:
 	// 移動方向にプレイヤーを向かせる関数
 	void SetLookAt(FVector Direction, float Speed);
 public:
-	//HPバーのノルマ位置をセット
-	void SetNormaPercent(const float percent);
 	float GetMoveAmount() { return MoveAmount; };
 	//ゲージUIを非表示にする
 	void HammerCountBarParent();
+	//TickをOFFにする
+	void SetNoTick();
 	//プレイヤーを非表示にする
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 	void SetPlayerHiddenInGame();
