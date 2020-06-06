@@ -314,7 +314,8 @@ void APlayerCharacter::TriggerHammerAttack(void)
 	//クールタイムがあるときと最大HPとHPが同じなら構えれない
 	//if (MaxHammerHP == HammerHP)return;
 	if (HammerHP <= 0.0f)return;
-	if (CoolTime != 0.0f)return;
+	//赤いバーがあるときも構えれないようにする
+	if (HammerCountBarUI->GetIsDamage())return;
 	AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInst->HummerChergeEvent();
 	IsAttackHold = true;
@@ -354,6 +355,7 @@ void APlayerCharacter::HummerAttackEnd()
 	{
 		HammerCountBarUI->PouseGaugeAnimation();
 	}
+	HammerCountBarUI->ReflectionGauge();
 	HammerPower = 0.0f;
 	ChargeCount = 0.0f;
 }
@@ -363,15 +365,8 @@ void APlayerCharacter::MinusHammerGauge(const float Power)
 	if (!HammerCountBarUI)return;
 	if (ChargeCount < ChargePowerMax)
 	{//最大溜め時はクールタイムを加算しない
-		//更に現在のHPがMAXHPより下だったら加算
-		//if (MaxHammerHP > HammerHP)
 		if (HammerHP > 0.0f)
 		{
-			CoolTime += ChargeSpeed;
-			if (CoolTime >= ChargePowerMax)
-			{
-				CoolTime = ChargePowerMax;
-			}
 			HammerHP -= ChargeSpeed;
 			if (HammerHP >= MaxHammerHP)
 			{
@@ -386,7 +381,7 @@ void APlayerCharacter::MinusHammerGauge(const float Power)
 	}
 
 	HammerCountBarUI->UpdateGauge(HammerHP);
-	HammerCountBarUI->UpdateCoolTime(CoolTime);
+	//HammerCountBarUI->UpdateCoolTime(CoolTime);
 }
 
 bool APlayerCharacter::CheckGround()
@@ -587,23 +582,21 @@ void APlayerCharacter::UpdateGaugeHP()
 	if (IsPlayAttackAnime)return;
 	if (IsAttackHold)return;
 	if (HammerPower > 0.0f)return;
-	CoolTime -= ChargeSpeed * CoolTimeHealSpped;
-
-	if (CoolTime < 0.0f)
-	{
-		CoolTime = 0.0f;
-	}
 	if (HammerCountBarUI)
 	{
-		if (CoolTime <= 0.0f)
+		if (!HammerCountBarUI->GetIsDamage())
 		{
-			HammerHP += ChargeSpeed * HpHealSpped;
+			HammerHP += HpHealSpped;
 			if (HammerHP > MaxHammerHP)
 			{
 				HammerHP = MaxHammerHP;
 			}
 			HammerCountBarUI->UpdateGauge(HammerHP);
+			HammerCountBarUI->UpdateDamageGauge(HammerHP);
 		}
-		HammerCountBarUI->UpdateCoolTime(CoolTime);
+		else
+		{
+			HammerCountBarUI->UpdateCoolTime(CoolTimeHealSpped);
+		}
 	}
 }

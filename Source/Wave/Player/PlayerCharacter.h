@@ -45,14 +45,12 @@ private:
 		float ChargePowerMax = 100.0f;
 	// CoolTime回復時間倍率（高いほど早い）
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-		float CoolTimeHealSpped = 0.8f;
+		float CoolTimeHealSpped = 14.0f;
 	// HP回復時間（高いほど早い）
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-		float HpHealSpped = 0.9f;
+		float HpHealSpped = 0.8f;
 	// 溜めている力をカウント
 	float ChargeCount= 0.0f;
-	//叩けない時間
-	float CoolTime = 0.0f;
 	// 波を起こす力
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 		float HammerPowerValue = 1.0f;

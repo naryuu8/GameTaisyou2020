@@ -61,6 +61,8 @@ public:
 	//毎フレーム減らすゲージ量を計算し返す
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		float DownGauge(const float DamageX,const float HpX);
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		float DownGaugeTime(const float DamageX, const float HpX,const float Speed);
 	//ノルマバーの位置をセット
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void SetNormaPercent(const float Percent);
@@ -70,4 +72,6 @@ public:
 		void SetMaxChargePowerMax(const float charge) { MaxChargePowerMax = charge; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE bool GetIsGaugeAnimeEnd() const { return IsGaugeAnimeEnd; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE bool GetIsDamage() const { return IsDamage; }
 };
