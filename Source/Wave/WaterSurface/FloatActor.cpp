@@ -26,7 +26,6 @@ void AFloatActor::BeginPlay()
 	Super::BeginPlay();
 	
 	WaterSurface = Cast<AWaterSurface>((UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass())));
-	StaticMeshComponent = Cast<UStaticMeshComponent>(GetComponentByClass(UStaticMeshComponent::StaticClass()));
 
 	IsFall = false;
 }
@@ -88,6 +87,8 @@ void AFloatActor::Tick(float DeltaTime)
 		Height = FMath::Lerp(CurPos.Z, Height, 0.15f);
 		SetActorLocation(FVector(CurPos.X, CurPos.Y, Height));
 	}
+
+	RootComponent->UpdateChildTransforms();
 }
 
 FVector AFloatActor::AdjustMove_VS_Circle(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius)

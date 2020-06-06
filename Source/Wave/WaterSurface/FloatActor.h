@@ -72,6 +72,5 @@ public:
 
 protected:
 	AWaterSurface* WaterSurface;
-	UStaticMeshComponent* StaticMeshComponent;
 private:
 };

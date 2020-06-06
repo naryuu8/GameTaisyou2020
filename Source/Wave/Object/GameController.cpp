@@ -2,7 +2,7 @@
 
 #include "GameController.h"
 #include "Kismet/GameplayStatics.h"
-#include "Goal.h"
+#include "GoalComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "../UI/TimeCountUI.h"
 #include "../UI/GameOverUI.h"
@@ -26,24 +26,32 @@ void AGameController::BeginPlay()
 	GetPlayer = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	IsGameClear = false;
 	IsGameOver = false;
+	NotExplotionCount = 0;
 	DataTableLoad();
-	// シーン上のゴールを全て取得
-	TArray<class AActor*> FoundGoals;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGoal::StaticClass(), FoundGoals);
-	for (auto Actor : FoundGoals)
-	{
-		GoalArray.Add(Cast<AGoal>(Actor));
-	}
-	SetNorma();
+
 	//ポーズ中でもTickが来るようにする
 	SetTickableWhenPaused(true);
+
+	// シーン上のゴールを全て取得
+	TArray<class AActor*> FoundGoals;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), FoundGoals);
+	for (auto Actor : FoundGoals)
+	{
+		UGoalComponent * Goal = Cast<UGoalComponent>(Actor->GetComponentByClass(UGoalComponent::StaticClass()));
+		if (!Goal) continue;
+
+		if(!Goal->GetIsExplotion())
+			NotExplotionCount++;
+	}
+
+//	SetNorma();
+
 	//MaxNimotuが0の時はデバッグモードなので現在のマップの荷物数を得る
 	if (MaxNimotu == 0)
 	{
 		GetMaxNimotu();
 	}
 	GameMaxNimotu = MaxNimotu;
-	NotExplotionCount = GetNotExplotionCount(); //壊れていない家の数Get
 }
 
 // Called every frame
@@ -60,28 +68,6 @@ void AGameController::Tick(float DeltaTime)
 	GameOverCheck();
 	InputGameOverUI();
 	InputResultUI();
-}
-
-int AGameController::GetGoalCount()
-{
-	int Count = 0;
-	for (auto Goal : GoalArray)
-	{
-		if (Goal->GetIsGoal())
-			Count++;
-	}
-	return Count;
-}
-
-int AGameController::GetNotExplotionCount()
-{
-	int Count = 0;
-	for (auto Goal : GoalArray)
-	{
-		if (!Goal->GetIsExplotion())
-			Count++;
-	}
-	return Count;
 }
 
 void AGameController::CreateTimeCountUI()
@@ -235,7 +221,7 @@ void AGameController::GameClearCheck()
 		timerManager.SetTimer(handle, this, &AGameController::GameClear, 2.8f);
 	};
 	// ゲームクリア条件
-	//①ノルマ以上荷物を入れている時かつハンマーが壊れて残り時間が0になったら
+	//①ノルマ以上荷物を入れている時かつ残り時間が0になったら
 	if (GoalCount >= NormaGoalCount && GetLimitTimeZero())
 	{
 		gameclear();
@@ -265,7 +251,7 @@ void AGameController::GameOverCheck()
 		FTimerHandle handle;
 		timerManager.SetTimer(handle, this, &AGameController::GameOver,3.0f);
 	};
-	//①ノルマまで荷物を運んでおらずハンマーが壊れて残り時間が0になったら
+	//①ノルマまで荷物を運んでおらず残り時間が0になったら
 	if (GoalCount < NormaGoalCount && GetLimitTimeZero())
 	{
 		gameover();

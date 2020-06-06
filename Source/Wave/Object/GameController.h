@@ -50,7 +50,7 @@ private:
 	//ゲーム上に配置されている荷物の数（リアルタイム更新）
 	int GameMaxNimotu = 0;
 	// シーン上の全てのゴールのポインタを所持する
-	TArray<class AGoal*> GoalArray;
+	//TArray<class UGoalComponent*> GoalArray;
 
 	// 表示するUI　エディタで指定する
 	UPROPERTY(EditAnywhere)
@@ -101,10 +101,7 @@ public:
 	void AddNotExplotionCount() { NotExplotionCount++; }
 	void MinusNotExplotionCount() { NotExplotionCount--; }
 private:
-	// ゴール済みの個数を取得
-	int GetGoalCount();
-	// 爆発済みの家の個数を取得
-	int GetNotExplotionCount();
+
 	void CreateTimeCountUI();
 	void CreateGameOverUI();
 	void CreateResultUI();
