@@ -11,6 +11,7 @@
 #include "SquareLand.h"
 #include "../MyFunc.h"
 #include "../Object/GameController.h"
+#include "../Object/GoalComponent.h"
 
 
 // Sets default values
@@ -28,6 +29,7 @@ void AFloatActor::BeginPlay()
 	WaterSurface = Cast<AWaterSurface>((UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass())));
 
 	IsFall = false;
+	IsDeth = false;
 }
 
 // Called every frame
@@ -35,7 +37,7 @@ void AFloatActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!WaterSurface) return;
+	if (!WaterSurface || IsDeth) return;
 
 	if (IsFall)
 	{
@@ -64,9 +66,6 @@ void AFloatActor::Tick(float DeltaTime)
 	if ((!WaterSurface->IsInField(GetActorLocation() + Velocity)))
 	{
 		IsFall = true;
-		/// 物理演算を使用する
-		//StaticMeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_Visibility);
-		//StaticMeshComponent->SetSimulatePhysics(true);
 		Velocity = Velocity.GetSafeNormal() * 8.0f;
 		// 数秒後にオブジェクトを削除
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
@@ -231,14 +230,21 @@ FVector AFloatActor::AdjustMove_VS_Square(const FVector & OldPos, FVector MovedP
 
 void AFloatActor::MyDestroy()
 {
+	AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+	if (!game) return;
+
 	//自身がゴールに運ぶ荷物だったらゲームコントローラーにゲーム内の荷物が減ったことを通知
 	if (ActorHasTag("Nimotu"))
 	{
-		AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
-		if (game)
-		{
-			game->MinusGameMaxNimotu();
-		}
+		game->MinusGameMaxNimotu();
 	}
+	else
+	{
+		// ゴールを持っていた場合はゴールを壊したことにする
+		UGoalComponent * Goal = Cast<UGoalComponent>(GetComponentByClass(UGoalComponent::StaticClass()));
+		if (Goal)
+			Goal->SetGoalMinus();
+	}
+
 	this->Destroy();
 }

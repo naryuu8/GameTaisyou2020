@@ -40,12 +40,7 @@ void UGoalComponent::OnFloatActorCheck(AActor * OtherActor)
 	// Õ“Ë‚µ‚½ƒAƒNƒ^[‚ª”š’e‚ÌŽž”š”­‚µ‚ÄƒS[ƒ‹Ï‚Ý‚Å‚àƒS[ƒ‹‚µ‚Ä‚¢‚È‚¢‚±‚Æ‚É‚·‚é
 	if (OtherFloat->ActorHasTag("Bom"))
 	{
-		if (isGoal)
-			game->MinusGoalCount();
-
-		game->MinusNotExplotionCount();
-		isGoal = false;
-		isExplotion = true;
+		SetGoalMinus();
 		OtherFloat->Destroy();
 		//BreakHome();
 		return;
@@ -71,5 +66,17 @@ void UGoalComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void UGoalComponent::SetGoalMinus()
+{
+	AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+	if (!game) return;
+	if (isGoal)
+		game->MinusGoalCount();
+
+	isGoal = false;
+	isExplotion = true;
+	game->MinusNotExplotionCount();
 }
 

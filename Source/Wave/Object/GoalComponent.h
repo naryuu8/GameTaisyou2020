@@ -40,6 +40,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		bool GetIsExplotion()const { return isExplotion; };
 
+	void SetGoalMinus();
+
 private:
 	bool isGoal;
 	bool isExplotion; //Ç±ÇÌÇÍÇƒÇµÇ‹Ç¡ÇΩÅIÅI

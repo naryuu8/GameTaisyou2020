@@ -36,6 +36,7 @@ void ABreakFloatActor::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 	if (OtherFloat->ActorHasTag("Bom"))
 	{
 		IsExplotion = true;
+		SetDeth();
 		BreakAnime();
 		OtherFloat->Destroy();
 	}
