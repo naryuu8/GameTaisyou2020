@@ -7,6 +7,8 @@
 #include "../WaterSurface/WaterSurface.h"
 #include "../WaterSurface/FloatActor.h"
 
+#include "../SoundManager.h"
+
 // Sets default values
 ABreakSquareLand::ABreakSquareLand()
 {
@@ -53,4 +55,6 @@ void ABreakSquareLand::Break()
 		Water->SetSquareLand(GetActorLocation(), XLength, YLength, VertexType::Water);
 	}
 	SetIsUse(false);
+	ASoundManager::SafePlaySound(SOUND_TYPE::BREAK_LAND);
+	ASoundManager::SafePlaySound(SOUND_TYPE::EXPLOSION);
 }

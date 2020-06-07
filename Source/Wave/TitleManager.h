@@ -48,6 +48,8 @@ private:
 	void SetCameraMove(AActor* camera, const float camera_speed);
 	//タイトルでボタンを押したときステージセレクトまでのカメラ遷移を行う
 	void CameraMoveCheck();
+
+	UAudioComponent* AudioComponent;
 public:
 	// Sets default values for this pawn's properties
 	ATitleManager();
