@@ -5,7 +5,7 @@ static ASoundManager* SoundManagerInstance = nullptr;
 
 static TCHAR* FileNames[] =
 {
-	TEXT("title_Cue"),
+	TEXT("title_Cue"),					
 	TEXT("walk_wood"),
 	TEXT("system_kirikae_1"),
 	TEXT("walk_sougen"),
