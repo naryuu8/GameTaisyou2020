@@ -27,12 +27,8 @@ protected:
 		bool IsDeth;	// 場外に出たまたは水に落ちた時
 
 private:
-	// ポーズUI　エディタで指定する
-	UPROPERTY(EditAnywhere)
-		TSubclassOf<UPauseUI> PauseUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UHammerCountBarUI> HammerCountBarUIClass;
-	UPauseUI* PauseUI = nullptr;
 	UHammerCountBarUI* HammerCountBarUI = nullptr;
 	//ゲージで表示する用のプレイヤーのハンマーMAXHP
 	UPROPERTY(EditAnywhere, Category = "Parameter")
@@ -63,7 +59,6 @@ private:
 
 	float HammerHP;
 	float MoveAmount;	// 移動量の割合
-	void PauseInput();
 	void CreateHammerCountBarUI();
 	void UpdateGaugeHP();
 	AWaterSurface* Water;
@@ -186,4 +181,6 @@ public:
 		FORCEINLINE	float GetHammerPower() const { return HammerPower; };
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	float GetChargeCount() const { return ChargeCount; };
+	bool GetIsAttack() const;
+	bool GetIsCharge() const;
 };

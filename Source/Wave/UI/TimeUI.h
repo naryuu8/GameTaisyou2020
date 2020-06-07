@@ -29,14 +29,22 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float NormaAngle;
 	//1フレーム毎に回転する値を求める
+	//他の計算式でここで求めた値を使うので必ず最初に呼ぶこと
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void SetOneFrameAngle(const int time_limit);
 	//カウントダウンUIを表示する時間をセット
-	//戻り値は引数をそのまま返す
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		int SetCountDownAngle(const int countdown);
+		void SetCountDownAngle(const int countdown);
 	//ノルマ針の回転値をセット
 	//戻り値は回転値
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		float SetNormaAngle(const int norma_time);
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void UpDateTime();
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetTimeLimit(const int limit);
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetCountDownTime(const int time);
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetNormaTime(const int time);
 };

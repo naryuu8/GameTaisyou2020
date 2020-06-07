@@ -9,9 +9,10 @@
 class UHammerCountUI;
 class UGameOverUI;
 class UResultUI;
-class UTimeCountUI;
+class UGameTimeUI;
 class APlayerCharacter;
 class UNimotuCountUI;
+class UPauseUI;
 // ゲーム中のクリア条件などを管理するクラス
 
 UCLASS()
@@ -30,12 +31,15 @@ protected:
 	// クリアかどうかのゴールのノルマカウント
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game")
 		int NormaGoalCount = 0;
-	//ノルマの割合 0-100で入力
+	//制限時間
 	UPROPERTY(EditAnywhere, Category = "Game")
-		float NormaPercent = 0;
-	//ハンマーが0になった時の残り時間
+		int TimeLimit = 60;
+	//ノルマ時間
 	UPROPERTY(EditAnywhere, Category = "Game")
-		int LimitTime = 10;
+		int NormaTime = 10;
+	//カウントダウン表示開始時間
+	UPROPERTY(EditAnywhere, Category = "Game")
+		int CountDownTime = 10;
 private:
 	APlayerCharacter* GetPlayer;//プレイヤー情報
 	// ゲームクリアかどうか
@@ -50,19 +54,20 @@ private:
 	int MaxNimotu = 0;
 	//ゲーム上に配置されている荷物の数（リアルタイム更新）
 	int GameMaxNimotu = 0;
-	// シーン上の全てのゴールのポインタを所持する
-	//TArray<class UGoalComponent*> GoalArray;
 
 	// 表示するUI　エディタで指定する
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<UTimeCountUI> TimeCountUIClass;
+		TSubclassOf<UGameTimeUI> GameTimeUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UGameOverUI> GameOverUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UResultUI> ResultUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UNimotuCountUI> NimotuCountUIClass;
-	UTimeCountUI* TimeCountUI = nullptr;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UPauseUI> PauseUIClass;
+	UPauseUI* PauseUI = nullptr;
+	UGameTimeUI* GameTimeUI = nullptr;
 	UGameOverUI* GameOverUI = nullptr;
 	UResultUI* ResultUI = nullptr;
 	UNimotuCountUI* NimotuCountUI = nullptr;
@@ -86,9 +91,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		int GetMaxNimotu();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		FORCEINLINE float GetNormaPercent() const { return NormaPercent; }
+		FORCEINLINE int GetNormaTime() const { return NormaTime; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		void SetNormaPercent(const float percent) { NormaPercent = percent; }
+		void SetNormaTime(const int time) { NormaTime = time; }
 	//ゲームオーバーUIを生成していたらtrue
 	bool GetIsGameOverUI();
 	void MinusGameMaxNimotu();
@@ -106,14 +111,15 @@ public:
 	void MinusNotExplotionCount() { NotExplotionCount--; }
 private:
 
-	void CreateTimeCountUI();
+	void CreateGameTimeUI();
 	void CreateGameOverUI();
 	void CreateResultUI();
 	void CreateNimotuCountUI();
 	void InputGameOverUI();
 	void InputResultUI();
-	//ゲージのノルマ設定
-	void SetNorma();
+	void InputPause();
+	//時計の針を進める
+	void UpdateTime();
 	//ゲームクリア条件確認
 	void GameClearCheck();
 	//ゲームオーバー条件確認
@@ -122,8 +128,6 @@ private:
 	void GameOver();
 	//ゲームプレイ中の荷物数確認
 	int CountGameNimotu();
-	//ハンマーのHPが0でハンマーを叩き終わったらカウントダウンを開始する
-	void CheckTimeCount();
 	//カウントダウンの残り時間0の時trueを返す
 	bool GetLimitTimeZero();
 };

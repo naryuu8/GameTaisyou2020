@@ -12,7 +12,7 @@ void UTimeUI::SetOneFrameAngle(const int time_limit)
 	OneFrameAngle = one / 60.0f;
 }
 
-int UTimeUI::SetCountDownAngle(const int countdown)
+void UTimeUI::SetCountDownAngle(const int countdown)
 {
 	//‚Ü‚¸1•b–ˆ‚Ì‰ñ“]’l‚ğ‹‚ß‚é
 	CountDownAngle = OneFrameAngle * 60.0f;
@@ -20,7 +20,6 @@ int UTimeUI::SetCountDownAngle(const int countdown)
 	CountDownAngle = CountDownAngle * countdown;
 	//360‚ğˆø‚¢‚Ä•\¦‚·‚é‰ñ“]’l‚ğ‹‚ß‚é
 	CountDownAngle = 360.0f- CountDownAngle;
-	return countdown;
 }
 
 float UTimeUI::SetNormaAngle(const int norma_time)

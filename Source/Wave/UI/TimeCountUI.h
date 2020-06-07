@@ -25,7 +25,8 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		FText CountText;
 public:
-	void SetTimeCount(const int time) { TimeCount = time; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void SetTimeCount(const int time) { TimeCount = time; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsCountZero() const { return IsCountZero; }
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)

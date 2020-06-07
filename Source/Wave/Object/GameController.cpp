@@ -4,10 +4,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "GoalComponent.h"
 #include "Blueprint/UserWidget.h"
-#include "../UI/TimeCountUI.h"
+#include "../UI/GameTimeUI.h"
 #include "../UI/GameOverUI.h"
 #include "../UI/ResultUI.h"
 #include "../UI/NimotuCountUI.h"
+#include "../UI/PauseUI.h"
 #include "../InputManager.h"
 #include "../Player/PlayerCharacter.h"
 #include "../WaterSurface/FloatActor.h"
@@ -45,8 +46,6 @@ void AGameController::BeginPlay()
 			NotExplotionCount++;
 	}
 
-//	SetNorma();
-
 	//MaxNimotuが0の時はデバッグモードなので現在のマップの荷物数を得る
 	if (MaxNimotu == 0)
 	{
@@ -54,8 +53,8 @@ void AGameController::BeginPlay()
 	}
 	GameMaxNimotu = MaxNimotu;
 
-	//NotExplotionCount = GetNotExplotionCount(); //壊れていない家の数Get
 	CreateNimotuCountUI();
+	CreateGameTimeUI();
 }
 
 // Called every frame
@@ -67,32 +66,44 @@ void AGameController::Tick(float DeltaTime)
 	{
 		GetPlayer = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	}
-	CheckTimeCount();
+	//アタックアニメ中はポーズを開けないようにする
+	if (!GetPlayer->GetIsAttack() && !GetPlayer->GetIsCharge())
+	{
+		InputPause();
+		if (UGameplayStatics::IsGamePaused(GetWorld()))
+		{//ポーズ中はポーズの入力しか受け付けない
+			return;
+		}
+	}
+	
 	GameClearCheck();
 	GameOverCheck();
 	InputGameOverUI();
 	InputResultUI();
+	UpdateTime();
 }
 
-void AGameController::CreateTimeCountUI()
+void AGameController::CreateGameTimeUI()
 {
-	if (TimeCountUI)return;
-	if (TimeCountUIClass != nullptr)
+	if (GameTimeUI)return;
+	if (GameTimeUIClass != nullptr)
 	{
-		TimeCountUI = CreateWidget<UTimeCountUI>(GetWorld(), TimeCountUIClass);
-		if (TimeCountUI != nullptr)
+		GameTimeUI = CreateWidget<UGameTimeUI>(GetWorld(), GameTimeUIClass);
+		if (GameTimeUI != nullptr)
 		{
-			TimeCountUI->AddToViewport();
-			TimeCountUI->SetTimeCount(LimitTime);
+			GameTimeUI->AddToViewport();
+			GameTimeUI->SetTimeLimit(TimeLimit);
+			GameTimeUI->SetCountDownTime(NormaTime);
+			GameTimeUI->SetNormaTime(CountDownTime);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("TimeCountUIClass : %s"), L"Widget cannot create");
+			UE_LOG(LogTemp, Error, TEXT("GameTimeUIClass : %s"), L"Widget cannot create");
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("TimeCountUIClass : %s"), L"UIClass is nullptr");
+		UE_LOG(LogTemp, Error, TEXT("GameTimeUIClass : %s"), L"UIClass is nullptr");
 	}
 }
 
@@ -128,7 +139,7 @@ void AGameController::CreateResultUI()
 		{
 			ResultUI->AddToViewport();
 			GetPlayer->HammerCountBarParent();
-			ResultUI->SetResultGaugeAnimeCheckEvent(GetPlayer->GetMaxHammerHP(),GetPlayer->GetHammerHP(), NormaPercent);
+		//	ResultUI->SetResultGaugeAnimeCheckEvent(GetPlayer->GetMaxHammerHP(),GetPlayer->GetHammerHP(), NormaPercent);
 			//ResultUI->SetResultGaugeAnimeCheckEvent(100.0f, 80.0f, 30.0f);
 			ResultUI->SetResultNowNimotuCheckEvent(GoalCount);
 			//ResultUI->SetResultNowNimotuCheckEvent(3);
@@ -173,7 +184,6 @@ void AGameController::CreateNimotuCountUI()
 void AGameController::InputGameOverUI()
 {
 	if (!IsGameOver)return;
-	//if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
 	if (!GameOverUI)return;
 	if (GameOverUI->GetIsPlayAnimation())return;
 	const AInputManager * inputManager = AInputManager::GetInstance();
@@ -214,8 +224,87 @@ void AGameController::InputResultUI()
 	}
 }
 
-void AGameController::SetNorma()
+void AGameController::InputPause()
 {
+	const AInputManager * inputManager = AInputManager::GetInstance();
+	if (!inputManager)return;
+	const InputState * input = inputManager->GetState();
+	if (input->Pause.IsPress)
+	{//ポーズ中でなければポーズ画面を開き、ポーズ中だったらポーズ画面を閉じる
+		AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+		//ゲーム終了条件を満たしていたらポーズを開けないようにする
+		if (game->GetIsClear() || game->GetIsGameOver())return;
+		if (!UGameplayStatics::IsGamePaused(GetWorld()))
+		{
+			if (PauseUIClass != nullptr)
+			{//初めてポーズ画面を開くときはUIを生成する
+				if (!PauseUI)
+				{
+					PauseUI = CreateWidget<UPauseUI>(GetWorld(), PauseUIClass);
+					PauseUI->AddToViewport();
+					////ポーズ用のバーを更新するためHPを渡す
+					//PauseUI->SetMaxHP(MaxHammerHP);
+					//PauseUI->SetHP(HammerHP);
+					if (game)
+					{
+						game->SetTimeCountPause();
+					}
+				}
+				else if (PauseUI)
+				{
+					if (PauseUI->GetIsPlayAnimation())return;
+					PauseUI->AddToViewport();
+					//PauseUI->SetHP(HammerHP);
+					if (game)
+					{
+						game->SetTimeCountPause();
+					}
+				}
+				//生成してもnullptrだったらエラー文表示
+				if (PauseUI == nullptr)
+				{
+					UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"Widget cannot create");
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"PauseUIClass is nullptr");
+			}
+		}
+		else if (UGameplayStatics::IsGamePaused(GetWorld()))
+		{
+			if (!PauseUI)return;
+			if (PauseUI->GetIsPlayAnimation())return;
+			PauseUI->EndPlayAnimation();
+			if (game)
+			{
+				game->SetTimeCountRePlay();
+			}
+		}
+	}
+	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
+	if (!PauseUI)return;
+	if (input->Up.IsPress)
+	{
+		PauseUI->BackSelectState();
+	}
+	if (input->Down.IsPress)
+	{
+		PauseUI->NextSelectState();
+	}
+	if (input->Select.IsPress)
+	{
+		PauseUI->SelectStateAction();
+	}
+}
+
+void AGameController::UpdateTime()
+{
+	if (UGameplayStatics::IsGamePaused(GetWorld()))return;
+	if (GameTimeUI)
+	{
+		GameTimeUI->UpDateTime();
+	}
 }
 
 int AGameController::GetMaxNimotu()
@@ -301,18 +390,18 @@ void AGameController::GameOverCheck()
 void AGameController::GameClear()
 {
 	CreateResultUI();
-	if (TimeCountUI)
+	if (GameTimeUI)
 	{
-		TimeCountUI->RemoveFromParent();
+		GameTimeUI->RemoveFromParent();
 	}
 }
 
 void AGameController::GameOver()
 {
 	CreateGameOverUI();
-	if (TimeCountUI)
+	if (GameTimeUI)
 	{
-		TimeCountUI->RemoveFromParent();
+		GameTimeUI->RemoveFromParent();
 	}
 }
 
@@ -335,33 +424,28 @@ int AGameController::CountGameNimotu()
 	return num;
 }
 
-void AGameController::CheckTimeCount()
-{
-
-}
-
 bool AGameController::GetLimitTimeZero()
 {
-	if (TimeCountUI)
+	if (GameTimeUI)
 	{
-		return TimeCountUI->GetIsCountZero();
+		return GameTimeUI->GetIsCountZero();
 	}
 	return false;
 }
 
 void AGameController::SetTimeCountPause()
 {
-	if (TimeCountUI)
+	if (GameTimeUI)
 	{
-		TimeCountUI->AnimationPause();
+		GameTimeUI->AnimationPause();
 	}
 }
 
 void AGameController::SetTimeCountRePlay()
 {
-	if (TimeCountUI)
+	if (GameTimeUI)
 	{
-		TimeCountUI->AnimationRePlay();
+		GameTimeUI->AnimationRePlay();
 	}
 }
 
