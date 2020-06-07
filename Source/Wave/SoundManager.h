@@ -28,6 +28,7 @@ enum class SOUND_TYPE : uint8
 	WAVE			UMETA(DisplayName = "Wave"),
 	SPAWN_SLIP		UMETA(DisplayName = "SpawnSlip"),
 	COUNT_UP		UMETA(DisplayName = "CountUp"),
+	STAMP			UMETA(DisplayName = "Stamp"),
 	MENU_SELECT		UMETA(DisplayName = "MenuSelect"),
 	MENU_DECISION	UMETA(DisplayName = "MenuDecision")
 };

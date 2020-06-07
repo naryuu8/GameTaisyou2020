@@ -12,6 +12,7 @@
 #include "FloatActor.h"
 #include "BreakSquareLand.h"
 #include "../MyFunc.h"
+#include "../SoundManager.h"
 
 AWaterSurface::AWaterSurface() : AProceduralMeshActor()
 {
@@ -193,6 +194,8 @@ void AWaterSurface::Tick(float DeltaTime)
 
 void AWaterSurface::CreateWave(int32 x, int32 y, float power)
 {
+	ASoundManager::SafePlaySound(SOUND_TYPE::WAVE);
+
 	// ƒKƒEƒX‰‰ŽZ
 	auto gauss = [](float distance, float sigma)
 	{

@@ -21,6 +21,7 @@ static TCHAR* FileNames[] =
 	TEXT("SoundWave'/Game/Main/Sound/SE/ikada_nami_1.ikada_nami_1'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/Result_drop.result_drop'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/Result_number.result_number'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/result_hanko.result_hanko'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/kirikae/kirikae_1.kirikae_1' "),
 	TEXT("SoundWave'/Game/Main/Sound/SE/kettei/kettei_2.kettei_2'")
 };
