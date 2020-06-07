@@ -5,24 +5,24 @@ static ASoundManager* SoundManagerInstance = nullptr;
 
 static TCHAR* FileNames[] =
 {
-	TEXT("title_Cue"),					
-	TEXT("walk_wood"),
-	TEXT("system_kirikae_1"),
-	TEXT("walk_sougen"),
-	TEXT("hammer_small"),
-	TEXT("hammer_medium"),
-	TEXT("hammer_big"),
-	TEXT("house_in"),
-	TEXT("explosion"),
+	TEXT("SoundCue'/Game/Main/Sound/BGM/title_Cue.title_Cue'"),					
+	TEXT("SoundWave'/Game/Main/Sound/SE/walk_wood/walk_wood_1.walk_wood_1'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/system_kirikae_1.system_kirikae_1'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/walk_sougen/walk_sougen_1.walk_sougen_1'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/hammer_small.hammer_small'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/hammer_medium.hammer_medium'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/hammer_big.hammer_big'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/house_in.house_in'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/explosion.explosion'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/fall/fall_1.fall_1'"),
-	TEXT("player_fall"),
-	TEXT("explosion"),
-	TEXT("ikada_kishimi_1"),
-	TEXT("ikada_nami_1"),
-	TEXT("result_drop"),
-	TEXT("result_number"),
-	TEXT("kirikae_1 "),
-	TEXT("kettei_2")
+	TEXT("SoundWave'/Game/Main/Sound/SE/player_fall.player_fall'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/explosion.explosionik"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/ikada_kisimi_1.ikada_kisimi_1'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/ikada_nami_1.ikada_nami_1'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/Result_drop.result_drop'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/Result_number.result_number'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/kirikae/kirikae_1.kirikae_1' "),
+	TEXT("SoundWave'/Game/Main/Sound/SE/kettei/kettei_2.kettei_2'")
 };
 
 // Sets default values
