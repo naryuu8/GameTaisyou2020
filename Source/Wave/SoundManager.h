@@ -41,6 +41,8 @@ private:
 	UPROPERTY(EditAnywhere)
 		TArray <UAudioComponent*> AudioComponent;	
 
+	void AddAudioComponent(UAudioComponent* addComp) { AudioComponent.Add(addComp); }
+
 public:	
 
 	ASoundManager();
