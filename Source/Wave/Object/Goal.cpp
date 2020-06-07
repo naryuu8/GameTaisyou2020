@@ -65,6 +65,7 @@ void AGoal::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 		if (game)
 		{
 			game->AddGoalCount();
+			game->MinusGameMaxNimotu();
 		}
 		// Õ“Ë‚µ‚½‰×•¨‚ðíœ
 		OtherFloat->Destroy();

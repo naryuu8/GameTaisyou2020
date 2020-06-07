@@ -12,66 +12,44 @@ ASoundManager::ASoundManager()
 }
 
 void ASoundManager::BeginPlay() {
-	if (AudioComponent.Num() == SoundList.Num())
-	{
-		return;
-	}
 
-	for (const auto& Cue : SoundList)
-	{
-		FString CueName = Cue->GetName();
-		FName AudioCompName(*CueName);
-
-		// create AudioComponent
-		auto NewAudioComponent = NewObject<UAudioComponent>(this, AudioCompName);
-
-		AudioComponent.Add(NewAudioComponent);
-	}
+	auto NewAudioComponent = NewObject<UAudioComponent>(this);
+	AudioComponent.Add(NewAudioComponent);
 }
 
-void ASoundManager::PlaySound(int Index)
+void ASoundManager::PlaySound(TCHAR* fileName)
 {
-	if (Index < 0 || Index >= SoundList.Num()) return;//リストに存在しないインデックスなら再生しない
-	if (SoundList.GetData()[Index] == nullptr) return;//サウンドが設定されていないなら再生しない
-
-	AudioComponent[Index]->Sound = SoundList.GetData()[Index];//サウンド設定
-	AudioComponent[Index]->Play();//サウンドを再生する
+	for (int i = 0; i < AudioComponent.Num(); i++) {
+		if (!AudioComponent[i]->IsPlaying()) {
+			AudioComponent[i]->Sound = LoadObject<USoundBase>(NULL,fileName, NULL, LOAD_None, NULL);
+			AudioComponent[i]->Play();
+			break;
+		}
+		
+		if(AudioComponent.Num() == i + 1){
+			auto NewAudioComponent = NewObject<UAudioComponent>(this);
+			NewAudioComponent->Sound = LoadObject<USoundBase>(NULL, fileName, NULL, LOAD_None, NULL);
+			NewAudioComponent->Play();
+			AudioComponent.Add(NewAudioComponent);
+			break;
+		}
+	}
 }
-
-void ASoundManager::Play3DSound(int Index,UWorld* world,FVector vector)
-{
-	if (Index < 0 || Index >= SoundList.Num()) return;//リストに存在しないインデックスなら再生しない
-	if (SoundList.GetData()[Index] == nullptr) return;//サウンドが設定されていないなら再生しない
-
-	UGameplayStatics::PlaySoundAtLocation(world, SoundList.GetData()[Index], vector);
-}
-
-void ASoundManager::StopSound(int Index) {
-	if (Index < 0 || Index >= SoundList.Num()) return;//リストに存在しないインデックスなら再生しない
-	if (SoundList.GetData()[Index] == nullptr) return;//サウンドが設定されていないなら再生しない
-	AudioComponent[Index]->Stop();//サウンドを停止する
-}
-
 
 ASoundManager* ASoundManager::GetInstance()
 {
 	return SoundManagerInstance;
 }
 
-void ASoundManager::SafePlaySound(int Index)
+//引数はTCHARなので _T()で囲む　ex)_T("SoundCue'/Game/Main/Sound/hammer_sougen_Cue.hammer_sougen_Cue'")
+void ASoundManager::SafePlaySound(TCHAR* fileName)
 {
 	if (!SoundManagerInstance) return;
-	SoundManagerInstance->PlaySound(Index);
+	SoundManagerInstance->PlaySound(fileName);
 }
 
-void ASoundManager::SafePlay3DSound(int Index,UWorld* world, FVector vector)
-{
-	if (!SoundManagerInstance) return;
-	SoundManagerInstance->Play3DSound(Index,world,vector);
-}
-
-void ASoundManager::SafeStopSound(int Index)
-{
-	if (!SoundManagerInstance) return;
-	SoundManagerInstance->StopSound(Index);
+UAudioComponent* ASoundManager::CreateAudioComponent(TCHAR* fileName) {
+	auto NewAudioComponent = NewObject<UAudioComponent>();
+	NewAudioComponent->Sound = LoadObject<USoundBase>(NULL, fileName, NULL, LOAD_None, NULL);
+	return NewAudioComponent;
 }

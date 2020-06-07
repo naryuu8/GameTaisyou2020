@@ -333,7 +333,7 @@ void AWaterSurface::TickFlashFloodWave(AFlashFlood* FlashFlood)
 			Vertices[index].Z = FMath::Clamp(Vertices[index].Z, -MaxWaveHight, MaxWaveHight);
 
 			// ‚‚³‚É‰ž‚¶‚ÄƒJƒ‰[‚ð•ÏX
-			VertexColors[index] = FLinearColor::LerpUsingHSV(WaterColor, WaveColor, FMath::Abs(Vertices[index].Z) / MaxWaveHight);
+			VertexColors[index] = FLinearColor::LerpUsingHSV(WaterColor, WaveColor, FMath::Abs(Vertices[index].Z) / FlashFlood->MaxHight);
 		}
 	}
 }
@@ -512,7 +512,7 @@ FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector& moveVec
 	for (auto Actor : FoundActors)
 	{
 		AFloatActor* FloatActor = Cast<AFloatActor>(Actor);
-		if (!FloatActor || Object == Actor) continue;
+		if (!FloatActor || Object == Actor || FloatActor->GetIsDeth()) continue;
 
 		movedPos = FloatActor->AdjustMove_VS_Circle(actorPos, movedPos, moveVec, circleRadius);
 	}
@@ -541,7 +541,7 @@ FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector & moveVe
 	for (auto Actor : FoundActors)
 	{
 		AFloatActor* FloatActor = Cast<AFloatActor>(Actor);
-		if (!FloatActor || Object == Actor) continue;
+		if (!FloatActor || Object == Actor || FloatActor->GetIsDeth()) continue;
 
 		movedPos = FloatActor->AdjustMove_VS_Square(actorPos, movedPos, moveVec, XLen, YLen);
 	}

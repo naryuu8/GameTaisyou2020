@@ -53,6 +53,8 @@ struct InputState
 	InputDirection RightStick;
 	// プレイヤーアタック
 	InputActionState Attack;
+	// プレイヤーアタックキャンセル
+	InputActionState AttackCancel;
 	// カメラの追従タイプ切り替え（右スティック押し込みボタン）
 	InputActionState RightStickButton;
 	// ポーズボタン
@@ -109,6 +111,8 @@ private:
 	// ハンマーでたたく入力情報受け取り
 	void InputAttackPress() { State.Attack.Press(); };
 	void InputAttackRelease() { State.Attack.Release(); };
+	void InputAttackCancelPress() { State.AttackCancel.Press(); };
+	void InputAttackCancelRelease() { State.AttackCancel.Release(); };
 	
 	// カメラの追従タイプ切り替え入力情報受け取り（右スティック押し込みボタン）
 	void InputRightStickButtonPress() { State.RightStickButton.Press(); };
