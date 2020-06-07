@@ -14,7 +14,7 @@ static TCHAR* FileNames[] =
 	TEXT("hammer_big"),
 	TEXT("house_in"),
 	TEXT("explosion"),
-	TEXT("fall"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/fall/fall_1.fall_1'"),
 	TEXT("player_fall"),
 	TEXT("explosion"),
 	TEXT("ikada_kishimi_1"),

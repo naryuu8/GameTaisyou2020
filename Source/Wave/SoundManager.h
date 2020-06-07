@@ -9,26 +9,27 @@
 #include "Kismet/GameplayStatics.h"
 #include "SoundManager.generated.h"
 
-enum class SOUND_TYPE
+UENUM(BlueprintType)
+enum class SOUND_TYPE : uint8
 {
-	TITLE_BGM,
-	WALK_WOOD,
-	STAGE_SELECT,
-	WALK_GRASS,
-	HAMMER_SMALL,
-	HAMMER_MEDIUM,
-	HAMMER_BIG,
-	GOAL,
-	EXPLOSION,
-	FALL_ACTOR,
-	FALL_PLAYER,
-	BREAK_LAND,
-	MOVE_RAFT,
-	WAVE,
-	SPAWN_SLIP,
-	COUNT_UP,
-	MENU_SELECT,
-	MENU_DECISION
+	TITLE_BGM		UMETA(DisplayName = "TitleBGM"),
+	WALK_WOOD		UMETA(DisplayName = "WalkWood"),
+	STAGE_SELECT	UMETA(DisplayName = "StageSelect"),
+	WALK_GRASS		UMETA(DisplayName = "WalkGrass"),
+	HAMMER_SMALL	UMETA(DisplayName = "HammerSmall"),
+	HAMMER_MEDIUM	UMETA(DisplayName = "HammerMedium"),
+	HAMMER_BIG		UMETA(DisplayName = "HammerBig"),
+	GOAL			UMETA(DisplayName = "Goal"),
+	EXPLOSION		UMETA(DisplayName = "Explosion"),
+	FALL_ACTOR		UMETA(DisplayName = "FallActor"),
+	FALL_PLAYER		UMETA(DisplayName = "FallPlayer"),
+	BREAK_LAND		UMETA(DisplayName = "BreakLand"),
+	MOVE_RAFT		UMETA(DisplayName = "MoveRaft"),
+	WAVE			UMETA(DisplayName = "Wave"),
+	SPAWN_SLIP		UMETA(DisplayName = "SpawnSlip"),
+	COUNT_UP		UMETA(DisplayName = "CountUp"),
+	MENU_SELECT		UMETA(DisplayName = "MenuSelect"),
+	MENU_DECISION	UMETA(DisplayName = "MenuDecision")
 };
 
 UCLASS()
@@ -51,9 +52,11 @@ public:
 
 	//@brief 再生可能かチェックを行い、可能なら音声を再生する
 	//@param Index [in] 再生する音声のインデックス
+	UFUNCTION(BlueprintCallable, Category = "Sound")
 	static void SafePlaySound(SOUND_TYPE type);
 
 	//指定した音声(Cue)が入っているUAudioComponentを返す
+	UFUNCTION(BlueprintCallable, Category = "Sound")
 	static UAudioComponent* CreateAudioComponent(SOUND_TYPE type);
 
 	//@brief サウンドマネージャを取得する
