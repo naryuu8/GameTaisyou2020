@@ -50,9 +50,9 @@ public:
 		ResultSelectState SelectState;
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void ClearPlayAnimation();
-	//このステージをクリアした時のMAXHP、HP、ノルマパーセントをセット
+	//このステージをクリアした時の制限時間、クリア時の針アングル、ノルマ針アングル、ノルマ時間をセット
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
-		void SetResultGaugeAnimeCheckEvent(const float MaxHP,const float HP,const float NormaPercent);
+		void SetResultTokeiAnimeCheckEvent(const int limit_time,const float clear_angle,const float norma_angle,const int norma_time);
 	//このステージで取得した荷物をセット
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void SetResultNowNimotuCheckEvent(const int NowNimotu);
