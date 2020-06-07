@@ -77,6 +77,5 @@ UAudioComponent* ASoundManager::CreateAudioComponent(SOUND_TYPE type) {
 	auto NewAudioComponent = NewObject<UAudioComponent>(SoundManagerInstance);
 	TCHAR* fileName = FileNames[(int)type];
 	NewAudioComponent->Sound = LoadObject<USoundBase>(NULL, fileName, NULL, LOAD_None, NULL);
-	SoundManagerInstance->AddAudioComponent(NewAudioComponent);
 	return NewAudioComponent;
 }
