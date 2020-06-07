@@ -3,6 +3,28 @@
 //インスタンスへのアドレス
 static ASoundManager* SoundManagerInstance = nullptr;
 
+static TCHAR* FileNames[] =
+{
+	TEXT("title_Cue"),
+	TEXT("walk_wood"),
+	TEXT("system_kirikae_1"),
+	TEXT("walk_sougen"),
+	TEXT("hammer_small"),
+	TEXT("hammer_medium"),
+	TEXT("hammer_big"),
+	TEXT("house_in"),
+	TEXT("explosion"),
+	TEXT("fall"),
+	TEXT("player_fall"),
+	TEXT("explosion"),
+	TEXT("ikada_kishimi_1"),
+	TEXT("ikada_nami_1"),
+	TEXT("result_drop"),
+	TEXT("result_number"),
+	TEXT("kirikae_1 "),
+	TEXT("kettei_2")
+};
+
 // Sets default values
 ASoundManager::ASoundManager()
 {
@@ -17,8 +39,10 @@ void ASoundManager::BeginPlay() {
 	AudioComponent.Add(NewAudioComponent);
 }
 
-void ASoundManager::PlaySound(TCHAR* fileName)
+void ASoundManager::PlaySound(SOUND_TYPE type)
 {
+	TCHAR* fileName = FileNames[(int)type];
+
 	for (int i = 0; i < AudioComponent.Num(); i++) {
 		if (!AudioComponent[i]->IsPlaying()) {
 			AudioComponent[i]->Sound = LoadObject<USoundBase>(NULL,fileName, NULL, LOAD_None, NULL);
@@ -42,14 +66,15 @@ ASoundManager* ASoundManager::GetInstance()
 }
 
 //引数はTCHARなので _T()で囲む　ex)_T("SoundCue'/Game/Main/Sound/hammer_sougen_Cue.hammer_sougen_Cue'")
-void ASoundManager::SafePlaySound(TCHAR* fileName)
+void ASoundManager::SafePlaySound(SOUND_TYPE type)
 {
 	if (!SoundManagerInstance) return;
-	SoundManagerInstance->PlaySound(fileName);
+	SoundManagerInstance->PlaySound(type);
 }
 
-UAudioComponent* ASoundManager::CreateAudioComponent(TCHAR* fileName) {
+UAudioComponent* ASoundManager::CreateAudioComponent(SOUND_TYPE type) {
 	auto NewAudioComponent = NewObject<UAudioComponent>();
+	TCHAR* fileName = FileNames[(int)type];
 	NewAudioComponent->Sound = LoadObject<USoundBase>(NULL, fileName, NULL, LOAD_None, NULL);
 	return NewAudioComponent;
 }
