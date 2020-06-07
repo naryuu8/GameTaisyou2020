@@ -3,6 +3,7 @@
 
 #include "BreakFloatActor.h"
 #include "../WaterSurface/FloatActor.h"
+#include "../SoundManager.h"
 
 ABreakFloatActor::ABreakFloatActor()
 {
@@ -35,6 +36,7 @@ void ABreakFloatActor::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 
 	if (OtherFloat->ActorHasTag("Bom"))
 	{
+		ASoundManager::SafePlaySound(SOUND_TYPE::EXPLOSION);
 		IsExplotion = true;
 		SetDeth();
 		BreakAnime();

@@ -9,6 +9,7 @@
 #include "../WaterSurface/FloatActor.h"
 #include "GameController.h"
 #include "Kismet/GameplayStatics.h"
+#include "../SoundManager.h"
 // Sets default values
 AGoal::AGoal()
 {
@@ -49,6 +50,7 @@ void AGoal::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 			}
 			game->MinusNotExplotionCount();
 		}
+		ASoundManager::SafePlaySound(SOUND_TYPE::EXPLOSION);
 		isGoal = false;
 		isExplotion = true;
 		OtherFloat->Destroy();
@@ -62,6 +64,7 @@ void AGoal::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 	{
 		// 衝突したアクターが荷物ならゴール済みにする
 		isGoal = true;
+		ASoundManager::SafePlaySound(SOUND_TYPE::GOAL);
 		if (game)
 		{
 			game->AddGoalCount();

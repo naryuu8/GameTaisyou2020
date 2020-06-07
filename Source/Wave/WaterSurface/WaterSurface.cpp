@@ -12,6 +12,7 @@
 #include "FloatActor.h"
 #include "BreakSquareLand.h"
 #include "../MyFunc.h"
+#include "../SoundManager.h"
 
 AWaterSurface::AWaterSurface() : AProceduralMeshActor()
 {
@@ -193,6 +194,8 @@ void AWaterSurface::Tick(float DeltaTime)
 
 void AWaterSurface::CreateWave(int32 x, int32 y, float power)
 {
+	ASoundManager::SafePlaySound(SOUND_TYPE::WAVE);
+
 	// ガウス演算
 	auto gauss = [](float distance, float sigma)
 	{
@@ -333,7 +336,7 @@ void AWaterSurface::TickFlashFloodWave(AFlashFlood* FlashFlood)
 			Vertices[index].Z = FMath::Clamp(Vertices[index].Z, -MaxWaveHight, MaxWaveHight);
 
 			// 高さに応じてカラーを変更
-			VertexColors[index] = FLinearColor::LerpUsingHSV(WaterColor, WaveColor, FMath::Abs(Vertices[index].Z) / MaxWaveHight);
+			VertexColors[index] = FLinearColor::LerpUsingHSV(WaterColor, WaveColor, FMath::Abs(Vertices[index].Z) / FlashFlood->MaxHight);
 		}
 	}
 }

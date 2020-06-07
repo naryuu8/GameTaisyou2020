@@ -71,8 +71,6 @@ private:
 	ARaft* CurrentRaft = nullptr;	// 乗っていない時は常にnullptr
 	bool IsInRaft = false;
 	void ResetRaftParam();
-	bool OldAttackFrame = false;
-	int  FreasTime = 0;
 public:
 	APlayerCharacter();
 
@@ -85,12 +83,6 @@ public:
 	// ハンマーの先端のトランスフォーム
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++Class")
 		USceneComponent* HummerTipPoint = nullptr;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++Class")
-		float BaseTurnRate;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++Class")
-		float BaseLookUpRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
 		UNiagaraSystem* AttackEffect = nullptr;
@@ -109,9 +101,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
 		void ChageDestroyEmmiter();
 	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
-		void ChageUpDateEmmiter(FVector pos);
+		void ChageUpDateEmmiter();
 	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
-		void ImpactEmmiterCreate(float FreasTimes);
+		void ImpactEmmiterCreate(const FVector & Pos);
 
 
 	static FORCEINLINE bool Trace(
@@ -159,14 +151,6 @@ protected:
 	void HummerAttackEnd();
 protected:
 
-	//BlueprintReadWrite=GetとSet関数をブルーブリントで公開
-
-	//ハンマー攻撃でホールド中ならtrue
-	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
-		bool IsAttackHold;
-	//攻撃アニメ再生中ならtrue
-	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
-		bool IsPlayAttackAnime;
 	//ハンマーパワー変数
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float HammerPower;
@@ -202,6 +186,4 @@ public:
 		FORCEINLINE	float GetHammerPower() const { return HammerPower; };
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	float GetChargeCount() const { return ChargeCount; };
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		FORCEINLINE	bool GetIsAttackHold() const { return IsAttackHold; };
 };

@@ -15,13 +15,16 @@ class WAVE_API UPlayerAnimInstance : public UAnimInstance
 protected:
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float Speed;
-	UPROPERTY(BlueprintReadOnly, Category = "C++Class")
+
+public:
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		bool IsCharge;
-	UPROPERTY(BlueprintReadOnly, Category = "C++Class")
-		bool IsAttackAnime;
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		bool IsAttack;
 
 private:
-	UAnimMontage* AnimMontage;
+	//UAnimMontage* AnimMontage;
+	FAnimNode_StateMachine * AnimState;
 public:
 	// コンストラクタ
 	UPlayerAnimInstance(const FObjectInitializer& ObjectInitializer);
@@ -41,13 +44,9 @@ public:
 	// イベント開始時
 	virtual void NativeBeginPlay() override;
 
-	void HummerChergeEvent();
-	void HummerAttackEvent();
+	bool IsCurrentStateName(FName StateName) const;
+	bool IsChargeAnim() { return IsCurrentStateName("Charge State"); };
 
-	bool GetIsCharge() const { return IsCharge; }
-
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		FORCEINLINE bool GetIsAttackAnime() const { return IsAttackAnime; }
 
 	// ブループリント側でアタック終了時にハンマーの先端部分を引数に入れる
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
