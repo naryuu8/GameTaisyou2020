@@ -10,6 +10,7 @@
 #include "UI/TitleUI.h"
 #include "GlobalGameInstance.h"
 #include "UI/FadeUI.h"
+#include "SoundManager.h"
 // Sets default values
 ATitleManager::ATitleManager()
 {
@@ -113,10 +114,13 @@ void ATitleManager::TitleInput()
 		if (input->Right.IsPress)
 		{
 			StageSelectCamera->RightInput();
+			ASoundManager::SafePlaySound(SOUND_TYPE::STAGE_SELECT);
+			
 		}
 		if (input->Left.IsPress)
 		{
 			StageSelectCamera->LeftInput();
+			ASoundManager::SafePlaySound(SOUND_TYPE::STAGE_SELECT);
 		}
 	}
 }
@@ -140,12 +144,15 @@ void ATitleManager::CameraMoveCheck()
 		{
 			MoveFrameTime = StageSelectTime * 60.0f;
 			State = ETitleState::TitleMove;
+			if(!AudioComponent)AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::WALK_WOOD);
+			AudioComponent->Play();
 			SetCameraMove(StageSelectCamera, StageSelectTime);
 			TitlePlayer->TargetRotation();
 		}
 		else if (State == ETitleState::TitleMove)
 		{
 			State = ETitleState::StageSelect;
+			AudioComponent->Stop();
 			IsNoInput = false;
 		}
 	}

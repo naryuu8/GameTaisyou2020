@@ -4,6 +4,7 @@
 #include "PauseUI.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Object/GameController.h"
+#include "../SoundManager.h"
 
 void UPauseUI::NativeConstruct()
 {
@@ -30,6 +31,7 @@ void UPauseUI::NextSelectState()
 	if (IsNoInput)return;
 	SelectNumber++;
 	SelectSE_Play();
+	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
 	if (SelectNumber > static_cast<int>(PauseState::STAGESELECT))
 	{
 		SelectNumber = static_cast<int>(PauseState::GAMEBACK);
@@ -42,6 +44,7 @@ void UPauseUI::BackSelectState()
 	if (IsNoInput)return;
 	SelectNumber--;
 	SelectSE_Play();
+	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
 	if (SelectNumber < 0)
 	{
 		SelectNumber = static_cast<int>(PauseState::STAGESELECT);
@@ -59,6 +62,7 @@ void UPauseUI::SelectStateAction()
 	}
 	IsNoInput = true;
 	EnterSE_Play();
+	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
 	switch (SelectNumber)
 	{
 		case static_cast<int>(PauseState::GAMEBACK):

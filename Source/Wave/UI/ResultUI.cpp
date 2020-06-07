@@ -3,6 +3,7 @@
 
 #include "ResultUI.h"
 #include "../InputManager.h"
+#include "../SoundManager.h"
 
 void UResultUI::NativeConstruct()
 {
@@ -20,6 +21,7 @@ void UResultUI::NextSelectState()
 	{
 		SelectNumber = static_cast<int>(ResultSelectState::NEXTSTAGE);
 	}
+	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
 }
 
 void UResultUI::BackSelectState()
@@ -31,6 +33,7 @@ void UResultUI::BackSelectState()
 	{
 		SelectNumber = static_cast<int>(ResultSelectState::STAGESELECT);
 	}
+	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
 }
 
 void UResultUI::SelectStateAction()
@@ -46,8 +49,10 @@ void UResultUI::SelectStateAction()
 	{
 		case static_cast<int>(ResultSelectState::NEXTSTAGE) :
 			NextStageChenge();
+			ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
 			break;
 			case static_cast<int>(ResultSelectState::STAGESELECT) :
+				ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
 				StageSelectChenge();
 				break;
 	}

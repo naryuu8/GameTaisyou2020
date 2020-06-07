@@ -13,11 +13,13 @@
 #include "../Object/GameController.h"
 #include "../Object/GoalComponent.h"
 
+#include "../SoundManager.h"
+
 
 // Sets default values
 AFloatActor::AFloatActor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -66,6 +68,9 @@ void AFloatActor::Tick(float DeltaTime)
 	if ((!WaterSurface->IsInField(GetActorLocation() + Velocity)))
 	{
 		IsFall = true;
+		
+		ASoundManager::SafePlaySound(SOUND_TYPE::FALL_ACTOR);
+
 		Velocity = Velocity.GetSafeNormal() * 8.0f;
 		// 数秒後にオブジェクトを削除
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
