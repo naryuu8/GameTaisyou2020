@@ -99,6 +99,7 @@ void ATitleManager::TitleInput()
 		{
 			SetCameraMove(TitleMoveCamera, TitleMoveTime);
 			IsNoInput = true;
+			TitlePlayer->SetIsSelect(true);
 			TitleUI->RemoveFromParent();
 		}
 		if (State == ETitleState::StageSelect)
