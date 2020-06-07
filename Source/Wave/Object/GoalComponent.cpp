@@ -53,6 +53,7 @@ void UGoalComponent::OnFloatActorCheck(AActor * OtherActor)
 		// 衝突したアクターが荷物ならゴール済みにする
 		isGoal = true;
 		game->AddGoalCount();
+		game->MinusGameMaxNimotu();
 		// 衝突した荷物を削除
 		OtherFloat->Destroy();
 		// ここでドアが閉まるアニメーション開始

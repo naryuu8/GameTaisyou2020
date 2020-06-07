@@ -19,6 +19,8 @@ public:
 		FText MaxNimotu;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		FText InNimotu;
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		FText LimitTime;
 	//スタンプ用テキスト
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		FText StampNimotu;
@@ -44,19 +46,22 @@ public:
 	//スタンプアニメが終わったらtrue
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		bool IsStampAnimeEnd = false;
-	//リザルトのノルマバー以上にあるか調べる変数
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
-		float ResultHP;
+		float ResultClearAngle;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
-		float ResultNormaPercent;
+		float ResultNormaAngle;
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		int ResultNormaTime;
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsCountAnimeEnd() const { return IsCountAnimeEnd; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsStampAnimeEnd() const { return IsStampAnimeEnd; }
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
-		void SetMaxHP(const float hp);
+		void SetTimeLimit(const int time);
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
-		void SetHP(const float hp);
+		void SetNormaAngle(const float time);
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetNeedleAndBG_Material(const float angle);
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void NimotuCountPlayAnimation();
 	//セーブデータの指定したスタンプフラグをtrueにする
