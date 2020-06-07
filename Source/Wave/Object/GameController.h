@@ -91,9 +91,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		int GetMaxNimotu();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		float GetNowTimeAngle();
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		float GetNormaTimeAngle();
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE int GetNormaTime() const { return NormaTime; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE int GetTimeLimit() const { return TimeLimit; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void SetNormaTime(const int time) { NormaTime = time; }
+	//制限時間とノルマ時間をセット
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void SetTime(const int time, const int norma) { TimeLimit = time; NormaTime = norma; }
 	//ゲームオーバーUIを生成していたらtrue
 	bool GetIsGameOverUI();
 	void MinusGameMaxNimotu();

@@ -28,6 +28,21 @@ public:
 	//ノルマを表示する回転値
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float NormaAngle;
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		float NowTimeAngle = 0.0f;
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		float NormaTimeAngle = 0.0f;
+	//リザルトで使用する変数/////
+	//時計のアニメが終わったらTrue
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		bool IsTokeiAnimeEnd = false;
+	//クリア時の針の位置
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		float ClearAngle;
+	//クリア時のノルマ針の位置
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		float ClearNormaAngle;
+	///////////////////////////////
 	//1フレーム毎に回転する値を求める
 	//他の計算式でここで求めた値を使うので必ず最初に呼ぶこと
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
@@ -47,4 +62,17 @@ public:
 		void SetCountDownTime(const int time);
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void SetNormaTime(const int time);
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetNormaAngleEdit(const float angle);
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetTitleTime(const int limit,const int norma);
+	//通常の針と背景マテリアルを指定のアングルに移動する
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetNeedleAndBG_Material(const float angle);
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE bool GetIsTokeiAnimeEnd() const { return IsTokeiAnimeEnd; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	float GetNowTimeAngle() const { return NowTimeAngle; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	float GetNormaTimeAngle() const { return NormaTimeAngle; }
 };

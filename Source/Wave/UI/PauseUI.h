@@ -45,12 +45,15 @@ public:
 	//スタンプテスト用イベント
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void TestStampPlayAnimation();
-	//ポーズ画面のバーため現在のプレイヤーの最大HPを受け取る
+	//ポーズ画面の時計のため制限時間を受け取る
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
-		void SetMaxHP(const float hp);
-	//ポーズ画面のバー更新のため現在のプレイヤーHPを受け取る
+		void SetTimeLimit(const int time);
+	//ポーズ画面の時計のためノルマの針の位置を受け取る
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
-		void SetHP(const float hp);
+		void SetNormaAngle(const float time);
+	//ポーズ画面の時計のため現在の針の位置を受け取る
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetNeedleAndBG_Material(const float angle);
 	//フェードインを行いリトライする
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void Retry();

@@ -70,10 +70,6 @@ void AGameController::Tick(float DeltaTime)
 	if (!GetPlayer->GetIsAttack() && !GetPlayer->GetIsCharge())
 	{
 		InputPause();
-		if (UGameplayStatics::IsGamePaused(GetWorld()))
-		{//ポーズ中はポーズの入力しか受け付けない
-			return;
-		}
 	}
 	
 	GameClearCheck();
@@ -139,7 +135,8 @@ void AGameController::CreateResultUI()
 		{
 			ResultUI->AddToViewport();
 			GetPlayer->HammerCountBarParent();
-		//	ResultUI->SetResultGaugeAnimeCheckEvent(GetPlayer->GetMaxHammerHP(),GetPlayer->GetHammerHP(), NormaPercent);
+			//このステージをクリアした時の制限時間、クリア時の針アングル、ノルマ針アングル、ノルマ時間をセット
+			ResultUI->SetResultTokeiAnimeCheckEvent(TimeLimit, GetNowTimeAngle(), GetNormaTimeAngle(),NormaTime);
 			//ResultUI->SetResultGaugeAnimeCheckEvent(100.0f, 80.0f, 30.0f);
 			ResultUI->SetResultNowNimotuCheckEvent(GoalCount);
 			//ResultUI->SetResultNowNimotuCheckEvent(3);
@@ -231,9 +228,8 @@ void AGameController::InputPause()
 	const InputState * input = inputManager->GetState();
 	if (input->Pause.IsPress)
 	{//ポーズ中でなければポーズ画面を開き、ポーズ中だったらポーズ画面を閉じる
-		AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
 		//ゲーム終了条件を満たしていたらポーズを開けないようにする
-		if (game->GetIsClear() || game->GetIsGameOver())return;
+		if (GetIsClear() || GetIsGameOver())return;
 		if (!UGameplayStatics::IsGamePaused(GetWorld()))
 		{
 			if (PauseUIClass != nullptr)
@@ -242,23 +238,22 @@ void AGameController::InputPause()
 				{
 					PauseUI = CreateWidget<UPauseUI>(GetWorld(), PauseUIClass);
 					PauseUI->AddToViewport();
+					PauseUI->SetNormaAngle(GetNormaTimeAngle());
+					PauseUI->SetNeedleAndBG_Material(GetNowTimeAngle());
+					PauseUI->SetTimeLimit(TimeLimit);
 					////ポーズ用のバーを更新するためHPを渡す
 					//PauseUI->SetMaxHP(MaxHammerHP);
 					//PauseUI->SetHP(HammerHP);
-					if (game)
-					{
-						game->SetTimeCountPause();
-					}
+					SetTimeCountPause();
 				}
 				else if (PauseUI)
 				{
 					if (PauseUI->GetIsPlayAnimation())return;
 					PauseUI->AddToViewport();
-					//PauseUI->SetHP(HammerHP);
-					if (game)
-					{
-						game->SetTimeCountPause();
-					}
+					PauseUI->SetNormaAngle(GetNormaTimeAngle());
+					PauseUI->SetNeedleAndBG_Material(GetNowTimeAngle());
+					PauseUI->SetTimeLimit(TimeLimit);
+					SetTimeCountPause();
 				}
 				//生成してもnullptrだったらエラー文表示
 				if (PauseUI == nullptr)
@@ -276,10 +271,6 @@ void AGameController::InputPause()
 			if (!PauseUI)return;
 			if (PauseUI->GetIsPlayAnimation())return;
 			PauseUI->EndPlayAnimation();
-			if (game)
-			{
-				game->SetTimeCountRePlay();
-			}
 		}
 	}
 	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
@@ -300,7 +291,17 @@ void AGameController::InputPause()
 
 void AGameController::UpdateTime()
 {
-	if (UGameplayStatics::IsGamePaused(GetWorld()))return;
+	//ゲームが終了していたら時計を進めない
+	if (GetIsClear() || GetIsGameOver())return;
+	if (UGameplayStatics::IsGamePaused(GetWorld()))
+	{
+		SetTimeCountPause();
+		return;
+	}
+	if (!UGameplayStatics::IsGamePaused(GetWorld()))
+	{
+		SetTimeCountRePlay();
+	}
 	if (GameTimeUI)
 	{
 		GameTimeUI->UpDateTime();
@@ -342,7 +343,8 @@ void AGameController::GameClearCheck()
 	//①ノルマ以上荷物を入れている時かつ残り時間が0になったら
 	if (GoalCount >= NormaGoalCount && GetLimitTimeZero())
 	{
-		gameclear();
+		IsGameClear = true;
+		GameClear();
 	}
 	//②荷物を全て入れる
 	else if (GoalCount == MaxNimotu)
@@ -372,7 +374,8 @@ void AGameController::GameOverCheck()
 	//①ノルマまで荷物を運んでおらず残り時間が0になったら
 	if (GoalCount < NormaGoalCount && GetLimitTimeZero())
 	{
-		gameover();
+		IsGameOver = true;
+		GameOver();
 	}
 	//②荷物がノルマ数達成できないほど無くなった時(ゴールに入った荷物と合わせる)
 	else if (GameMaxNimotu + GoalCount < NormaGoalCount)
@@ -487,4 +490,14 @@ void AGameController::MinusGameMaxNimotu()
 	GameMaxNimotu--;
 	NimotuCountUI->SetStageNimotu(GameMaxNimotu);
 	NimotuCountUI->GameNimotuAnimation();
+}
+
+float AGameController::GetNowTimeAngle()
+{
+	return GameTimeUI->GetNowTimeAngle();
+}
+
+float AGameController::GetNormaTimeAngle()
+{
+	return GameTimeUI->GetNormaTimeAngle();
 }

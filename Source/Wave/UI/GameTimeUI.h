@@ -17,6 +17,10 @@ public:
 	//ƒJƒEƒ“ƒg‚ª0‚É‚È‚Á‚½‚çtrue
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		bool IsCountZero = false;
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		float NowTimeAngle = 0.0f;
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		float NormaTimeAngle = 0.0f;
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void UpDateTime();
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
@@ -31,4 +35,8 @@ public:
 		void AnimationRePlay();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsCountZero() const { return IsCountZero; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	float GetNowTimeAngle() const { return NowTimeAngle; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	float GetNormaTimeAngle() const { return NormaTimeAngle; }
 };
