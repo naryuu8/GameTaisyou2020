@@ -674,6 +674,8 @@ ALandPoint * AWaterSurface::GetLandPoint(const FVector & WorldPos, bool IsLand)
 	{
 		if (Actor->IsLand != IsLand) continue;
 
+		if (!Actor->GetIsUse()) continue;
+
 		if (Actor->OnGround(WorldPos))
 		{
 			return Actor;

@@ -98,6 +98,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 	// もし失敗したらプレイヤーは落下した判定にする
 	else
 	{
+		ASoundManager::SafePlaySound(SOUND_TYPE::FALL_PLAYER);
+
 		Water->SetCollisionEnabled(false);	// WaterSurfaceのコリジョンをオフに設定
 
 		if (CurPos.Z < -10.0f) // プレイヤーの座標が一定以下に行った時は死亡
