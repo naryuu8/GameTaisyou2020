@@ -53,7 +53,13 @@ void AGameController::BeginPlay()
 		GetMaxNimotu();
 	}
 	GameMaxNimotu = MaxNimotu;
-
+	if (DebugScreenMode)
+	{
+		GetPlayer->SetPlayerHiddenInGame();
+		GetPlayer->DebugHammerCountBarParent();
+		GetPlayer->SetNoTick();
+		return;
+	}
 	CreateNimotuCountUI();
 	CreateGameTimeUI();
 }
@@ -61,6 +67,7 @@ void AGameController::BeginPlay()
 // Called every frame
 void AGameController::Tick(float DeltaTime)
 {
+	if (DebugScreenMode)return;
 	Super::Tick(DeltaTime);
 	//プレイヤーへのアドレスを取得出来ていなかったら再び貰う
 	if (!GetPlayer)
