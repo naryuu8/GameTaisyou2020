@@ -66,6 +66,8 @@ private:
 	ARaft* CurrentRaft = nullptr;	// æ‚Á‚Ä‚¢‚È‚¢‚Íí‚Énullptr
 	bool IsInRaft = false;
 	void ResetRaftParam();
+
+	UAudioComponent* AudioComponent;
 public:
 	APlayerCharacter();
 

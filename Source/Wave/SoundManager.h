@@ -13,12 +13,17 @@ UENUM(BlueprintType)
 enum class SOUND_TYPE : uint8
 {
 	TITLE_BGM		UMETA(DisplayName = "TitleBGM"),
+	STAGE_BGM		UMETA(DisplayName = "StageBGM"),
+	CLEAR_BGM		UMETA(DisplayName = "ClearBGM"),
 	WALK_WOOD		UMETA(DisplayName = "WalkWood"),
 	STAGE_SELECT	UMETA(DisplayName = "StageSelect"),
 	WALK_GRASS		UMETA(DisplayName = "WalkGrass"),
 	HAMMER_SMALL	UMETA(DisplayName = "HammerSmall"),
 	HAMMER_MEDIUM	UMETA(DisplayName = "HammerMedium"),
 	HAMMER_BIG		UMETA(DisplayName = "HammerBig"),
+	HAMMER_SMALL_W	UMETA(DisplayName = "HammerSmallW"),
+	HAMMER_MEDIUM_W	UMETA(DisplayName = "HammerMediumW"),
+	HAMMER_BIG_W	UMETA(DisplayName = "HammerBigW"),
 	GOAL			UMETA(DisplayName = "Goal"),
 	EXPLOSION		UMETA(DisplayName = "Explosion"),
 	FALL_ACTOR		UMETA(DisplayName = "FallActor"),
@@ -30,7 +35,8 @@ enum class SOUND_TYPE : uint8
 	COUNT_UP		UMETA(DisplayName = "CountUp"),
 	STAMP			UMETA(DisplayName = "Stamp"),
 	MENU_SELECT		UMETA(DisplayName = "MenuSelect"),
-	MENU_DECISION	UMETA(DisplayName = "MenuDecision")
+	MENU_DECISION	UMETA(DisplayName = "MenuDecision"),
+	HAMMER_CHARGE	UMETA(DisplayName = "HammerChage")
 };
 
 UCLASS()
