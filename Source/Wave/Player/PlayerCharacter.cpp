@@ -115,6 +115,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			FollowCamera->ChangeState(new GameCameraStateFall(CurPos));
 			Water->AddPower(FVector(CurPos.X, CurPos.Y, 0.0f), ChargePowerMax);
 			IsDeth = true;
+			AnimInst->IsDeth = true;
 			PlayerDeth();
 			UCapsuleComponent * Collision = Cast<UCapsuleComponent>(GetComponentByClass(UCapsuleComponent::StaticClass()));
 			if (Collision)Collision->SetActive(false);

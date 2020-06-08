@@ -403,7 +403,8 @@ void AGameController::GameOverCheck()
 	//②プレイヤーが落下した時
 	else if (GetPlayer->GetIsDeth())
 	{
-		gameover(1.5f);
+		IsGameOver = true;
+		GameOver();
 	}
 	//③荷物がノルマ数達成できないほど無くなった時(ゴールに入った荷物と合わせる)
 	else if (GameMaxNimotu + GoalCount < NormaGoalCount)
