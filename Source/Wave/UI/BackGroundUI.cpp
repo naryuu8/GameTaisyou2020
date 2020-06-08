@@ -13,3 +13,8 @@ bool UBackGroundUI::GetIsAllStamp() const
 	}
 	return false;
 }
+
+bool UBackGroundUI::GetIsStamp(const int index) const
+{
+	return ResultSaveData.IsStamp[index];
+}

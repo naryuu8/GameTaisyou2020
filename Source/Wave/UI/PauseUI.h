@@ -43,6 +43,8 @@ public:
 	//ポーズ画面の時計のため制限時間を受け取る
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void SetTimeLimit(const int time);
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetNormaTime(const int time);
 	//ポーズ画面の時計のためノルマの針の位置を受け取る
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void SetNormaAngle(const float time);
