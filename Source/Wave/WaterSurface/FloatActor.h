@@ -78,5 +78,6 @@ public:
 
 protected:
 	AWaterSurface* WaterSurface;
+	bool IsFloating = false;
 private:
 };
