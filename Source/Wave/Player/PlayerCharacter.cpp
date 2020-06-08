@@ -22,6 +22,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Runtime/Engine/Classes/Engine/Engine.h"
 #include "GameFramework/PlayerController.h"
+#include "../SoundManager.h"
 
 #define DISPLAY_LOG(fmt, ...) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT(fmt), __VA_ARGS__));
 //////////////////////////////////////////////////////////////////////////
@@ -97,6 +98,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 	// もし失敗したらプレイヤーは落下した判定にする
 	else
 	{
+		ASoundManager::SafePlaySound(SOUND_TYPE::FALL_PLAYER);
+
 		Water->SetCollisionEnabled(false);	// WaterSurfaceのコリジョンをオフに設定
 
 		if (CurPos.Z < -10.0f) // プレイヤーの座標が一定以下に行った時は死亡
@@ -218,6 +221,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 					//体力がほぼ0なら溜めても加算しない
 					if (HammerHP > 0.1f)
 					{
+						if (!AudioComponent)AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::HAMMER_CHARGE);
+						if (!AudioComponent->IsPlaying())AudioComponent->Play();
 						HammerPower += ChargeSpeed;
 						HammerPower = FMath::Min(HammerPower, ChargePowerMax);
 					}
@@ -231,6 +236,11 @@ void APlayerCharacter::Tick(float DeltaTime)
 		}
 		else
 		{
+			if (AudioComponent && !(AudioComponent->IsPlaying()))
+			{
+				AudioComponent->Stop();
+			}
+
 			ChageDestroyEmmiter();
 		}
 	}// !InputManager	
@@ -436,6 +446,37 @@ void APlayerCharacter::WaterAttack(FVector Point, float Power)
 		if (water)
 		{
 			water->AddPower(Point, Power * 100.0f);
+
+			if (water->IsInLand(Point))
+			{
+				if (Power == ChargePowerMax)
+				{
+					ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_BIG);
+				}
+				else if (Power > ChargePowerMax * 0.5f)
+				{
+					ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_MEDIUM);
+				}
+				else
+				{
+					ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_SMALL);
+				}
+			}
+			else
+			{
+				if (Power == ChargePowerMax)
+				{
+					ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_BIG_W);
+				}
+				else if (Power > ChargePowerMax * 0.5f)
+				{
+					ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_MEDIUM_W);
+				}
+				else
+				{
+					ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_SMALL_W);
+				}
+			}
 		}
 	}
 }

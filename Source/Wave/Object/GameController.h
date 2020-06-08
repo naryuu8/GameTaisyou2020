@@ -40,6 +40,9 @@ protected:
 	//カウントダウン表示開始時間
 	UPROPERTY(EditAnywhere, Category = "Game")
 		int CountDownTime = 10;
+	// BGM用
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game")
+		UAudioComponent* AudioComponent;
 private:
 	APlayerCharacter* GetPlayer;//プレイヤー情報
 	// ゲームクリアかどうか
@@ -66,10 +69,16 @@ private:
 		TSubclassOf<UNimotuCountUI> NimotuCountUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UPauseUI> PauseUIClass;
+	//勝手に開放されることがあるのでガベージコレクションの対象外にする
+	UPROPERTY()
 	UPauseUI* PauseUI = nullptr;
+	UPROPERTY()
 	UGameTimeUI* GameTimeUI = nullptr;
+	UPROPERTY()
 	UGameOverUI* GameOverUI = nullptr;
+	UPROPERTY()
 	UResultUI* ResultUI = nullptr;
+	UPROPERTY()
 	UNimotuCountUI* NimotuCountUI = nullptr;
 public:	
 	// Called every frame

@@ -159,6 +159,8 @@ void AWaterSurface::Tick(float DeltaTime)
 		}
 	}
 
+	bool isSoundPlay = false;
+
 	for (int xi = 1; xi < SplitPointNum.X - 1; ++xi)
 	{
 		for (int yi = 1; yi < SplitPointNum.Y - 1; ++yi)
@@ -171,6 +173,9 @@ void AWaterSurface::Tick(float DeltaTime)
 			PrevHeights[index] = CurrentHeights[index];
 			CurrentHeights[index] = NewHeights[index];
 
+			// ‰¹‚ªo‚é‚‚³‚Ì”g‚ª‹N‚«‚Ä‚¢‚é‚©‚ð”»•Ê
+			if(!isSoundPlay)isSoundPlay = CurrentHeights[index] >= SoundPlayWaveHight;
+
 			//if (VertexTypes[index] == VertexType::Water)
 			{
 				Vertices[index].Z = CurrentHeights[index];
@@ -181,6 +186,16 @@ void AWaterSurface::Tick(float DeltaTime)
 				Vertices[index].Z = FMath::Clamp(Vertices[index].Z, -MaxWaveHight, MaxWaveHight);
 			}
 		}
+	}
+
+	if (isSoundPlay)
+	{
+		if(!AudioComponent) AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::WAVE);
+		AudioComponent->Play();		
+	}
+	else
+	{
+		if (AudioComponent) AudioComponent->Stop();
 	}
 
 	// •’Ê‚Ì”g‚É‚È‚ç‚È‚¢‚æ‚¤…—¬‚ÍÅŒã‚ÉŒvŽZ
@@ -658,6 +673,8 @@ ALandPoint * AWaterSurface::GetLandPoint(const FVector & WorldPos, bool IsLand)
 	for (auto Actor : LandPointActors)
 	{
 		if (Actor->IsLand != IsLand) continue;
+
+		if (!Actor->GetIsUse()) continue;
 
 		if (Actor->OnGround(WorldPos))
 		{

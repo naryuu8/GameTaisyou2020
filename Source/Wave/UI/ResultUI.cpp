@@ -22,6 +22,7 @@ void UResultUI::NextSelectState()
 		SelectNumber = static_cast<int>(ResultSelectState::NEXTSTAGE);
 	}
 	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
+	ImageSizeChenge();
 }
 
 void UResultUI::BackSelectState()
@@ -34,15 +35,16 @@ void UResultUI::BackSelectState()
 		SelectNumber = static_cast<int>(ResultSelectState::STAGESELECT);
 	}
 	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
+	ImageSizeChenge();
 }
 
 void UResultUI::SelectStateAction()
 {
-	if (State == ResultState::ENTER_WAIT)
-	{
-		State = ResultState::INPUT;
-		return;
-	}
+	//if (State == ResultState::ENTER_WAIT)
+	//{
+	//	State = ResultState::INPUT;
+	//	return;
+	//}
 	if (State != ResultState::INPUT)return;
 	//次のステージがなかったら次のステージへを出さないこと
 	switch (SelectNumber)
@@ -62,4 +64,5 @@ void UResultUI::SelectStateAction()
 void  UResultUI::SetStageSelectState()
 {
 	SelectNumber = static_cast<int>(ResultSelectState::STAGESELECT);
+	ImageSizeChenge();
 }
