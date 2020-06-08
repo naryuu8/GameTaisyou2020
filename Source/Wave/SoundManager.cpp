@@ -80,6 +80,7 @@ void ASoundManager::SafePlaySound(SOUND_TYPE type)
 }
 
 UAudioComponent* ASoundManager::CreateAudioComponent(SOUND_TYPE type) {
+	if (SoundManagerInstance == nullptr) return nullptr;
 	auto NewAudioComponent = NewObject<UAudioComponent>(SoundManagerInstance);
 	TCHAR* fileName = FileNames[(int)type];
 	NewAudioComponent->Sound = LoadObject<USoundBase>(NULL, fileName, NULL, LOAD_None, NULL);

@@ -145,15 +145,12 @@ void ATitleManager::CameraMoveCheck()
 		{
 			MoveFrameTime = StageSelectTime * 60.0f;
 			State = ETitleState::TitleMove;
-			if(!AudioComponent)AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::WALK_WOOD);
-			AudioComponent->Play();
 			SetCameraMove(StageSelectCamera, StageSelectTime);
 			TitlePlayer->TargetRotation();
 		}
 		else if (State == ETitleState::TitleMove)
 		{
 			State = ETitleState::StageSelect;
-			AudioComponent->Stop();
 			IsNoInput = false;
 		}
 	}
