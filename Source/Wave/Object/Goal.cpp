@@ -5,7 +5,6 @@
 #include "UObject/ConstructorHelpers.h"
 #include "UObject/UObjectGlobals.h"
 #include "Blueprint/UserWidget.h"
-#include "../UI/HammerCountUI.h"
 #include "../WaterSurface/FloatActor.h"
 #include "GameController.h"
 #include "Kismet/GameplayStatics.h"
