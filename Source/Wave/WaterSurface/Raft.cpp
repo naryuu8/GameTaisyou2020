@@ -21,7 +21,7 @@ void ARaft::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (IsFloating)
+	if (IsFloating && GetActorLocation().Z > -10.0f)
 	{
 		if (!AudioComponent) AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::MOVE_RAFT);
 		if (!AudioComponent->IsPlaying())AudioComponent->Play();
