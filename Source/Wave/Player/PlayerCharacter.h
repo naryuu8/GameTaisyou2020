@@ -66,6 +66,8 @@ private:
 	ARaft* CurrentRaft = nullptr;	// èÊÇ¡ÇƒÇ¢Ç»Ç¢éûÇÕèÌÇ…nullptr
 	bool IsInRaft = false;
 	void ResetRaftParam();
+
+	UAudioComponent* AudioComponent;
 public:
 	APlayerCharacter();
 
@@ -181,6 +183,8 @@ public:
 		FORCEINLINE	float GetHammerPower() const { return HammerPower; };
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	float GetChargeCount() const { return ChargeCount; };
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	bool GetIsDeth() const { return IsDeth; };
 	bool GetIsAttack() const;
 	bool GetIsCharge() const;
 };
