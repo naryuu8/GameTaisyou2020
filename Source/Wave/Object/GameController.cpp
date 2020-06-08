@@ -358,6 +358,11 @@ void AGameController::GameClearCheck()
 	{
 		gameclear();
 	}
+	//④ゴールが全て入っているかつ荷物が残っているかつノルマ以上にゴールに入れていたらクリア
+	else if (NotExplotionCount - GoalCount <= 0 && GameMaxNimotu > 0 && GoalCount >= NormaGoalCount)
+	{
+		gameclear();
+	}
 }
 
 void AGameController::GameOverCheck()
@@ -387,7 +392,7 @@ void AGameController::GameOverCheck()
 		GameOver();
 	}
 	//③ゴールがノルマの荷物より少なくなった時
-	else if (NotExplotionCount < NormaGoalCount && GoalCount < NormaGoalCount)
+	else if (NotExplotionCount < NormaGoalCount && GoalCount - NotExplotionCount < NormaGoalCount)
 	{
 		gameover(3.0f);
 	}
