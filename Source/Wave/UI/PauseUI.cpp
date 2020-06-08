@@ -30,12 +30,13 @@ void UPauseUI::NextSelectState()
 	if (IsPlayAnimation)return;
 	if (IsNoInput)return;
 	SelectNumber++;
-	SelectSE_Play();
+//	SelectSE_Play();
 	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
 	if (SelectNumber > static_cast<int>(PauseState::STAGESELECT))
 	{
 		SelectNumber = static_cast<int>(PauseState::GAMEBACK);
 	}
+	ImageSizeChenge();
 }
 
 void UPauseUI::BackSelectState()
@@ -43,12 +44,13 @@ void UPauseUI::BackSelectState()
 	if (IsPlayAnimation)return;
 	if (IsNoInput)return;
 	SelectNumber--;
-	SelectSE_Play();
+//SelectSE_Play();
 	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
 	if (SelectNumber < 0)
 	{
 		SelectNumber = static_cast<int>(PauseState::STAGESELECT);
 	}
+	ImageSizeChenge();
 }
 
 void UPauseUI::SelectStateAction()
@@ -61,7 +63,6 @@ void UPauseUI::SelectStateAction()
 		return;
 	}
 	IsNoInput = true;
-	EnterSE_Play();
 	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
 	switch (SelectNumber)
 	{

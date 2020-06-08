@@ -71,6 +71,9 @@ public:
 	//データテーブルが存在するか確認
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void CheckDataTable();
+	//キーを押したとき項目画像サイズを変更
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void ImageSizeChenge();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void SetStageSelectState();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")

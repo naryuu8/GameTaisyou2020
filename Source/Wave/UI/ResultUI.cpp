@@ -22,6 +22,7 @@ void UResultUI::NextSelectState()
 		SelectNumber = static_cast<int>(ResultSelectState::NEXTSTAGE);
 	}
 	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
+	ImageSizeChenge();
 }
 
 void UResultUI::BackSelectState()
@@ -34,6 +35,7 @@ void UResultUI::BackSelectState()
 		SelectNumber = static_cast<int>(ResultSelectState::STAGESELECT);
 	}
 	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
+	ImageSizeChenge();
 }
 
 void UResultUI::SelectStateAction()
@@ -62,4 +64,5 @@ void UResultUI::SelectStateAction()
 void  UResultUI::SetStageSelectState()
 {
 	SelectNumber = static_cast<int>(ResultSelectState::STAGESELECT);
+	ImageSizeChenge();
 }

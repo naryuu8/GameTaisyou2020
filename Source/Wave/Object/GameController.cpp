@@ -90,8 +90,8 @@ void AGameController::CreateGameTimeUI()
 		{
 			GameTimeUI->AddToViewport();
 			GameTimeUI->SetTimeLimit(TimeLimit);
-			GameTimeUI->SetCountDownTime(NormaTime);
-			GameTimeUI->SetNormaTime(CountDownTime);
+			GameTimeUI->SetCountDownTime(CountDownTime);
+			GameTimeUI->SetNormaTime(NormaTime);
 		}
 		else
 		{
@@ -364,13 +364,13 @@ void AGameController::GameOverCheck()
 	if (IsGameClear)return;
 	// ゲームオーバー条件
 	//ノルマを1つも達成できなくなったらゲームオーバー
-	auto gameover = [=] 
+	auto gameover = [=] (const float time)
 	{ 
 		IsGameOver = true;
 		//指定の時間後ゲームオーバーにする
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
 		FTimerHandle handle;
-		timerManager.SetTimer(handle, this, &AGameController::GameOver,3.0f);
+		timerManager.SetTimer(handle, this, &AGameController::GameOver, time);
 	};
 	//①ノルマまで荷物を運んでおらず残り時間が0になったら
 	if (GoalCount < NormaGoalCount && GetLimitTimeZero())
@@ -387,12 +387,12 @@ void AGameController::GameOverCheck()
 	//③ゴールがノルマの荷物より少なくなった時
 	else if (NotExplotionCount < NormaGoalCount && GoalCount < NormaGoalCount)
 	{
-		gameover();
+		gameover(3.0f);
 	}
 	//④プレイヤーが落ちた時
 	else if (GetPlayer->GetIsDeth())
 	{
-		gameover();
+		gameover(1.8f);
 	}
 }
 
@@ -403,6 +403,10 @@ void AGameController::GameClear()
 	{
 		GameTimeUI->RemoveFromParent();
 	}
+	if (NimotuCountUI)
+	{
+		NimotuCountUI->RemoveFromParent();
+	}
 }
 
 void AGameController::GameOver()
@@ -412,6 +416,11 @@ void AGameController::GameOver()
 	{
 		GameTimeUI->RemoveFromParent();
 	}
+	if (NimotuCountUI)
+	{
+		NimotuCountUI->RemoveFromParent();
+	}
+	GetPlayer->HammerCountBarParent();
 }
 
 int AGameController::CountGameNimotu()
