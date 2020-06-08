@@ -70,6 +70,8 @@ private:
 	UGameTimeUI* GameTimeUI = nullptr;
 	UGameOverUI* GameOverUI = nullptr;
 	UResultUI* ResultUI = nullptr;
+	//勝手に開放されることがあるのでガベージコレクションの対象外にする
+	UPROPERTY()
 	UNimotuCountUI* NimotuCountUI = nullptr;
 public:	
 	// Called every frame

@@ -60,10 +60,9 @@ public:
 	//フェードインを行いステージ選択画面に戻る
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void StageSelectChenge();
+	//キーを押したとき項目画像サイズを変更
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
-		void SelectSE_Play();
-	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
-		void EnterSE_Play();
+		void ImageSizeChenge();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsPlayAnimation() const{ return IsPlayAnimation; };
 };
