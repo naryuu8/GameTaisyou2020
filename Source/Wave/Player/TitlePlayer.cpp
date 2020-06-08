@@ -21,7 +21,7 @@ void ATitlePlayer::BeginPlay()
 
 void ATitlePlayer::BeginPlay_C()
 {
-	FirstPosition = this->GetActorLocation();
+
 }
 
 // Called every frame
@@ -45,7 +45,9 @@ void ATitlePlayer::TargetRotation()
 
 void ATitlePlayer::TargetMove()
 {
-	FVector position = FMath::Lerp(this->GetActorLocation(), TargetPoint->GetActorLocation(),0.02f);
+	IsMove = true;
+	if (IsTarget)return;
+	FVector position = FMath::Lerp(this->GetActorLocation(), TargetPoint->GetActorLocation(), MoveSpeed);
 	float z = this->GetActorLocation().Z;
 	SetActorLocation(FVector(position.X, position.Y,z));
 }

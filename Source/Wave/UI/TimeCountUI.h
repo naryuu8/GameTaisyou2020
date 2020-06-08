@@ -22,12 +22,18 @@ protected:
 	//ƒJƒEƒ“ƒg‚ª0‚É‚È‚Á‚½‚çtrue
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		bool IsCountZero = false;
+	//InitAnimation’†true
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		bool IsInitAnimation = false;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		FText CountText;
 public:
-	void SetTimeCount(const int time) { TimeCount = time; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void SetTimeCount(const int time) { TimeCount = time; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsCountZero() const { return IsCountZero; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	bool GetIsInitAnimation() const { return IsInitAnimation; }
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void AnimationPause();
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)

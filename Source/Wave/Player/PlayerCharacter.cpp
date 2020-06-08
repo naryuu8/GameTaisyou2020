@@ -12,7 +12,6 @@
 #include "../Object/GameController.h"
 #include "../Camera/GameCameraActor.h"
 #include "../InputManager.h"
-#include "../UI/PauseUI.h"
 #include "../UI/HammerCountBarUI.h"
 #include "Animation/AnimInstance.h"
 #include "PlayerAnimInstance.h"
@@ -80,14 +79,10 @@ void APlayerCharacter::BeginPlay_C()
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
-	//アタックアニメ中はポーズを開けないようにする
-	if (!AnimInst->IsAttack && !AnimInst->IsCharge)
-	{
-		PauseInput();
-		if (UGameplayStatics::IsGamePaused(GetWorld()))
-		{//ポーズ中はポーズの入力しか受け付けない
-			return;
-		}
+
+	if (UGameplayStatics::IsGamePaused(GetWorld()))
+	{//ポーズ中はリターン	
+		return;
 	}
 	// 死亡時は何もできない
 	if (IsDeth) return;
@@ -430,80 +425,6 @@ void APlayerCharacter::SetLookAt(FVector Direction, float Speed)
 	SetActorRotation(FQuat::Slerp(GetActorQuat(), LookAt, Speed));
 }
 
-void APlayerCharacter::PauseInput()
-{
-	const AInputManager * inputManager = AInputManager::GetInstance();
-	if (!inputManager)return;
-	const InputState * input = inputManager->GetState();
-	if (input->Pause.IsPress)
-	{//ポーズ中でなければポーズ画面を開き、ポーズ中だったらポーズ画面を閉じる
-		AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
-		//ゲーム終了条件を満たしていたらポーズを開けないようにする
-		if (game->GetIsClear() || game->GetIsGameOver())return;
-		if (!UGameplayStatics::IsGamePaused(GetWorld()))
-		{
-			if (PauseUIClass != nullptr)
-			{//初めてポーズ画面を開くときはUIを生成する
-				if (!PauseUI)
-				{
-					PauseUI = CreateWidget<UPauseUI>(GetWorld(), PauseUIClass);
-					PauseUI->AddToViewport();
-					//ポーズ用のバーを更新するためHPを渡す
-					PauseUI->SetMaxHP(MaxHammerHP);
-					PauseUI->SetHP(HammerHP);
-					if (game)
-					{
-						game->SetTimeCountPause();
-					}
-				}
-				else if (PauseUI)
-				{
-				if (PauseUI->GetIsPlayAnimation())return;
-				PauseUI->AddToViewport();
-				PauseUI->SetHP(HammerHP);
-				if (game)
-				{
-					game->SetTimeCountPause();
-				}
-				}
-				//生成してもnullptrだったらエラー文表示
-				if (PauseUI == nullptr)
-				{
-					UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"Widget cannot create");
-				}
-			}
-			else
-			{
-			UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"PauseUIClass is nullptr");
-			}
-		}
-		else if (UGameplayStatics::IsGamePaused(GetWorld()))
-		{
-			if (!PauseUI)return;
-			if (PauseUI->GetIsPlayAnimation())return;
-			PauseUI->EndPlayAnimation();
-			if (game)
-			{
-				game->SetTimeCountRePlay();
-			}
-		}
-	}
-	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
-	if (!PauseUI)return;
-	if (input->Up.IsPress)
-	{
-		PauseUI->BackSelectState();
-	}
-	if (input->Down.IsPress)
-	{
-		PauseUI->NextSelectState();
-	}
-	if (input->Select.IsPress)
-	{
-		PauseUI->SelectStateAction();
-	}
-}
-
 void APlayerCharacter::WaterAttack(FVector Point, float Power)
 {
 	TArray<AActor*> FoundActors;
@@ -532,12 +453,12 @@ void APlayerCharacter::CreateHammerCountBarUI()
 		//生成してもnullptrだったらエラー文表示
 		if (HammerCountBarUI == nullptr)
 		{
-			UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"Widget cannot create");
+			UE_LOG(LogTemp, Error, TEXT("HammerCountBarUI : %s"), L"Widget cannot create");
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"HammerCountBarUIClass is nullptr");
+		UE_LOG(LogTemp, Error, TEXT("HammerCountBarUI : %s"), L"HammerCountBarUIClass is nullptr");
 	}
 
 }
@@ -559,6 +480,16 @@ void APlayerCharacter::SetNoTick()
 void APlayerCharacter::SetPlayerHiddenInGame()
 {
 	this->SetActorHiddenInGame(true);
+}
+
+bool APlayerCharacter::GetIsAttack() const
+{
+	return AnimInst->IsAttack;
+}
+
+bool APlayerCharacter::GetIsCharge() const
+{
+	return AnimInst->IsCharge;
 }
 
 void APlayerCharacter::UpdateGaugeHP()

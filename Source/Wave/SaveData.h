@@ -21,9 +21,9 @@ struct FSaveDataStruct
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Weapon)
 		int InNimotu = 0;
 
-	//ステージをクリアした時のゲージ位置
+	//ステージをクリアした時の時計の針の位置
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Weapon)
-		float HpBarPercent = 0.0f;
+		float ClearTimeAngle = 0.0f;
 
 	//スタンプの状態、押されていたらtrue
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = Weapon)
