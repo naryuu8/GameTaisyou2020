@@ -26,6 +26,7 @@
 
 #include "../Camera/State/GameCameraStateFall.h"
 #include "../Camera/State/GameCameraStateClear.h"
+#include "../Camera/GameCameraFocusPoint.h"
 
 #define DISPLAY_LOG(fmt, ...) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT(fmt), __VA_ARGS__));
 //////////////////////////////////////////////////////////////////////////
@@ -113,6 +114,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			}
 
 			FollowCamera->ChangeState(new GameCameraStateFall(CurPos));
+			AGameCameraFocusPoint::SpawnFocusPoint(this, CurPos, 1.0f);
 			Water->AddPower(FVector(CurPos.X, CurPos.Y, 0.0f), ChargePowerMax);
 			IsDeth = true;
 			AnimInst->IsDeth = true;
