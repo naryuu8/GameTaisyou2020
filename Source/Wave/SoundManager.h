@@ -14,6 +14,7 @@ enum class SOUND_TYPE : uint8
 {
 	TITLE_BGM		UMETA(DisplayName = "TitleBGM"),
 	STAGE_BGM		UMETA(DisplayName = "StageBGM"),
+	SELECT_BGM		UMETA(DisplayName = "SelectBGM"),
 	CLEAR_BGM		UMETA(DisplayName = "ClearBGM"),
 	WALK_WOOD		UMETA(DisplayName = "WalkWood"),
 	STAGE_SELECT	UMETA(DisplayName = "StageSelect"),
