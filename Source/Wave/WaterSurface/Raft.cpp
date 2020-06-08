@@ -3,6 +3,7 @@
 #include "WaterSurface.h"
 #include "Runtime/Engine/Classes/Kismet//GameplayStatics.h"
 #include "Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
+#include "../SoundManager.h"
 
 void ARaft::DebugDraw()
 {
@@ -19,6 +20,16 @@ void ARaft::DebugDraw()
 void ARaft::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (IsFloating)
+	{
+		if (!AudioComponent) AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::MOVE_RAFT);
+		if (!AudioComponent->IsPlaying())AudioComponent->Play();
+	}
+	else
+	{
+		if (AudioComponent) AudioComponent->Stop();
+	}
 }
 
 FVector ARaft::AdjustMoveOnRaft(const FVector & actorPos, const FVector & moveVec, float CircleRadius)

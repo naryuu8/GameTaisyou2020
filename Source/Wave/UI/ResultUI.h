@@ -32,6 +32,9 @@ private:
 	virtual void NativeConstruct() override;
 	int SelectNumber = 0;
 protected:
+	// BGM—p
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++Class")
+		UAudioComponent* AudioComponent;
 
 public:
 	void NextSelectState();

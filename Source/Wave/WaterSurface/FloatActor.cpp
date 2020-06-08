@@ -61,7 +61,12 @@ void AFloatActor::Tick(float DeltaTime)
 
 	if (MoveVec.Size() > MinFloatWavePower)
 	{
+		IsFloating = true;
 		Velocity += MoveVec;
+	}
+	else
+	{
+		IsFloating = false;
 	}
 	// フィールドの外に出た時
 	// 崖にいる場合は落下

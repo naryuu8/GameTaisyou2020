@@ -5,13 +5,18 @@ static ASoundManager* SoundManagerInstance = nullptr;
 
 static TCHAR* FileNames[] =
 {
-	TEXT("SoundCue'/Game/Main/Sound/BGM/title_Cue.title_Cue'"),					
+	TEXT("SoundCue'/Game/Main/Sound/BGM/title_Cue.title_Cue'"),
+	TEXT("SoundCue'/Game/Main/Sound/BGM/stage_Cue.stage_Cue'"),
+	TEXT("SoundCue'/Game/Main/Sound/BGM/game_clear_Cue.game_clear_Cue'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/walk_wood/walk_wood_1.walk_wood_1'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/system_kirikae_1.system_kirikae_1'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/walk_sougen/walk_sougen_1.walk_sougen_1'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/hammer_small.hammer_small'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/hammer_medium.hammer_medium'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/hammer_big.hammer_big'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/hammerAttack_small_water.hammerAttack_small_water'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/hammerAttack_midium_water.hammerAttack_midium_water'"),
+	TEXT("SoundWave'/Game/Main/Sound/SE/hammerAttack_big_water.hammerAttack_big_water'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/house_in.house_in'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/explosion.explosion'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/fall/fall_1.fall_1'"),
@@ -23,7 +28,8 @@ static TCHAR* FileNames[] =
 	TEXT("SoundWave'/Game/Main/Sound/SE/Result_number.result_number'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/result_hanko.result_hanko'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/kirikae/kirikae_1.kirikae_1' "),
-	TEXT("SoundWave'/Game/Main/Sound/SE/kettei/kettei_2.kettei_2'")
+	TEXT("SoundWave'/Game/Main/Sound/SE/kettei/kettei_2.kettei_2'"),
+	TEXT("SoundWave'/Game/Main/Sound/hammer_charge.hammer_charge'")
 };
 
 // Sets default values
@@ -77,6 +83,5 @@ UAudioComponent* ASoundManager::CreateAudioComponent(SOUND_TYPE type) {
 	auto NewAudioComponent = NewObject<UAudioComponent>(SoundManagerInstance);
 	TCHAR* fileName = FileNames[(int)type];
 	NewAudioComponent->Sound = LoadObject<USoundBase>(NULL, fileName, NULL, LOAD_None, NULL);
-	SoundManagerInstance->AddAudioComponent(NewAudioComponent);
 	return NewAudioComponent;
 }

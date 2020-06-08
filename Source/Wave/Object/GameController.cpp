@@ -13,6 +13,7 @@
 #include "../Player/PlayerCharacter.h"
 #include "../WaterSurface/FloatActor.h"
 #include "TimerManager.h"
+#include "../SoundManager.h"
 // Sets default values
 
 AGameController::AGameController()
@@ -89,8 +90,8 @@ void AGameController::CreateGameTimeUI()
 		{
 			GameTimeUI->AddToViewport();
 			GameTimeUI->SetTimeLimit(TimeLimit);
-			GameTimeUI->SetCountDownTime(NormaTime);
-			GameTimeUI->SetNormaTime(CountDownTime);
+			GameTimeUI->SetCountDownTime(CountDownTime);
+			GameTimeUI->SetNormaTime(NormaTime);
 		}
 		else
 		{
@@ -334,7 +335,7 @@ void AGameController::GameClearCheck()
 	auto gameclear = [=]
 	{
 		//指定の時間後ゲームクリアにする
-		IsGameClear = true;
+		IsGameClear = true;	
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
 		FTimerHandle handle;
 		timerManager.SetTimer(handle, this, &AGameController::GameClear, 2.8f);
