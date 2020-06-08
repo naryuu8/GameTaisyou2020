@@ -4,6 +4,7 @@
 #include "BreakFloatActor.h"
 #include "../WaterSurface/FloatActor.h"
 #include "../SoundManager.h"
+#include "../Camera/GameCameraFocusPoint.h"
 
 ABreakFloatActor::ABreakFloatActor()
 {
@@ -41,5 +42,7 @@ void ABreakFloatActor::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 		SetDeth();
 		BreakAnime();
 		OtherFloat->Destroy();
+
+		AGameCameraFocusPoint::SpawnFocusPoint(this, GetActorLocation());
 	}
 }

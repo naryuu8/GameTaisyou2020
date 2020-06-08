@@ -8,6 +8,7 @@
 #include "../WaterSurface/FloatActor.h"
 
 #include "../SoundManager.h"
+#include "../Camera/GameCameraFocusPoint.h"
 
 // Sets default values
 ABreakSquareLand::ABreakSquareLand()
@@ -57,4 +58,6 @@ void ABreakSquareLand::Break()
 	SetIsUse(false);
 	ASoundManager::SafePlaySound(SOUND_TYPE::BREAK_LAND);
 	ASoundManager::SafePlaySound(SOUND_TYPE::EXPLOSION);
+
+	AGameCameraFocusPoint::SpawnFocusPoint(this, GetActorLocation());
 }

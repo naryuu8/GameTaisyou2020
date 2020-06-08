@@ -4,3 +4,12 @@
 #include "BackGroundUI.h"
 
 #include "../SoundManager.h"
+
+bool UBackGroundUI::GetIsAllStamp() const
+{
+	if (ResultSaveData.IsStamp[0] == true && ResultSaveData.IsStamp[1] == true && ResultSaveData.IsStamp[2] == true)
+	{
+		return true;
+	}
+	return false;
+}

@@ -32,6 +32,9 @@ private:
 	virtual void NativeConstruct() override;
 	int SelectNumber = 0;
 protected:
+	// BGM用
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++Class")
+		UAudioComponent* AudioComponent;
 
 public:
 	void NextSelectState();
@@ -68,6 +71,12 @@ public:
 	//データテーブルが存在するか確認
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void CheckDataTable();
+	//キーを押したとき項目画像サイズを変更
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void ImageSizeChenge();
+	//少し待ってからINPUTステートに切り替え
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void WaitInputStateChenge();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void SetStageSelectState();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")

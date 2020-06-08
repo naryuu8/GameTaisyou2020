@@ -7,6 +7,7 @@
 #include "../Object/TitleMemo.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/UnrealMathUtility.h"
+#include "../GlobalGameInstance.h"
 // Sets default values
 ATitleCamera::ATitleCamera()
 {
@@ -31,7 +32,14 @@ void ATitleCamera::BeginPlay()
 {
 	Super::BeginPlay();
 	MyStageNumber = DefaultStageNumber;
-	
+	UGlobalGameInstance* instance = UGlobalGameInstance::GetInstance();
+	if (instance)
+	{
+		if (instance->GetStageNumber() > -1)
+		{
+			MyStageNumber = instance->GetStageNumber();
+		}
+	}
 }
 
 // Called every frame

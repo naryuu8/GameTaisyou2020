@@ -4,6 +4,7 @@
 #include "../WaterSurface/FloatActor.h"
 #include "GameController.h"
 #include "Kismet/GameplayStatics.h"
+#include "../Camera/GameCameraFocusPoint.h"
 
 // Sets default values for this component's properties
 UGoalComponent::UGoalComponent()
@@ -42,6 +43,7 @@ void UGoalComponent::OnFloatActorCheck(AActor * OtherActor)
 	{
 		SetGoalMinus();
 		OtherFloat->Destroy();
+		AGameCameraFocusPoint::SpawnFocusPoint(GetOwner(), GetOwner()->GetActorLocation());
 		//BreakHome();
 		return;
 	}
@@ -56,6 +58,8 @@ void UGoalComponent::OnFloatActorCheck(AActor * OtherActor)
 		game->MinusGameMaxNimotu();
 		// 衝突した荷物を削除
 		OtherFloat->Destroy();
+
+		AGameCameraFocusPoint::SpawnFocusPoint(GetOwner(), GetOwner()->GetActorLocation());
 		// ここでドアが閉まるアニメーション開始
 		//PlayAnimationDoorClose();
 	}

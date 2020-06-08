@@ -56,6 +56,8 @@ void ATitleManager::BeginPlay()
 		}
 		else
 		{
+			if (!AudioComponent) AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::TITLE_BGM);
+			if (!(AudioComponent->IsPlaying())) AudioComponent->Play();
 			IsNoInput = false;
 			State = ETitleState::Title;
 			APlayerController *playerControtller = UGameplayStatics::GetPlayerController(this, 0);
@@ -145,15 +147,26 @@ void ATitleManager::CameraMoveCheck()
 		{
 			MoveFrameTime = StageSelectTime * 60.0f;
 			State = ETitleState::TitleMove;
-			if(!AudioComponent)AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::WALK_WOOD);
-			AudioComponent->Play();
+
 			SetCameraMove(StageSelectCamera, StageSelectTime);
 			TitlePlayer->TargetRotation();
 		}
 		else if (State == ETitleState::TitleMove)
 		{
 			State = ETitleState::StageSelect;
-			AudioComponent->Stop();
+
+			if (AudioComponent)
+			{
+				AudioComponent->Stop();
+			}
+
+			AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::SELECT_BGM);
+
+			if (AudioComponent)
+			{
+				AudioComponent->Play();
+			}
+
 			IsNoInput = false;
 		}
 	}

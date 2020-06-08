@@ -82,6 +82,10 @@ private:
 		FLinearColor WaterColor = FLinearColor::Blue;
 	UPROPERTY(EditAnywhere)
 		FLinearColor WaveColor = FLinearColor::White;
+	UPROPERTY(EditAnywhere)
+		float SoundPlayWaveHight = 30.0f;
+
+	class UAudioComponent* AudioComponent;
 
 	TArray<VertexType> VertexTypes;
 

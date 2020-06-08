@@ -66,6 +66,8 @@ private:
 	ARaft* CurrentRaft = nullptr;	// 乗っていない時は常にnullptr
 	bool IsInRaft = false;
 	void ResetRaftParam();
+
+	UAudioComponent* AudioComponent;
 public:
 	APlayerCharacter();
 
@@ -151,7 +153,7 @@ protected:
 		float HammerPower;
 
 private:
-
+	bool NoTick = false;
 	UPlayerAnimInstance* AnimInst;
 
 	//水面に波をたてる
@@ -168,6 +170,8 @@ public:
 	float GetMoveAmount() { return MoveAmount; };
 	//ゲージUIを非表示にする
 	void HammerCountBarParent();
+	//ゲージUIを非表示にする(デバッグ用）
+	void DebugHammerCountBarParent();
 	//TickをOFFにする
 	void SetNoTick();
 	void SetGameClear();
@@ -182,7 +186,8 @@ public:
 		FORCEINLINE	float GetHammerPower() const { return HammerPower; };
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	float GetChargeCount() const { return ChargeCount; };
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	bool GetIsDeth() const { return IsDeth; };
 	bool GetIsAttack() const;
 	bool GetIsCharge() const;
-	bool GetIsDeth() const { return IsDeth; };
 };

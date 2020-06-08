@@ -12,7 +12,7 @@ class WAVE_API AGameCameraFocusPoint : public AActor
 public:	
 	AGameCameraFocusPoint();
 
-	static void SpawnFocusPoint(const AActor * Object, const FVector & Pos, float Time);
+	static void SpawnFocusPoint(const AActor * Object, const FVector & Pos, float Time = 2.0f);
 
 protected:
 	virtual void BeginPlay() override;

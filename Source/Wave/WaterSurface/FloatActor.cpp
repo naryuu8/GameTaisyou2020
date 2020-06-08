@@ -62,7 +62,12 @@ void AFloatActor::Tick(float DeltaTime)
 
 	if (MoveVec.Size() > MinFloatWavePower)
 	{
+		IsFloating = true;
 		Velocity += MoveVec;
+	}
+	else
+	{
+		IsFloating = false;
 	}
 	// フィールドの外に出た時
 	// 崖にいる場合は落下
@@ -70,7 +75,7 @@ void AFloatActor::Tick(float DeltaTime)
 	{
 		IsFall = true;
 		
-		AGameCameraFocusPoint::SpawnFocusPoint(this, GetActorLocation() + Velocity, 1.5f);
+		AGameCameraFocusPoint::SpawnFocusPoint(this, GetActorLocation() + Velocity);
 		ASoundManager::SafePlaySound(SOUND_TYPE::FALL_ACTOR);
 
 		Velocity = Velocity.GetSafeNormal() * 8.0f;

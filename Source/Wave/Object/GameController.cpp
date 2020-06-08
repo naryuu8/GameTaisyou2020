@@ -13,6 +13,8 @@
 #include "../Player/PlayerCharacter.h"
 #include "../WaterSurface/FloatActor.h"
 #include "TimerManager.h"
+#include "../SoundManager.h"
+#include "../Camera/GameCameraFocusPoint.h"
 // Sets default values
 
 AGameController::AGameController()
@@ -52,7 +54,13 @@ void AGameController::BeginPlay()
 		GetMaxNimotu();
 	}
 	GameMaxNimotu = MaxNimotu;
-
+	if (DebugScreenMode)
+	{
+		GetPlayer->SetPlayerHiddenInGame();
+		GetPlayer->DebugHammerCountBarParent();
+		GetPlayer->SetNoTick();
+		return;
+	}
 	CreateNimotuCountUI();
 	CreateGameTimeUI();
 }
@@ -60,6 +68,7 @@ void AGameController::BeginPlay()
 // Called every frame
 void AGameController::Tick(float DeltaTime)
 {
+	if (DebugScreenMode)return;
 	Super::Tick(DeltaTime);
 	//プレイヤーへのアドレスを取得出来ていなかったら再び貰う
 	if (!GetPlayer)
@@ -71,9 +80,14 @@ void AGameController::Tick(float DeltaTime)
 	{
 		InputPause();
 	}
-	
-	GameClearCheck();
-	GameOverCheck();
+	//カメラの注目ポイントが存在する場合はゲームの判定をしない
+	TArray<AActor*> FocusPoints;
+	UGameplayStatics::GetAllActorsOfClass(this, AGameCameraFocusPoint::StaticClass(), FocusPoints);
+	if (FocusPoints.Num() == 0)
+	{
+		GameOverCheck();
+		GameClearCheck();
+	}
 	InputGameOverUI();
 	InputResultUI();
 	UpdateTime();
@@ -89,8 +103,8 @@ void AGameController::CreateGameTimeUI()
 		{
 			GameTimeUI->AddToViewport();
 			GameTimeUI->SetTimeLimit(TimeLimit);
-			GameTimeUI->SetCountDownTime(NormaTime);
-			GameTimeUI->SetNormaTime(CountDownTime);
+			GameTimeUI->SetCountDownTime(CountDownTime);
+			GameTimeUI->SetNormaTime(NormaTime);
 		}
 		else
 		{
@@ -207,11 +221,11 @@ void AGameController::InputResultUI()
 	const AInputManager * inputManager = AInputManager::GetInstance();
 	if (!inputManager)return;
 	const InputState * input = inputManager->GetState();
-	if (input->Up.IsPress)
+	if (input->Left.IsPress)
 	{
 		ResultUI->BackSelectState();
 	}
-	if (input->Down.IsPress)
+	if (input->Right.IsPress)
 	{
 		ResultUI->NextSelectState();
 	}
@@ -270,16 +284,16 @@ void AGameController::InputPause()
 		{
 			if (!PauseUI)return;
 			if (PauseUI->GetIsPlayAnimation())return;
-			PauseUI->EndPlayAnimation();
+			PauseUI->EndAnimation();
 		}
 	}
 	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
 	if (!PauseUI)return;
-	if (input->Up.IsPress)
+	if (input->Left.IsPress)
 	{
 		PauseUI->BackSelectState();
 	}
-	if (input->Down.IsPress)
+	if (input->Right.IsPress)
 	{
 		PauseUI->NextSelectState();
 	}
@@ -331,6 +345,7 @@ int AGameController::GetMaxNimotu()
 void AGameController::GameClearCheck()
 {
 	if (IsGameOver)return;
+	if (IsGameClear)return;
 	auto gameclear = [=]
 	{
 		//指定の時間後ゲームクリアにする
@@ -345,8 +360,6 @@ void AGameController::GameClearCheck()
 	if (GoalCount >= NormaGoalCount && GetLimitTimeZero())
 	{
 		gameclear();
-		//IsGameClear = true;
-		//GameClear();
 	}
 	//②荷物を全て入れる
 	else if (GoalCount == MaxNimotu)
@@ -358,20 +371,26 @@ void AGameController::GameClearCheck()
 	{
 		gameclear();
 	}
+	//④ゴールが全て入っているかつ荷物が残っているかつノルマ以上にゴールに入れていたらクリア
+	else if (NotExplotionCount - GoalCount <= 0 && GameMaxNimotu > 0 && GoalCount >= NormaGoalCount)
+	{
+		gameclear();
+	}
 }
 
 void AGameController::GameOverCheck()
 {
 	if (IsGameClear)return;
+	if (IsGameOver)return;
 	// ゲームオーバー条件
 	//ノルマを1つも達成できなくなったらゲームオーバー
-	auto gameover = [=](float Timer = 3.0f)
+	auto gameover = [=] (const float time)
 	{ 
 		IsGameOver = true;
 		//指定の時間後ゲームオーバーにする
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
 		FTimerHandle handle;
-		timerManager.SetTimer(handle, this, &AGameController::GameOver, Timer);
+		timerManager.SetTimer(handle, this, &AGameController::GameOver, time);
 	};
 	//①ノルマまで荷物を運んでおらず残り時間が0になったら
 	if (GoalCount < NormaGoalCount && GetLimitTimeZero())
@@ -382,7 +401,7 @@ void AGameController::GameOverCheck()
 	//②プレイヤーが落下した時
 	else if (GetPlayer->GetIsDeth())
 	{
-		gameover(1.0f);
+		gameover(1.5f);
 	}
 	//③荷物がノルマ数達成できないほど無くなった時(ゴールに入った荷物と合わせる)
 	else if (GameMaxNimotu + GoalCount < NormaGoalCount)
@@ -391,9 +410,9 @@ void AGameController::GameOverCheck()
 		GameOver();
 	}
 	//④ゴールがノルマの荷物より少なくなった時
-	else if (NotExplotionCount < NormaGoalCount && GoalCount < NormaGoalCount)
+	else if (NotExplotionCount < NormaGoalCount && GoalCount - NotExplotionCount < NormaGoalCount)
 	{
-		gameover();
+		gameover(3.0f);
 	}
 }
 
@@ -404,6 +423,10 @@ void AGameController::GameClear()
 	{
 		GameTimeUI->RemoveFromParent();
 	}
+	if (NimotuCountUI)
+	{
+		NimotuCountUI->RemoveFromParent();
+	}
 }
 
 void AGameController::GameOver()
@@ -413,6 +436,11 @@ void AGameController::GameOver()
 	{
 		GameTimeUI->RemoveFromParent();
 	}
+	if (NimotuCountUI)
+	{
+		NimotuCountUI->RemoveFromParent();
+	}
+	GetPlayer->HammerCountBarParent();
 }
 
 int AGameController::CountGameNimotu()
