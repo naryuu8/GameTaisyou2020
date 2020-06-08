@@ -55,6 +55,9 @@ public:
 		float ResultNormaAngle;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		int ResultNormaTime;
+	//全てのスタンプが押されていたらtrueを返す
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		bool GetIsAllStamp() const;
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsCountAnimeEnd() const { return IsCountAnimeEnd; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
