@@ -23,6 +23,9 @@
 #include "Runtime/Engine/Classes/Engine/Engine.h"
 #include "GameFramework/PlayerController.h"
 
+#include "../Camera/State/GameCameraStateFall.h"
+#include "../Camera/State/GameCameraStateClear.h"
+
 #define DISPLAY_LOG(fmt, ...) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT(fmt), __VA_ARGS__));
 //////////////////////////////////////////////////////////////////////////
 // APlayerCharacter
@@ -79,13 +82,13 @@ void APlayerCharacter::BeginPlay_C()
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
-
 	if (UGameplayStatics::IsGamePaused(GetWorld()))
 	{//ポーズ中はリターン	
 		return;
 	}
 	// 死亡時は何もできない
 	if (IsDeth) return;
+	if (AnimInst->IsClear) return;
 
 	FVector CurPos = GetActorLocation();
 
@@ -101,6 +104,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 		if (CurPos.Z < -10.0f) // プレイヤーの座標が一定以下に行った時は死亡
 		{
+			FollowCamera->ChangeState(new GameCameraStateFall(CurPos));
 			Water->AddPower(FVector(CurPos.X, CurPos.Y, 0.0f), ChargePowerMax);
 			IsDeth = true;
 			PlayerDeth();
@@ -475,6 +479,12 @@ void APlayerCharacter::SetNoTick()
 {
 	this->SetActorTickEnabled(false);
 	MoveAmount = 0.0f;
+}
+
+void APlayerCharacter::SetGameClear()
+{
+	AnimInst->IsClear = true;
+	FollowCamera->ChangeState(new GameCameraStateClear());
 }
 
 void APlayerCharacter::SetPlayerHiddenInGame()

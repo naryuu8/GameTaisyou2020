@@ -2,11 +2,11 @@
 
 #include "GameCameraActor.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameCameraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "../InputManager.h"
 #include "../WaterSurface/WaterSurface.h"
-
+#include "State/GameCameraStateIdle.h"
+#include "GameCameraFocusPoint.h"
 
 // Sets default values
 AGameCameraActor::AGameCameraActor()
@@ -25,6 +25,7 @@ AGameCameraActor::AGameCameraActor()
 
 	// カメラブームのメンバにアタッチ
 	GameCameraBoom->SetCamera(Camera);
+	//AActor * Actor = GetWorld()->SpawnActor<AActor>(FVector::ZeroVector, FRotator::ZeroRotator);
 }
 
 // Called when the game starts or when spawned
@@ -46,6 +47,8 @@ void AGameCameraActor::BeginPlay()
 	{
 		playerControtller->SetViewTarget(this);
 	}
+
+	ChangeState(new GameCameraStateIdle());
 }
 
 void AGameCameraActor::InputChangeType()
@@ -67,30 +70,18 @@ void AGameCameraActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	InputChangeType();
+	if (!State) return;
 
-	float FollowDist = 0.0f;
-	FVector FollowPos;
+	// 注目するポイントがあるか確かめる
+	UGameplayStatics::GetAllActorsOfClass(this, AGameCameraFocusPoint::StaticClass(), FocusPoints);
 
-	switch (Type)
-	{
-	case FollowType::FieldCenter:
-		FollowDist = FieldDistance;
-		FollowPos = FieldCenterPos;
-		break;
-	case FollowType::CharacterFollow_Far:
-		FollowDist = CharacterDistance_Far;
-		if(FollowTarget) FollowPos = FollowTarget->GetActorLocation();
-		break;
-	case FollowType::CharacterFollow_Near:
-		FollowDist = CharacterDistance_Near;
-		if (FollowTarget) FollowPos = FollowTarget->GetActorLocation();
-		break;
-	}
+	State->OnUpdate(this);
+}
 
-	// なめらかに追従
-	SetActorLocation(FMath::Lerp<FVector>(GetActorLocation(), FollowPos, 0.1f));
-	// カメラの距離をセット
-	GameCameraBoom->SetTargetDistance(FollowDist);
+void AGameCameraActor::ChangeState(GameCameraState * NewState)
+{
+	if (!NewState) return;
+	this->State = NewState;
+	this->State->OnStart(this);
 }
 

@@ -334,6 +334,7 @@ void AGameController::GameClearCheck()
 	auto gameclear = [=]
 	{
 		//指定の時間後ゲームクリアにする
+		GetPlayer->SetGameClear();
 		IsGameClear = true;
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
 		FTimerHandle handle;
@@ -343,8 +344,9 @@ void AGameController::GameClearCheck()
 	//①ノルマ以上荷物を入れている時かつ残り時間が0になったら
 	if (GoalCount >= NormaGoalCount && GetLimitTimeZero())
 	{
-		IsGameClear = true;
-		GameClear();
+		gameclear();
+		//IsGameClear = true;
+		//GameClear();
 	}
 	//②荷物を全て入れる
 	else if (GoalCount == MaxNimotu)
@@ -363,13 +365,13 @@ void AGameController::GameOverCheck()
 	if (IsGameClear)return;
 	// ゲームオーバー条件
 	//ノルマを1つも達成できなくなったらゲームオーバー
-	auto gameover = [=] 
+	auto gameover = [=](float Timer = 3.0f)
 	{ 
 		IsGameOver = true;
 		//指定の時間後ゲームオーバーにする
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
 		FTimerHandle handle;
-		timerManager.SetTimer(handle, this, &AGameController::GameOver,3.0f);
+		timerManager.SetTimer(handle, this, &AGameController::GameOver, Timer);
 	};
 	//①ノルマまで荷物を運んでおらず残り時間が0になったら
 	if (GoalCount < NormaGoalCount && GetLimitTimeZero())
@@ -377,13 +379,18 @@ void AGameController::GameOverCheck()
 		IsGameOver = true;
 		GameOver();
 	}
-	//②荷物がノルマ数達成できないほど無くなった時(ゴールに入った荷物と合わせる)
+	//②プレイヤーが落下した時
+	else if (GetPlayer->GetIsDeth())
+	{
+		gameover(1.0f);
+	}
+	//③荷物がノルマ数達成できないほど無くなった時(ゴールに入った荷物と合わせる)
 	else if (GameMaxNimotu + GoalCount < NormaGoalCount)
 	{//このゲームオーバーの時はTimerを使わない
 		IsGameOver = true;
 		GameOver();
 	}
-	//③ゴールがノルマの荷物より少なくなった時
+	//④ゴールがノルマの荷物より少なくなった時
 	else if (NotExplotionCount < NormaGoalCount && GoalCount < NormaGoalCount)
 	{
 		gameover();

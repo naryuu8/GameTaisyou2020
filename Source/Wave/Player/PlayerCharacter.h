@@ -170,6 +170,7 @@ public:
 	void HammerCountBarParent();
 	//TickをOFFにする
 	void SetNoTick();
+	void SetGameClear();
 	//プレイヤーを非表示にする
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 	void SetPlayerHiddenInGame();
@@ -183,4 +184,5 @@ public:
 		FORCEINLINE	float GetChargeCount() const { return ChargeCount; };
 	bool GetIsAttack() const;
 	bool GetIsCharge() const;
+	bool GetIsDeth() const { return IsDeth; };
 };

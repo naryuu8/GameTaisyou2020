@@ -25,6 +25,7 @@ protected:
 
 	float FollowDistance = 0.0f;
 	float TargetFollowDistance = 0.0f;
+	float FollowDistanceSpeed = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 		float RotationSpeed = 1.5f;
@@ -47,6 +48,13 @@ private:
 public:	
 
 	void SetCamera(UCameraComponent * Camera) { FollowCamera = Camera; }
-	void SetTargetDistance(float Dist) { TargetFollowDistance = Dist; }
+	float GetVerticalDegree();
+	void SetTargetDistance(float Dist, float Speed = 0.1f) 
+	{
+		TargetFollowDistance = Dist;
+		FollowDistanceSpeed = Speed;
+	}
 
+	void SetVertical(float Degree, float Speed);
+	void SetHorizontal(const FVector & Direction, float Speed);
 };

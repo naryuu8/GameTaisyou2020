@@ -14,6 +14,7 @@
 #include "../Object/GoalComponent.h"
 
 #include "../SoundManager.h"
+#include "../Camera/GameCameraFocusPoint.h"
 
 
 // Sets default values
@@ -69,6 +70,7 @@ void AFloatActor::Tick(float DeltaTime)
 	{
 		IsFall = true;
 		
+		AGameCameraFocusPoint::SpawnFocusPoint(this, GetActorLocation() + Velocity, 1.5f);
 		ASoundManager::SafePlaySound(SOUND_TYPE::FALL_ACTOR);
 
 		Velocity = Velocity.GetSafeNormal() * 8.0f;
