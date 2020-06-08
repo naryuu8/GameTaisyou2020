@@ -219,6 +219,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 					//‘Ì—Í‚ª‚Ù‚Ú0‚È‚ç—­‚ß‚Ä‚à‰ÁŽZ‚µ‚È‚¢
 					if (HammerHP > 0.1f)
 					{
+						if (!AudioComponent)AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::HAMMER_CHARGE);
+						if (!AudioComponent->IsPlaying())AudioComponent->Play();
 						HammerPower += ChargeSpeed;
 						HammerPower = FMath::Min(HammerPower, ChargePowerMax);
 					}
@@ -232,6 +234,11 @@ void APlayerCharacter::Tick(float DeltaTime)
 		}
 		else
 		{
+			if (AudioComponent && !(AudioComponent->IsPlaying()))
+			{
+				AudioComponent->Stop();
+			}
+
 			ChageDestroyEmmiter();
 		}
 	}// !InputManager	

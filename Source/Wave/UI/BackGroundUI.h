@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "../SaveData.h"
+#include "../SoundManager.h"
 #include "BackGroundUI.generated.h"
 
 /**
@@ -15,6 +16,8 @@ class WAVE_API UBackGroundUI : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		UAudioComponent* AudioComponent;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		FText MaxNimotu;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")

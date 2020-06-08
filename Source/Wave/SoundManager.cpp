@@ -5,7 +5,9 @@ static ASoundManager* SoundManagerInstance = nullptr;
 
 static TCHAR* FileNames[] =
 {
-	TEXT("SoundCue'/Game/Main/Sound/BGM/title_Cue.title_Cue'"),					
+	TEXT("SoundCue'/Game/Main/Sound/BGM/title_Cue.title_Cue'"),
+	TEXT("SoundCue'/Game/Main/Sound/BGM/stage_Cue.stage_Cue'"),
+	TEXT("SoundCue'/Game/Main/Sound/BGM/game_clear_Cue.game_clear_Cue'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/walk_wood/walk_wood_1.walk_wood_1'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/system_kirikae_1.system_kirikae_1'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/walk_sougen/walk_sougen_1.walk_sougen_1'"),
@@ -26,7 +28,8 @@ static TCHAR* FileNames[] =
 	TEXT("SoundWave'/Game/Main/Sound/SE/Result_number.result_number'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/result_hanko.result_hanko'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/kirikae/kirikae_1.kirikae_1' "),
-	TEXT("SoundWave'/Game/Main/Sound/SE/kettei/kettei_2.kettei_2'")
+	TEXT("SoundWave'/Game/Main/Sound/SE/kettei/kettei_2.kettei_2'"),
+	TEXT("SoundWave'/Game/Main/Sound/hammer_charge.hammer_charge'")
 };
 
 // Sets default values
