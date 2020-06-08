@@ -23,5 +23,5 @@ public:
 	bool IsOnRaft(FVector worldPos);
 	bool IsInRaft(const FVector & worldPos, float CircleRadius);
 private:
-	UAudioComponent* AudioComponent;
+	class UAudioComponent* AudioComponent;
 };

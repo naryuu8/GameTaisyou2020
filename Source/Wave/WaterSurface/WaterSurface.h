@@ -85,7 +85,7 @@ private:
 	UPROPERTY(EditAnywhere)
 		float SoundPlayWaveHight = 30.0f;
 
-	UAudioComponent* AudioComponent;
+	class UAudioComponent* AudioComponent;
 
 	TArray<VertexType> VertexTypes;
 

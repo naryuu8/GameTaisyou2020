@@ -14,6 +14,7 @@
 #include "../WaterSurface/FloatActor.h"
 #include "TimerManager.h"
 #include "../SoundManager.h"
+#include "../Camera/GameCameraFocusPoint.h"
 // Sets default values
 
 AGameController::AGameController()
@@ -79,9 +80,14 @@ void AGameController::Tick(float DeltaTime)
 	{
 		InputPause();
 	}
-	
-	GameClearCheck();
-	GameOverCheck();
+	//カメラの注目ポイントが存在する場合はゲームの判定をしない
+	TArray<AActor*> FocusPoints;
+	UGameplayStatics::GetAllActorsOfClass(this, AGameCameraFocusPoint::StaticClass(), FocusPoints);
+	if (FocusPoints.Num() == 0)
+	{
+		GameOverCheck();
+		GameClearCheck();
+	}
 	InputGameOverUI();
 	InputResultUI();
 	UpdateTime();
@@ -345,7 +351,8 @@ void AGameController::GameClearCheck()
 	auto gameclear = [=]
 	{
 		//指定の時間後ゲームクリアにする
-		IsGameClear = true;	
+		GetPlayer->SetGameClear();
+		IsGameClear = true;
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
 		FTimerHandle handle;
 		timerManager.SetTimer(handle, this, &AGameController::GameClear, 2.8f);
@@ -354,8 +361,7 @@ void AGameController::GameClearCheck()
 	//①ノルマ以上荷物を入れている時かつ残り時間が0になったら
 	if (GoalCount >= NormaGoalCount && GetLimitTimeZero())
 	{
-		IsGameClear = true;
-		GameClear();
+		gameclear();
 	}
 	//②荷物を全て入れる
 	else if (GoalCount == MaxNimotu)
@@ -394,21 +400,22 @@ void AGameController::GameOverCheck()
 		IsGameOver = true;
 		GameOver();
 	}
-	//②荷物がノルマ数達成できないほど無くなった時(ゴールに入った荷物と合わせる)
+	//②プレイヤーが落下した時
+	else if (GetPlayer->GetIsDeth())
+	{
+		IsGameOver = true;
+		GameOver();
+	}
+	//③荷物がノルマ数達成できないほど無くなった時(ゴールに入った荷物と合わせる)
 	else if (GameMaxNimotu + GoalCount < NormaGoalCount)
 	{//このゲームオーバーの時はTimerを使わない
 		IsGameOver = true;
 		GameOver();
 	}
-	//③ゴールがノルマの荷物より少なくなった時
+	//④ゴールがノルマの荷物より少なくなった時
 	else if (NotExplotionCount < NormaGoalCount && GoalCount - NotExplotionCount < NormaGoalCount)
 	{
 		gameover(3.0f);
-	}
-	//④プレイヤーが落ちた時
-	else if (GetPlayer->GetIsDeth())
-	{
-		gameover(1.8f);
 	}
 }
 

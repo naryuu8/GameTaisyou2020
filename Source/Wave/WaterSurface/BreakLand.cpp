@@ -3,6 +3,7 @@
 
 #include "BreakLand.h"
 #include "../WaterSurface/FloatActor.h"
+#include "../Camera/GameCameraFocusPoint.h"
 
 void ABreakLand::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -16,6 +17,7 @@ void ABreakLand::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class
 	{
 		Break();
 		OtherFloat->Destroy();
+		AGameCameraFocusPoint::SpawnFocusPoint(this, GetActorLocation());
 	}
 }
 

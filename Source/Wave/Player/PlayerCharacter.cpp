@@ -24,6 +24,10 @@
 #include "GameFramework/PlayerController.h"
 #include "../SoundManager.h"
 
+#include "../Camera/State/GameCameraStateFall.h"
+#include "../Camera/State/GameCameraStateClear.h"
+#include "../Camera/GameCameraFocusPoint.h"
+
 #define DISPLAY_LOG(fmt, ...) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT(fmt), __VA_ARGS__));
 //////////////////////////////////////////////////////////////////////////
 // APlayerCharacter
@@ -87,25 +91,33 @@ void APlayerCharacter::Tick(float DeltaTime)
 	}
 	// 死亡時は何もできない
 	if (IsDeth) return;
+	if (AnimInst->IsClear) return;
 
 	FVector CurPos = GetActorLocation();
 
 	// 更新の始めにプレイヤーの下を確認する
-	if (CheckGround())
+	if (!CheckGround())
 	{
-		
-	}
-	// もし失敗したらプレイヤーは落下した判定にする
-	else
-	{
-
+		// もし失敗したらプレイヤーは落下した判定にする
 		Water->SetCollisionEnabled(false);	// WaterSurfaceのコリジョンをオフに設定
+		ChageDestroyEmmiter();
 
 		if (CurPos.Z < -10.0f) // プレイヤーの座標が一定以下に行った時は死亡
 		{
-			ASoundManager::SafePlaySound(SOUND_TYPE::FALL_PLAYER);
+			if (Water->IsInWater(CurPos))
+			{
+				ASoundManager::SafePlaySound(SOUND_TYPE::FALL_PLAYER);	// 水の上にいる時だけ鳴らす
+			}
+			else
+			{
+				ASoundManager::SafePlaySound(SOUND_TYPE::FALL_ACTOR);
+			}
+
+			FollowCamera->ChangeState(new GameCameraStateFall(CurPos));
+			AGameCameraFocusPoint::SpawnFocusPoint(this, CurPos, 1.0f);
 			Water->AddPower(FVector(CurPos.X, CurPos.Y, 0.0f), ChargePowerMax);
 			IsDeth = true;
+			AnimInst->IsDeth = true;
 			PlayerDeth();
 			UCapsuleComponent * Collision = Cast<UCapsuleComponent>(GetComponentByClass(UCapsuleComponent::StaticClass()));
 			if (Collision)Collision->SetActive(false);
@@ -437,46 +449,38 @@ void APlayerCharacter::SetLookAt(FVector Direction, float Speed)
 
 void APlayerCharacter::WaterAttack(FVector Point, float Power)
 {
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), FoundActors);
+	if (!Water) return;
 
-	for (auto Actor : FoundActors)
+	Water->AddPower(Point, Power * 100.0f);
+
+	if (Water->IsInLand(Point))
 	{
-		AWaterSurface* water = Cast<AWaterSurface>(Actor);
-		if (water)
+		if (Power == ChargePowerMax)
 		{
-			water->AddPower(Point, Power * 100.0f);
-
-			if (water->IsInLand(Point))
-			{
-				if (Power == ChargePowerMax)
-				{
-					ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_BIG);
-				}
-				else if (Power > ChargePowerMax * 0.5f)
-				{
-					ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_MEDIUM);
-				}
-				else
-				{
-					ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_SMALL);
-				}
-			}
-			else
-			{
-				if (Power == ChargePowerMax)
-				{
-					ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_BIG_W);
-				}
-				else if (Power > ChargePowerMax * 0.5f)
-				{
-					ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_MEDIUM_W);
-				}
-				else
-				{
-					ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_SMALL_W);
-				}
-			}
+			ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_BIG);
+		}
+		else if (Power > ChargePowerMax * 0.5f)
+		{
+			ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_MEDIUM);
+		}
+		else
+		{
+			ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_SMALL);
+		}
+	}
+	else
+	{
+		if (Power == ChargePowerMax)
+		{
+			ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_BIG_W);
+		}
+		else if (Power > ChargePowerMax * 0.5f)
+		{
+			ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_MEDIUM_W);
+		}
+		else
+		{
+			ASoundManager::SafePlaySound(SOUND_TYPE::HAMMER_SMALL_W);
 		}
 	}
 }
@@ -530,6 +534,19 @@ void APlayerCharacter::SetNoTick()
 	this->SetActorTickEnabled(false);
 	NoTick = true;
 	MoveAmount = 0.0f;
+}
+
+void APlayerCharacter::SetGameClear()
+{
+	AnimInst->IsClear = true;
+	FollowCamera->ChangeState(new GameCameraStateClear());
+
+	// プレイヤーがイカダに乗っていたらイカダの更新を止める
+	if (CurrentRaft != nullptr)
+	{
+		CurrentRaft->SetActorTickEnabled(false);
+	}
+	ChageDestroyEmmiter();
 }
 
 void APlayerCharacter::SetPlayerHiddenInGame()

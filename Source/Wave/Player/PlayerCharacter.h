@@ -174,6 +174,7 @@ public:
 	void DebugHammerCountBarParent();
 	//TickをOFFにする
 	void SetNoTick();
+	void SetGameClear();
 	//プレイヤーを非表示にする
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 	void SetPlayerHiddenInGame();

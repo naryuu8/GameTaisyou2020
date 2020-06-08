@@ -45,7 +45,7 @@ protected:
 		bool DebugScreenMode = false;
 	// BGM用
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game")
-		UAudioComponent* AudioComponent;
+		class UAudioComponent* AudioComponent;
 private:
 	APlayerCharacter* GetPlayer;//プレイヤー情報
 	// ゲームクリアかどうか

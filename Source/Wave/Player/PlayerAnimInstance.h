@@ -21,7 +21,10 @@ public:
 		bool IsCharge;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		bool IsAttack;
-
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		bool IsClear;
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		bool IsDeth;
 private:
 	//UAnimMontage* AnimMontage;
 	FAnimNode_StateMachine * AnimState;
