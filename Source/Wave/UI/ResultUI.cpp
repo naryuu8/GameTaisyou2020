@@ -40,11 +40,11 @@ void UResultUI::BackSelectState()
 
 void UResultUI::SelectStateAction()
 {
-	if (State == ResultState::ENTER_WAIT)
-	{
-		State = ResultState::INPUT;
-		return;
-	}
+	//if (State == ResultState::ENTER_WAIT)
+	//{
+	//	State = ResultState::INPUT;
+	//	return;
+	//}
 	if (State != ResultState::INPUT)return;
 	//次のステージがなかったら次のステージへを出さないこと
 	switch (SelectNumber)

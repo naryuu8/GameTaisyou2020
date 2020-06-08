@@ -208,11 +208,11 @@ void AGameController::InputResultUI()
 	const AInputManager * inputManager = AInputManager::GetInstance();
 	if (!inputManager)return;
 	const InputState * input = inputManager->GetState();
-	if (input->Up.IsPress)
+	if (input->Left.IsPress)
 	{
 		ResultUI->BackSelectState();
 	}
-	if (input->Down.IsPress)
+	if (input->Right.IsPress)
 	{
 		ResultUI->NextSelectState();
 	}
@@ -271,16 +271,16 @@ void AGameController::InputPause()
 		{
 			if (!PauseUI)return;
 			if (PauseUI->GetIsPlayAnimation())return;
-			PauseUI->EndPlayAnimation();
+			PauseUI->EndAnimation();
 		}
 	}
 	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
 	if (!PauseUI)return;
-	if (input->Up.IsPress)
+	if (input->Left.IsPress)
 	{
 		PauseUI->BackSelectState();
 	}
-	if (input->Down.IsPress)
+	if (input->Right.IsPress)
 	{
 		PauseUI->NextSelectState();
 	}
@@ -332,6 +332,7 @@ int AGameController::GetMaxNimotu()
 void AGameController::GameClearCheck()
 {
 	if (IsGameOver)return;
+	if (IsGameClear)return;
 	auto gameclear = [=]
 	{
 		//指定の時間後ゲームクリアにする
@@ -362,6 +363,7 @@ void AGameController::GameClearCheck()
 void AGameController::GameOverCheck()
 {
 	if (IsGameClear)return;
+	if (IsGameOver)return;
 	// ゲームオーバー条件
 	//ノルマを1つも達成できなくなったらゲームオーバー
 	auto gameover = [=] (const float time)
