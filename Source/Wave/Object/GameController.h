@@ -40,6 +40,9 @@ protected:
 	//カウントダウン表示開始時間
 	UPROPERTY(EditAnywhere, Category = "Game")
 		int CountDownTime = 10;
+	//スクリーンショット用デバッグフラグ
+	UPROPERTY(EditAnywhere, Category = "Game")
+		bool DebugScreenMode = false;
 	// BGM用
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game")
 		UAudioComponent* AudioComponent;

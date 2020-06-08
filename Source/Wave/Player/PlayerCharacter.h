@@ -153,7 +153,7 @@ protected:
 		float HammerPower;
 
 private:
-
+	bool NoTick = false;
 	UPlayerAnimInstance* AnimInst;
 
 	//水面に波をたてる
@@ -170,6 +170,8 @@ public:
 	float GetMoveAmount() { return MoveAmount; };
 	//ゲージUIを非表示にする
 	void HammerCountBarParent();
+	//ゲージUIを非表示にする(デバッグ用）
+	void DebugHammerCountBarParent();
 	//TickをOFFにする
 	void SetNoTick();
 	//プレイヤーを非表示にする

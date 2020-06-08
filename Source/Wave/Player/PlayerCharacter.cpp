@@ -80,7 +80,7 @@ void APlayerCharacter::BeginPlay_C()
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
-
+	if (NoTick)return;
 	if (UGameplayStatics::IsGamePaused(GetWorld()))
 	{//ポーズ中はリターン	
 		return;
@@ -512,9 +512,23 @@ void APlayerCharacter::HammerCountBarParent()
 	}
 }
 
+void APlayerCharacter::DebugHammerCountBarParent()
+{
+	if (HammerCountBarUI)
+	{
+		HammerCountBarUI->RemoveFromParent();
+	}
+	if (!HammerCountBarUI)
+	{
+		CreateHammerCountBarUI();
+		HammerCountBarUI->RemoveFromParent();
+	}
+}
+
 void APlayerCharacter::SetNoTick()
 {
 	this->SetActorTickEnabled(false);
+	NoTick = true;
 	MoveAmount = 0.0f;
 }
 
