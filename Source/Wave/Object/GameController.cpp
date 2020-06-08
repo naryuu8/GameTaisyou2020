@@ -388,6 +388,11 @@ void AGameController::GameOverCheck()
 	{
 		gameover();
 	}
+	//‡CƒvƒŒƒCƒ„[‚ª—Ž‚¿‚½Žž
+	else if (GetPlayer->GetIsDeth())
+	{
+		gameover();
+	}
 }
 
 void AGameController::GameClear()

@@ -181,6 +181,8 @@ public:
 		FORCEINLINE	float GetHammerPower() const { return HammerPower; };
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	float GetChargeCount() const { return ChargeCount; };
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	bool GetIsDeth() const { return IsDeth; };
 	bool GetIsAttack() const;
 	bool GetIsCharge() const;
 };
