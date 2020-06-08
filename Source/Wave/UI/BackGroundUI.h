@@ -62,6 +62,8 @@ public:
 		FORCEINLINE	bool GetIsCountAnimeEnd() const { return IsCountAnimeEnd; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsStampAnimeEnd() const { return IsStampAnimeEnd; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		bool GetIsStamp(const int index) const;
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void SetTimeLimit(const int time);
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
@@ -70,6 +72,8 @@ public:
 		void SetNeedleAndBG_Material(const float angle);
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void NimotuCountPlayAnimation();
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetNormaTime(const int time);
 	//セーブデータの指定したスタンプフラグをtrueにする
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void SetSaveDataIsStamp(const int index) { ResultSaveData.IsStamp[index] = true;}
