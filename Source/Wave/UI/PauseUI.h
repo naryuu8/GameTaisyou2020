@@ -6,12 +6,11 @@
 #include "Blueprint/UserWidget.h"
 #include "PauseUI.generated.h"
 UENUM(BlueprintType)
-enum class PauseState : uint8
+enum class PauseSelectState : uint8
 {
 	GAMEBACK,
 	RESTART,
-	SCORE,
-	STAGESELECT,
+	STAGESELECT
 };
 
 UCLASS()
@@ -31,20 +30,16 @@ public:
 	void BackSelectState();
 	//対応する選択ステートのアクションを実行する
 	void SelectStateAction();
+	void EndAnimation();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	int GetSelectNumber() const{ return SelectNumber; };
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		bool IsPlayAnimation;//アニメーション再生中ならtrue
-	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
-		bool IsScoreCheck;//スコア確認中ならtrue
 	//呼び出し時にBPでアニメーション再生
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void InitPlayAnimation();
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void EndPlayAnimation();
-	//スタンプテスト用イベント
-	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
-		void TestStampPlayAnimation();
 	//ポーズ画面の時計のため制限時間を受け取る
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void SetTimeLimit(const int time);

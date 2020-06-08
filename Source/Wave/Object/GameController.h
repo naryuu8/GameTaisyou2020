@@ -69,11 +69,15 @@ private:
 		TSubclassOf<UNimotuCountUI> NimotuCountUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UPauseUI> PauseUIClass;
-	UPauseUI* PauseUI = nullptr;
-	UGameTimeUI* GameTimeUI = nullptr;
-	UGameOverUI* GameOverUI = nullptr;
-	UResultUI* ResultUI = nullptr;
 	//勝手に開放されることがあるのでガベージコレクションの対象外にする
+	UPROPERTY()
+	UPauseUI* PauseUI = nullptr;
+	UPROPERTY()
+	UGameTimeUI* GameTimeUI = nullptr;
+	UPROPERTY()
+	UGameOverUI* GameOverUI = nullptr;
+	UPROPERTY()
+	UResultUI* ResultUI = nullptr;
 	UPROPERTY()
 	UNimotuCountUI* NimotuCountUI = nullptr;
 public:	
