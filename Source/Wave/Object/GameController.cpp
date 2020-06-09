@@ -255,7 +255,7 @@ void AGameController::InputPause()
 					PauseUI->SetNormaAngle(GetNormaTimeAngle());
 					PauseUI->SetNeedleAndBG_Material(GetNowTimeAngle());
 					PauseUI->SetTimeLimit(TimeLimit);
-					PauseUI->SetNormaTime(NormaTime);
+					PauseUI->SetNormaTime(TimeLimit - NormaTime);
 					////ポーズ用のバーを更新するためHPを渡す
 					//PauseUI->SetMaxHP(MaxHammerHP);
 					//PauseUI->SetHP(HammerHP);
