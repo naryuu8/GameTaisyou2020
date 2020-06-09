@@ -153,6 +153,7 @@ void AGameController::CreateResultUI()
 			ResultUI->SetResultTokeiAnimeCheckEvent(TimeLimit, GetNowTimeAngle(), GetNormaTimeAngle(),NormaTime);
 			ResultUI->SetResultNowNimotuCheckEvent(GoalCount);
 			ResultUI->SetStampAnimeCheckEvent(NormaGoalCount, MaxNimotu);
+			SetTimeCountPause();
 			IsResult = true;
 		}
 		else
