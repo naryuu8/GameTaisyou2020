@@ -54,6 +54,8 @@ public:
 	//–ß‚è’l‚Í‰ñ“]’l
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		float SetNormaAngle(const int norma_time);
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		float SetNormaAngleTitle(const int norma_time);
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void UpDateTime();
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
