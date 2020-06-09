@@ -5,6 +5,7 @@
 #include "GameController.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Camera/GameCameraFocusPoint.h"
+#include "../SoundManager.h"
 
 // Sets default values for this component's properties
 UGoalComponent::UGoalComponent()
@@ -41,6 +42,7 @@ void UGoalComponent::OnFloatActorCheck(AActor * OtherActor)
 	// 衝突したアクターが爆弾の時爆発してゴール済みでもゴールしていないことにする
 	if (OtherFloat->ActorHasTag("Bom"))
 	{
+		ASoundManager::SafePlaySound(SOUND_TYPE::EXPLOSION);
 		SetGoalMinus();
 		OtherFloat->Destroy();
 		AGameCameraFocusPoint::SpawnFocusPoint(GetOwner(), GetOwner()->GetActorLocation());
@@ -53,6 +55,7 @@ void UGoalComponent::OnFloatActorCheck(AActor * OtherActor)
 	if (OtherFloat->ActorHasTag("Nimotu"))
 	{
 		// 衝突したアクターが荷物ならゴール済みにする
+		ASoundManager::SafePlaySound(SOUND_TYPE::GOAL);
 		isGoal = true;
 		game->AddGoalCount();
 		game->MinusGameMaxNimotu();
