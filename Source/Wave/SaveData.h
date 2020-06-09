@@ -39,6 +39,6 @@ private:
 public:
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		TArray<FSaveDataStruct> Save;
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		FSaveDataStruct GetSaveData(const int number) const;
+	//UFUNCTION(BlueprintCallable, Category = "C++Library")
+	//	FSaveDataStruct GetSaveData(const int number) const;
 };
