@@ -75,11 +75,11 @@ void AGameController::Tick(float DeltaTime)
 	{
 		GetPlayer = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	}
-	//アタックアニメ中はポーズを開けないようにする
-	if (!GetPlayer->GetIsAttack() && !GetPlayer->GetIsCharge())
-	{
-		InputPause();
-	}
+	////アタックアニメ中はポーズを開けないようにする
+	//if (!GetPlayer->GetIsAttack() && !GetPlayer->GetIsCharge())
+	//{
+	////	InputPause();
+	//}
 	//カメラの注目ポイントが存在する場合はゲームの判定をしない
 	TArray<AActor*> FocusPoints;
 	UGameplayStatics::GetAllActorsOfClass(this, AGameCameraFocusPoint::StaticClass(), FocusPoints);
@@ -89,7 +89,7 @@ void AGameController::Tick(float DeltaTime)
 		GameClearCheck();
 	}
 	InputGameOverUI();
-	InputResultUI();
+//	InputResultUI();
 	UpdateTime();
 }
 
@@ -151,10 +151,9 @@ void AGameController::CreateResultUI()
 			GetPlayer->HammerCountBarParent();
 			//このステージをクリアした時の制限時間、クリア時の針アングル、ノルマ針アングル、ノルマ時間をセット
 			ResultUI->SetResultTokeiAnimeCheckEvent(TimeLimit, GetNowTimeAngle(), GetNormaTimeAngle(),NormaTime);
-			//ResultUI->SetResultGaugeAnimeCheckEvent(100.0f, 80.0f, 30.0f);
 			ResultUI->SetResultNowNimotuCheckEvent(GoalCount);
-			//ResultUI->SetResultNowNimotuCheckEvent(3);
 			ResultUI->SetStampAnimeCheckEvent(NormaGoalCount, MaxNimotu);
+			IsResult = true;
 		}
 		else
 		{
@@ -256,9 +255,6 @@ void AGameController::InputPause()
 					PauseUI->SetNeedleAndBG_Material(GetNowTimeAngle());
 					PauseUI->SetTimeLimit(TimeLimit);
 					PauseUI->SetNormaTime(TimeLimit - NormaTime);
-					////ポーズ用のバーを更新するためHPを渡す
-					//PauseUI->SetMaxHP(MaxHammerHP);
-					//PauseUI->SetHP(HammerHP);
 					SetTimeCountPause();
 				}
 				else if (PauseUI)
@@ -538,4 +534,111 @@ float AGameController::GetNowTimeAngle()
 float AGameController::GetNormaTimeAngle()
 {
 	return GameTimeUI->GetNormaTimeAngle();
+}
+
+void AGameController::PauseCall()
+{
+	//アタックアニメ中はポーズを開けないようにする
+	if (IsGameClear)return;
+	if (IsGameOver)return;
+	if (GetPlayer->GetIsAttack())return;
+	if (GetPlayer->GetIsCharge())return;
+	IsPause = true;
+	if (!UGameplayStatics::IsGamePaused(GetWorld()))
+	{
+		if (PauseUIClass != nullptr)
+		{//初めてポーズ画面を開くときはUIを生成する
+			if (!PauseUI)
+			{
+				PauseUI = CreateWidget<UPauseUI>(GetWorld(), PauseUIClass);
+				PauseUI->AddToViewport();
+				PauseUI->SetNormaAngle(GetNormaTimeAngle());
+				PauseUI->SetNeedleAndBG_Material(GetNowTimeAngle());
+				PauseUI->SetTimeLimit(TimeLimit);
+				PauseUI->SetNormaTime(TimeLimit - NormaTime);
+				SetTimeCountPause();
+			}
+			else if (PauseUI)
+			{
+				if (PauseUI->GetIsPlayAnimation())return;
+				PauseUI->AddToViewport();
+				PauseUI->SetNormaAngle(GetNormaTimeAngle());
+				PauseUI->SetNeedleAndBG_Material(GetNowTimeAngle());
+				PauseUI->SetTimeLimit(TimeLimit);
+				PauseUI->SetNormaTime(NormaTime);
+				SetTimeCountPause();
+			}
+			//生成してもnullptrだったらエラー文表示
+			if (PauseUI == nullptr)
+			{
+				UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"Widget cannot create");
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"PauseUIClass is nullptr");
+		}
+	}
+	else if (UGameplayStatics::IsGamePaused(GetWorld()))
+	{
+		if (!PauseUI)return;
+		if (PauseUI->GetIsPlayAnimation())return;
+		PauseUI->EndAnimation();
+		IsPause = false;
+	}
+}
+
+void AGameController::InputRightCall()
+{
+	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
+	if (IsPause)
+	{
+		if (!PauseUI)return;
+		PauseUI->NextSelectState();
+	}
+	else if (IsResult)
+	{
+		if (!IsGameClear)return;
+		if (!ResultUI)return;
+		ResultUI->NextSelectState();
+	}
+}
+
+void AGameController::InputLeftCall()
+{
+	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
+	if (IsPause)
+	{
+		if (!PauseUI)return;
+		PauseUI->BackSelectState();
+	}
+	else if (IsResult)
+	{
+		if (!IsGameClear)return;
+		if (!ResultUI)return;
+		ResultUI->BackSelectState();
+	}
+}
+
+void AGameController::InputSelectCall()
+{
+	if (IsGameOver)
+	{
+		if (!GameOverUI)return;
+		if (GameOverUI->GetIsPlayAnimation())return;
+		GameOverUI->SelectStateAction();
+	}
+	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
+	if (IsPause)
+	{
+		if (!PauseUI)return;
+		PauseUI->SelectStateAction();
+		IsPause = false;
+	}
+	else if (IsResult)
+	{
+		if (!IsGameClear)return;
+		if (!ResultUI)return;
+		ResultUI->SelectStateAction();
+	}
 }

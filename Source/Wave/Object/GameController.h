@@ -60,7 +60,8 @@ private:
 	int MaxNimotu = 0;
 	//ゲーム上に配置されている荷物の数（リアルタイム更新）
 	int GameMaxNimotu = 0;
-
+	bool IsPause = false;
+	bool IsResult = false;
 	// 表示するUI　エディタで指定する
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UGameTimeUI> GameTimeUIClass;
@@ -130,6 +131,14 @@ public:
 	void MinusGoalCount();
 	void AddNotExplotionCount() { NotExplotionCount++; }
 	void MinusNotExplotionCount() { NotExplotionCount--; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void PauseCall();
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void InputRightCall();
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void InputLeftCall();
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void InputSelectCall();
 private:
 
 	void CreateGameTimeUI();
