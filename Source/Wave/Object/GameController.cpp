@@ -265,7 +265,7 @@ void AGameController::InputPause()
 					PauseUI->SetNormaAngle(GetNormaTimeAngle());
 					PauseUI->SetNeedleAndBG_Material(GetNowTimeAngle());
 					PauseUI->SetTimeLimit(TimeLimit);
-					PauseUI->SetNormaTime(NormaTime);
+					PauseUI->SetNormaTime(TimeLimit - NormaTime);
 					SetTimeCountPause();
 				}
 				//生成してもnullptrだったらエラー文表示
@@ -566,7 +566,7 @@ void AGameController::PauseCall()
 				PauseUI->SetNormaAngle(GetNormaTimeAngle());
 				PauseUI->SetNeedleAndBG_Material(GetNowTimeAngle());
 				PauseUI->SetTimeLimit(TimeLimit);
-				PauseUI->SetNormaTime(NormaTime);
+				PauseUI->SetNormaTime(TimeLimit - NormaTime);
 				SetTimeCountPause();
 			}
 			//生成してもnullptrだったらエラー文表示

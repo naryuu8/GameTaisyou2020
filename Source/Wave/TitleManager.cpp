@@ -11,6 +11,7 @@
 #include "GlobalGameInstance.h"
 #include "UI/FadeUI.h"
 #include "SoundManager.h"
+#include "TimerManager.h"
 // Sets default values
 ATitleManager::ATitleManager()
 {
@@ -57,7 +58,10 @@ void ATitleManager::BeginPlay()
 		else
 		{
 			if (!AudioComponent) AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::TITLE_BGM);
-			if (!(AudioComponent->IsPlaying())) AudioComponent->Play();
+			if (AudioComponent)
+			{
+				if (!(AudioComponent->IsPlaying())) AudioComponent->Play();
+			}
 			IsNoInput = false;
 			State = ETitleState::Title;
 			APlayerController *playerControtller = UGameplayStatics::GetPlayerController(this, 0);
@@ -140,8 +144,25 @@ void ATitleManager::SetCameraMove(AActor * camera, const float camera_speed)
 void ATitleManager::CameraMoveCheck()
 {
 	if (!IsNoInput)return;	
-	if (MoveFrameTime == MoveFrameCount)
+	if (State == ETitleState::Title)
 	{
+		FTimerManager& timerManager = GetWorld()->GetTimerManager();
+		FTimerHandle handle;
+		timerManager.SetTimer(handle, this, &ATitleManager::SetTitleMoveState, TitleMoveTime);
+	
+	}
+	else if (State == ETitleState::TitleMove)
+	{
+		FTimerManager& timerManager = GetWorld()->GetTimerManager();
+		FTimerHandle handle;
+		timerManager.SetTimer(handle, this, &ATitleManager::StageSelectState, StageSelectTime);
+		
+	}
+	/*if (MoveFrameTime == MoveFrameCount)
+	{
+		FTimerManager& timerManager = GetWorld()->GetTimerManager();
+		FTimerHandle handle;
+		timerManager.SetTimer(handle, this, &AGameController::GameClear, 2.8f);
 		MoveFrameCount = 0;
 		if (State == ETitleState::Title)
 		{
@@ -173,7 +194,7 @@ void ATitleManager::CameraMoveCheck()
 	else
 	{
 		MoveFrameCount++;
-	}
+	}*/
 }
 
 // Called to bind functionality to input
@@ -183,3 +204,30 @@ void ATitleManager::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 }
 
+void ATitleManager::SetTitleMoveState()
+{
+	MoveFrameTime = StageSelectTime * 60.0f;
+	State = ETitleState::TitleMove;
+
+	SetCameraMove(StageSelectCamera, StageSelectTime);
+	TitlePlayer->TargetRotation();
+}
+
+void ATitleManager::StageSelectState()
+{
+	State = ETitleState::StageSelect;
+
+	if (AudioComponent)
+	{
+		AudioComponent->Stop();
+	}
+
+	AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::SELECT_BGM);
+
+	if (AudioComponent)
+	{
+		AudioComponent->Play();
+	}
+
+	IsNoInput = false;
+}
