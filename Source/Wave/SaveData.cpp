@@ -2,13 +2,3 @@
 
 
 #include "SaveData.h"
-//
-//FSaveDataStruct USaveData::GetSaveData(const int number) const
-//{
-//	//配列の要素外アクセスだったら空の値を返す
-//	if (number >= Save.Max())
-//	{
-//		return FSaveDataStruct();
-//	}
-//	return Save[number];
-//}
