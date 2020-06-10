@@ -48,9 +48,6 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 		float CharacterDistance_Near = 200.0f; // プレイヤー追従視点でのカメラの距離
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, meta = (ClampMin = "0.0", ClampMax = "180.0"))
-		float FocusViewingAngle = 130.0f; // カメラの注目時の視野角
 protected:
 
 	// Called when the game starts or when spawned
