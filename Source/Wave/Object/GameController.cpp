@@ -90,8 +90,7 @@ void AGameController::Tick(float DeltaTime)
 		GameOverCheck();
 		GameClearCheck();
 	}
-	InputGameOverUI();
-//	InputResultUI();
+	//InputGameOverUI();
 	UpdateTime();
 }
 
@@ -223,11 +222,11 @@ void AGameController::InputGameOverUI()
 	const AInputManager * inputManager = AInputManager::GetInstance();
 	if (!inputManager)return;
 	const InputState * input = inputManager->GetState();
-	if (input->Up.IsPress)
+	if (input->Left.IsPress)
 	{
 		GameOverUI->BackSelectState();
 	}
-	if (input->Down.IsPress)
+	if (input->Right.IsPress)
 	{
 		GameOverUI->NextSelectState();
 	}
@@ -614,6 +613,12 @@ void AGameController::PauseCall()
 
 void AGameController::InputRightCall()
 {
+	if (IsGameOver)
+	{
+		if (!GameOverUI)return;
+		if (GameOverUI->GetIsPlayAnimation())return;
+		GameOverUI->NextSelectState();
+	}
 	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
 	if (IsPause)
 	{
@@ -630,6 +635,12 @@ void AGameController::InputRightCall()
 
 void AGameController::InputLeftCall()
 {
+	if (IsGameOver)
+	{
+		if (!GameOverUI)return;
+		if (GameOverUI->GetIsPlayAnimation())return;
+		GameOverUI->BackSelectState();
+	}
 	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
 	if (IsPause)
 	{

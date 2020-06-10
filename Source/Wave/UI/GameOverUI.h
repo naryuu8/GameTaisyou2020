@@ -43,4 +43,6 @@ public:
 	//ゲームオーバー用プレイヤーモデル生成
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void SpawnGameOverPlayer();
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void ImageSizeChenge();
 };

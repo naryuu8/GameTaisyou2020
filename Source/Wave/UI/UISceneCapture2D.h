@@ -13,4 +13,7 @@ UCLASS()
 class WAVE_API AUISceneCapture2D : public ASceneCapture2D
 {
 	GENERATED_BODY()
+public:
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetIsAnimeStart();
 };
