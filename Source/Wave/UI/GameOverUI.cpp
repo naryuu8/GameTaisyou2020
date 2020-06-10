@@ -21,6 +21,7 @@ void UGameOverUI::NextSelectState()
 	{
 		SelectNumber = static_cast<int>(GameOverState::RESTART);
 	}
+	ImageSizeChenge();
 }
 
 void UGameOverUI::BackSelectState()
@@ -30,6 +31,7 @@ void UGameOverUI::BackSelectState()
 	{
 		SelectNumber = static_cast<int>(GameOverState::STAGESELECT);
 	}
+	ImageSizeChenge();
 }
 
 void UGameOverUI::SelectStateAction()
