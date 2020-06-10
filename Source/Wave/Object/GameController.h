@@ -13,6 +13,7 @@ class UGameTimeUI;
 class APlayerCharacter;
 class UNimotuCountUI;
 class UPauseUI;
+class UFadeUI;
 // ゲーム中のクリア条件などを管理するクラス
 
 UCLASS()
@@ -73,6 +74,8 @@ private:
 		TSubclassOf<UNimotuCountUI> NimotuCountUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UPauseUI> PauseUIClass;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UFadeUI> FadeUIClass;
 	//勝手に開放されることがあるのでガベージコレクションの対象外にする
 	UPROPERTY()
 	UPauseUI* PauseUI = nullptr;
@@ -145,6 +148,8 @@ private:
 	void CreateGameOverUI();
 	void CreateResultUI();
 	void CreateNimotuCountUI();
+	//ゲーム開始時のフェードアウト
+	void InitFadeOut();
 	void InputGameOverUI();
 	void InputResultUI();
 	void InputPause();

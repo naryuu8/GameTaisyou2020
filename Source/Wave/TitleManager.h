@@ -38,8 +38,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Instanced")
 		float StageSelectTime = 1.0f;//セレクト画面中継からセレクト画面への時間
 	ETitleState State;
-	int MoveFrameTime;//カメラ移動時間をフレーム時間に変換
-	int MoveFrameCount;
 	bool IsNoInput;//true時キー入力を無効にする
 	UTitleUI* TitleUI = nullptr;
 private:
@@ -51,6 +49,7 @@ private:
 	void SetTitleMoveState();
 	void StageSelectState();
 	UAudioComponent* AudioComponent;
+	UAudioComponent* SelectAudioComponent;
 public:
 	// Sets default values for this pawn's properties
 	ATitleManager();

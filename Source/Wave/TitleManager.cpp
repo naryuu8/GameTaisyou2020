@@ -30,7 +30,6 @@ void ATitleManager::BeginPlay()
 		if (instance->GetIsStageSelectMode())
 		{
 			State = ETitleState::TitleMove;
-			MoveFrameTime = StageSelectTime * 60.0f;
 			SetCameraMove(TitleMoveCamera, 0.0f);
 			IsNoInput = true;
 			if (FadeUIClass != nullptr)
@@ -39,7 +38,7 @@ void ATitleManager::BeginPlay()
 				if (fade != nullptr)
 				{
 					fade->AddToViewport();
-					fade->SetFade(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f),false, 1.0f);
+					fade->SetFade(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), false, 1.5f, true);
 				}
 				else
 				{
@@ -76,8 +75,6 @@ void ATitleManager::BeginPlay()
 			}
 		}
 	}	
-	MoveFrameCount = 0;
-	MoveFrameTime = TitleMoveTime * 60.0f;
 
 }
 
@@ -156,45 +153,14 @@ void ATitleManager::CameraMoveCheck()
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
 		FTimerHandle handle;
 		timerManager.SetTimer(handle, this, &ATitleManager::StageSelectState, StageSelectTime);
-		
-	}
-	/*if (MoveFrameTime == MoveFrameCount)
-	{
-		FTimerManager& timerManager = GetWorld()->GetTimerManager();
-		FTimerHandle handle;
-		timerManager.SetTimer(handle, this, &AGameController::GameClear, 2.8f);
-		MoveFrameCount = 0;
-		if (State == ETitleState::Title)
+
+		if (!SelectAudioComponent) SelectAudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::SELECT_BGM);
+
+		if (SelectAudioComponent)
 		{
-			MoveFrameTime = StageSelectTime * 60.0f;
-			State = ETitleState::TitleMove;
-
-			SetCameraMove(StageSelectCamera, StageSelectTime);
-			TitlePlayer->TargetRotation();
-		}
-		else if (State == ETitleState::TitleMove)
-		{
-			State = ETitleState::StageSelect;
-
-			if (AudioComponent)
-			{
-				AudioComponent->Stop();
-			}
-
-			AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::SELECT_BGM);
-
-			if (AudioComponent)
-			{
-				AudioComponent->Play();
-			}
-
-			IsNoInput = false;
+			SelectAudioComponent->Play();
 		}
 	}
-	else
-	{
-		MoveFrameCount++;
-	}*/
 }
 
 // Called to bind functionality to input
@@ -206,7 +172,6 @@ void ATitleManager::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 void ATitleManager::SetTitleMoveState()
 {
-	MoveFrameTime = StageSelectTime * 60.0f;
 	State = ETitleState::TitleMove;
 
 	SetCameraMove(StageSelectCamera, StageSelectTime);
@@ -220,13 +185,6 @@ void ATitleManager::StageSelectState()
 	if (AudioComponent)
 	{
 		AudioComponent->Stop();
-	}
-
-	AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::SELECT_BGM);
-
-	if (AudioComponent)
-	{
-		AudioComponent->Play();
 	}
 
 	IsNoInput = false;
