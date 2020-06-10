@@ -49,6 +49,7 @@ private:
 	void SetTitleMoveState();
 	void StageSelectState();
 	UAudioComponent* AudioComponent;
+	UAudioComponent* SelectAudioComponent;
 public:
 	// Sets default values for this pawn's properties
 	ATitleManager();

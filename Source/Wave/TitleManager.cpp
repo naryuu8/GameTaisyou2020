@@ -153,7 +153,13 @@ void ATitleManager::CameraMoveCheck()
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
 		FTimerHandle handle;
 		timerManager.SetTimer(handle, this, &ATitleManager::StageSelectState, StageSelectTime);
-		
+
+		if (!SelectAudioComponent) SelectAudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::SELECT_BGM);
+
+		if (SelectAudioComponent)
+		{
+			SelectAudioComponent->Play();
+		}
 	}
 }
 
@@ -179,13 +185,6 @@ void ATitleManager::StageSelectState()
 	if (AudioComponent)
 	{
 		AudioComponent->Stop();
-	}
-
-	AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::SELECT_BGM);
-
-	if (AudioComponent)
-	{
-		AudioComponent->Play();
 	}
 
 	IsNoInput = false;
