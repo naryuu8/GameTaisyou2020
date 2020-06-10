@@ -372,6 +372,7 @@ void AGameController::GameClearCheck()
 		//指定の時間後ゲームクリアにする
 		GetPlayer->SetGameClear();
 		IsGameClear = true;
+		SetTimeCountPause();
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
 		FTimerHandle handle;
 		timerManager.SetTimer(handle, this, &AGameController::GameClear, 2.8f);
@@ -408,6 +409,7 @@ void AGameController::GameOverCheck()
 	auto gameover = [=] (const float time)
 	{ 
 		IsGameOver = true;
+		SetTimeCountPause();
 		//指定の時間後ゲームオーバーにする
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
 		FTimerHandle handle;
