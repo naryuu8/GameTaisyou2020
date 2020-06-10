@@ -38,18 +38,18 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Instanced")
 		float StageSelectTime = 1.0f;//セレクト画面中継からセレクト画面への時間
 	ETitleState State;
-	int MoveFrameTime;//カメラ移動時間をフレーム時間に変換
-	int MoveFrameCount;
 	bool IsNoInput;//true時キー入力を無効にする
-	UTitleUI* TitleUI;
+	UTitleUI* TitleUI = nullptr;
 private:
 	void TitleInput();
 	//移動先のカメラと移行スピードを設定
 	void SetCameraMove(AActor* camera, const float camera_speed);
 	//タイトルでボタンを押したときステージセレクトまでのカメラ遷移を行う
 	void CameraMoveCheck();
-
+	void SetTitleMoveState();
+	void StageSelectState();
 	UAudioComponent* AudioComponent;
+	UAudioComponent* SelectAudioComponent;
 public:
 	// Sets default values for this pawn's properties
 	ATitleManager();

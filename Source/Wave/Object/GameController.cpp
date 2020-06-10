@@ -15,6 +15,7 @@
 #include "TimerManager.h"
 #include "../SoundManager.h"
 #include "../Camera/GameCameraFocusPoint.h"
+#include "../UI/FadeUI.h"
 // Sets default values
 
 AGameController::AGameController()
@@ -63,6 +64,7 @@ void AGameController::BeginPlay()
 	}
 	CreateNimotuCountUI();
 	CreateGameTimeUI();
+	InitFadeOut();
 }
 
 // Called every frame
@@ -192,6 +194,27 @@ void AGameController::CreateNimotuCountUI()
 	}
 }
 
+void AGameController::InitFadeOut()
+{
+	if (FadeUIClass != nullptr)
+	{
+		UFadeUI* FadeUI = CreateWidget<UFadeUI>(GetWorld(), FadeUIClass);
+		if (FadeUI != nullptr)
+		{
+			FadeUI->AddToViewport();
+			FadeUI->SetFade(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), false, 1.0f, true);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("FadeUIClass : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("FadeUIClass : %s"), L"UIClass is nullptr");
+	}
+}
+
 void AGameController::InputGameOverUI()
 {
 	if (!IsGameOver)return;
@@ -265,7 +288,7 @@ void AGameController::InputPause()
 					PauseUI->SetNormaAngle(GetNormaTimeAngle());
 					PauseUI->SetNeedleAndBG_Material(GetNowTimeAngle());
 					PauseUI->SetTimeLimit(TimeLimit);
-					PauseUI->SetNormaTime(NormaTime);
+					PauseUI->SetNormaTime(TimeLimit - NormaTime);
 					SetTimeCountPause();
 				}
 				//生成してもnullptrだったらエラー文表示
@@ -566,7 +589,7 @@ void AGameController::PauseCall()
 				PauseUI->SetNormaAngle(GetNormaTimeAngle());
 				PauseUI->SetNeedleAndBG_Material(GetNowTimeAngle());
 				PauseUI->SetTimeLimit(TimeLimit);
-				PauseUI->SetNormaTime(NormaTime);
+				PauseUI->SetNormaTime(TimeLimit - NormaTime);
 				SetTimeCountPause();
 			}
 			//生成してもnullptrだったらエラー文表示

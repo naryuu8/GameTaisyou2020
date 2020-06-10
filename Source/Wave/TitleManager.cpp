@@ -11,6 +11,7 @@
 #include "GlobalGameInstance.h"
 #include "UI/FadeUI.h"
 #include "SoundManager.h"
+#include "TimerManager.h"
 // Sets default values
 ATitleManager::ATitleManager()
 {
@@ -29,7 +30,6 @@ void ATitleManager::BeginPlay()
 		if (instance->GetIsStageSelectMode())
 		{
 			State = ETitleState::TitleMove;
-			MoveFrameTime = StageSelectTime * 60.0f;
 			SetCameraMove(TitleMoveCamera, 0.0f);
 			IsNoInput = true;
 			if (FadeUIClass != nullptr)
@@ -38,7 +38,7 @@ void ATitleManager::BeginPlay()
 				if (fade != nullptr)
 				{
 					fade->AddToViewport();
-					fade->SetFade(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f),false, 1.0f);
+					fade->SetFade(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), false, 1.5f, true);
 				}
 				else
 				{
@@ -57,7 +57,10 @@ void ATitleManager::BeginPlay()
 		else
 		{
 			if (!AudioComponent) AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::TITLE_BGM);
-			if (!(AudioComponent->IsPlaying())) AudioComponent->Play();
+			if (AudioComponent)
+			{
+				if (!(AudioComponent->IsPlaying())) AudioComponent->Play();
+			}
 			IsNoInput = false;
 			State = ETitleState::Title;
 			APlayerController *playerControtller = UGameplayStatics::GetPlayerController(this, 0);
@@ -72,8 +75,6 @@ void ATitleManager::BeginPlay()
 			}
 		}
 	}	
-	MoveFrameCount = 0;
-	MoveFrameTime = TitleMoveTime * 60.0f;
 
 }
 
@@ -140,39 +141,25 @@ void ATitleManager::SetCameraMove(AActor * camera, const float camera_speed)
 void ATitleManager::CameraMoveCheck()
 {
 	if (!IsNoInput)return;	
-	if (MoveFrameTime == MoveFrameCount)
+	if (State == ETitleState::Title)
 	{
-		MoveFrameCount = 0;
-		if (State == ETitleState::Title)
-		{
-			MoveFrameTime = StageSelectTime * 60.0f;
-			State = ETitleState::TitleMove;
-
-			SetCameraMove(StageSelectCamera, StageSelectTime);
-			TitlePlayer->TargetRotation();
-		}
-		else if (State == ETitleState::TitleMove)
-		{
-			State = ETitleState::StageSelect;
-
-			if (AudioComponent)
-			{
-				AudioComponent->Stop();
-			}
-
-			AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::SELECT_BGM);
-
-			if (AudioComponent)
-			{
-				AudioComponent->Play();
-			}
-
-			IsNoInput = false;
-		}
+		FTimerManager& timerManager = GetWorld()->GetTimerManager();
+		FTimerHandle handle;
+		timerManager.SetTimer(handle, this, &ATitleManager::SetTitleMoveState, TitleMoveTime);
+	
 	}
-	else
+	else if (State == ETitleState::TitleMove)
 	{
-		MoveFrameCount++;
+		FTimerManager& timerManager = GetWorld()->GetTimerManager();
+		FTimerHandle handle;
+		timerManager.SetTimer(handle, this, &ATitleManager::StageSelectState, StageSelectTime);
+
+		if (!SelectAudioComponent) SelectAudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::SELECT_BGM);
+
+		if (SelectAudioComponent)
+		{
+			SelectAudioComponent->Play();
+		}
 	}
 }
 
@@ -183,3 +170,22 @@ void ATitleManager::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 }
 
+void ATitleManager::SetTitleMoveState()
+{
+	State = ETitleState::TitleMove;
+
+	SetCameraMove(StageSelectCamera, StageSelectTime);
+	TitlePlayer->TargetRotation();
+}
+
+void ATitleManager::StageSelectState()
+{
+	State = ETitleState::StageSelect;
+
+	if (AudioComponent)
+	{
+		AudioComponent->Stop();
+	}
+
+	IsNoInput = false;
+}
