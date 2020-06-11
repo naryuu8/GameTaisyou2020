@@ -33,11 +33,12 @@ void ATitleManager::BeginPlay()
 			State = ETitleState::TitleMove;
 			SetCameraMove(TitleMoveCamera, 0.0f);
 			IsNoInput = true;
-			CreateFadeUI(true);
 			instance->SetIsStageSelectMode(false);
 			SetCameraMove(StageSelectCamera, 0.0f);
 			StageSelectCamera->SetCenterTitleMemo();
 			TitlePlayer->TargetRotation();
+			CreateTitleTipsUI();
+			CreateFadeUI(true);
 		}
 		else
 		{
@@ -57,6 +58,11 @@ void ATitleManager::BeginPlay()
 			if (TitleUI)
 			{
 				TitleUI->AddToViewport();
+			}
+			CreateTitleTipsUI();
+			if (TitleTipsUI)
+			{
+				TitleTipsUI->SetNoDraw();
 			}
 			CreateFadeUI(false);
 		}
@@ -134,6 +140,10 @@ void ATitleManager::TitleInput()
 			{
 				FadeUI->SetFadeLevel(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), 1.0f, *UGameplayStatics::GetCurrentLevelName(GetWorld()), false);
 			}
+			if (TitleTipsUI)
+			{
+				TitleTipsUI->RemoveFromParent();
+			}
 			ASoundManager::SafePlaySound(SOUND_TYPE::STAGE_SELECT);
 		}
 	}
@@ -196,7 +206,7 @@ void ATitleManager::StageSelectState()
 	{
 		AudioComponent->Stop();
 	}
-	CreateTitleTipsUI();
+	TitleTipsUI->SetDraw();
 	IsNoInput = false;
 }
 
@@ -268,10 +278,10 @@ void ATitleManager::CreateTitleTipsUI()
 {
 	if (TitleTipsUIClass != nullptr)
 	{
-		UTitleTipsUI* tips = CreateWidget<UTitleTipsUI>(GetWorld(), TitleTipsUIClass);
-		if (tips != nullptr)
+		TitleTipsUI = CreateWidget<UTitleTipsUI>(GetWorld(), TitleTipsUIClass);
+		if (TitleTipsUI != nullptr)
 		{
-			tips->AddToViewport();
+			TitleTipsUI->AddToViewport();
 		}
 		else
 		{
