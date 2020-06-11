@@ -19,9 +19,10 @@ enum class ResultState : uint8
 	END,
 };
 UENUM(BlueprintType)
-enum class ResultSelectState : uint8
+enum class ResultSelectState2 : uint8
 {
 	NEXTSTAGE,
+	RESTART,
 	STAGESELECT,
 };
 UCLASS()
@@ -50,7 +51,10 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		ResultState State;//リザルトのステート状態保持
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
-		ResultSelectState SelectState;
+		ResultSelectState2 SelectState;
+	//フェードインを行いリトライする
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void Retry();
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void ClearPlayAnimation();
 	//このステージをクリアした時の制限時間、クリア時の針アングル、ノルマ針アングル、ノルマ時間をセット
