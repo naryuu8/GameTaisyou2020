@@ -36,6 +36,7 @@ void AInputManager::Tick(float DeltaTime)
 	State.Up.Refresh();
 	State.Down.Refresh();
 	State.Select.Refresh();
+	State.Back.Refresh();
 	State.Right.Refresh();
 	State.Left.Refresh();
 //ポーズ中ならポーズボタン入力情報のみ更新
@@ -80,5 +81,8 @@ void AInputManager::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	//決定ボタンインプット
 	PlayerInputComponent->BindAction("Select", IE_Pressed, this, &AInputManager::InputSelectPress).bExecuteWhenPaused = true;
 	PlayerInputComponent->BindAction("Select", IE_Released, this, &AInputManager::InputSelectRelease).bExecuteWhenPaused = true;
+	//戻るボタンインプット
+	PlayerInputComponent->BindAction("Back", IE_Pressed, this, &AInputManager::InputBackPress).bExecuteWhenPaused = true;
+	PlayerInputComponent->BindAction("Back", IE_Released, this, &AInputManager::InputBackRelease).bExecuteWhenPaused = true;
 }
 

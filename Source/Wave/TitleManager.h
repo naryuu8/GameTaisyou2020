@@ -15,6 +15,7 @@ class ATitleCamera;
 class ATitlePlayer;
 class UTitleUI;
 class UFadeUI;
+class UTitleTipsUI;
 UCLASS()
 class WAVE_API ATitleManager : public APawn
 {
@@ -33,6 +34,8 @@ private:
 		TSubclassOf<UFadeUI> FadeUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UTitleUI> TitleUIClass = nullptr;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UTitleTipsUI> TitleTipsUIClass = nullptr;
 	UPROPERTY(EditAnywhere, Category = "Instanced")
 		float TitleMoveTime = 1.0f;//タイトル画面からセレクト画面中継カメラへの時間
 	UPROPERTY(EditAnywhere, Category = "Instanced")
@@ -40,6 +43,7 @@ private:
 	ETitleState State;
 	bool IsNoInput;//true時キー入力を無効にする
 	UTitleUI* TitleUI = nullptr;
+	UFadeUI* FadeUI = nullptr;
 private:
 	void TitleInput();
 	//移動先のカメラと移行スピードを設定
@@ -48,6 +52,10 @@ private:
 	void CameraMoveCheck();
 	void SetTitleMoveState();
 	void StageSelectState();
+	void CheckTitleSelectNumber();
+	//ポーズなどからステージ選択に戻っていたらtrue
+	void CreateFadeUI(const bool select);
+	void CreateTitleTipsUI();
 	UAudioComponent* AudioComponent;
 	UAudioComponent* SelectAudioComponent;
 public:

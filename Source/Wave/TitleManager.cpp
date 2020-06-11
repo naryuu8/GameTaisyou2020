@@ -8,6 +8,7 @@
 #include "Player/TitlePlayer.h"
 #include "Blueprint/UserWidget.h"
 #include "UI/TitleUI.h"
+#include "UI/TitleTipsUI.h"
 #include "GlobalGameInstance.h"
 #include "UI/FadeUI.h"
 #include "SoundManager.h"
@@ -32,23 +33,7 @@ void ATitleManager::BeginPlay()
 			State = ETitleState::TitleMove;
 			SetCameraMove(TitleMoveCamera, 0.0f);
 			IsNoInput = true;
-			if (FadeUIClass != nullptr)
-			{
-				UFadeUI* fade = CreateWidget<UFadeUI>(GetWorld(), FadeUIClass);
-				if (fade != nullptr)
-				{
-					fade->AddToViewport();
-					fade->SetFade(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), false, 1.5f, true);
-				}
-				else
-				{
-					UE_LOG(LogTemp, Error, TEXT("FadeUIClass : %s"), L"Widget cannot create");
-				}
-			}
-			else
-			{
-				UE_LOG(LogTemp, Error, TEXT("FadeUIClass : %s"), L"UIClass is nullptr");
-			}
+			CreateFadeUI(true);
 			instance->SetIsStageSelectMode(false);
 			SetCameraMove(StageSelectCamera, 0.0f);
 			StageSelectCamera->SetCenterTitleMemo();
@@ -73,6 +58,7 @@ void ATitleManager::BeginPlay()
 			{
 				TitleUI->AddToViewport();
 			}
+			CreateFadeUI(false);
 		}
 	}	
 
@@ -100,16 +86,30 @@ void ATitleManager::TitleInput()
 	{
 		if (State == ETitleState::Title)
 		{
-			SetCameraMove(TitleMoveCamera, TitleMoveTime);
-			IsNoInput = true;
-			TitlePlayer->SetIsSelect(true);
-			TitleUI->RemoveFromParent();
+			CheckTitleSelectNumber();
 		}
 		if (State == ETitleState::StageSelect)
 		{
 			if (!StageSelectCamera->GetIsSelectMap())
 			{
 				StageSelectCamera->SelectInput();
+			}
+		}
+	}
+	if (State == ETitleState::Title)
+	{
+		if (input->Up.IsPress)
+		{
+			if (TitleUI)
+			{
+				TitleUI->BackSelectState();
+			}
+		}
+		if (input->Down.IsPress)
+		{
+			if (TitleUI)
+			{
+				TitleUI->NextSelectState();
 			}
 		}
 	}
@@ -124,6 +124,16 @@ void ATitleManager::TitleInput()
 		if (input->Left.IsPress)
 		{
 			StageSelectCamera->LeftInput();
+			ASoundManager::SafePlaySound(SOUND_TYPE::STAGE_SELECT);
+		}
+		if (input->Back.IsPress)
+		{
+			StageSelectCamera->SetBack();
+			IsNoInput = true;
+			if (FadeUI)
+			{
+				FadeUI->SetFadeLevel(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), 1.0f, *UGameplayStatics::GetCurrentLevelName(GetWorld()), false);
+			}
 			ASoundManager::SafePlaySound(SOUND_TYPE::STAGE_SELECT);
 		}
 	}
@@ -186,6 +196,90 @@ void ATitleManager::StageSelectState()
 	{
 		AudioComponent->Stop();
 	}
-
+	CreateTitleTipsUI();
 	IsNoInput = false;
+}
+
+void ATitleManager::CheckTitleSelectNumber()
+{
+	if (TitleUI)
+	{	
+		switch (TitleUI->GetSelectNumber())
+		{
+			case static_cast<int>(TitleSelectState::GAME_START) :
+				SetCameraMove(TitleMoveCamera, TitleMoveTime);
+				IsNoInput = true;
+				TitlePlayer->SetIsSelect(true);
+				TitleUI->RemoveFromParent();
+				ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
+				break;
+				case static_cast<int>(TitleSelectState::DATA_DELETE) :
+					IsNoInput = true;
+					TitleUI->DeleteSaveData();
+					if (FadeUI)
+					{
+						FadeUI->SetFadeLevel(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), 1.0f, *UGameplayStatics::GetCurrentLevelName(GetWorld()), false);
+					}
+					ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
+					break;
+					case static_cast<int>(TitleSelectState::GAME_END) :
+						TitleUI->EndGame();
+						ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
+						IsNoInput = true;
+						if (FadeUI)
+						{
+							FadeUI->SetFade(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), true, 1.0f, false);
+						}
+						break;
+		}
+	}
+}
+
+void ATitleManager::CreateFadeUI(const bool select)
+{
+	if (FadeUI)return;
+	if (FadeUIClass != nullptr)
+	{
+		FadeUI = CreateWidget<UFadeUI>(GetWorld(), FadeUIClass);
+		if (FadeUI != nullptr)
+		{
+			FadeUI->AddToViewport();
+			if (select)
+			{
+				FadeUI->SetFade(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), false, 1.5f, true);
+			}
+			else
+			{
+				FadeUI->SetFade(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), false, 1.0f, false);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("FadeUIClass : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("FadeUIClass : %s"), L"UIClass is nullptr");
+	}
+}
+
+void ATitleManager::CreateTitleTipsUI()
+{
+	if (TitleTipsUIClass != nullptr)
+	{
+		UTitleTipsUI* tips = CreateWidget<UTitleTipsUI>(GetWorld(), TitleTipsUIClass);
+		if (tips != nullptr)
+		{
+			tips->AddToViewport();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("TitleTipsUIClass : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("TitleTipsUIClass : %s"), L"UIClass is nullptr");
+	}
 }
