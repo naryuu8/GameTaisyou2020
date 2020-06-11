@@ -362,17 +362,23 @@ void AWaterSurface::AddPower(FVector worldPos, float power)
 	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 	float HeightPower = FMath::Abs(worldPos.Z);
 	HeightPower = (HeightPower > MaxWaveHight) ? 0.0f : (MaxWaveHight - HeightPower) / MaxWaveHight;
-	
-	HammerBreakLand(worldPos);
 
 	CreateWave(WaveX, WaveY, power * HeightPower);
 }
 
-void AWaterSurface::HammerBreakLand(const FVector & worldPos)
+void AWaterSurface::HammerBreakLand(const FVector & worldPos, float Radius)
 {
-	ABreakSquareLand* BreakLand = Cast<ABreakSquareLand>(GetLandPoint(worldPos, true));
-	if (!BreakLand)return;
-	BreakLand->Break();
+	for (auto Actor : LandPointActors)
+	{
+		if (!Actor->IsLand) continue;
+		ABreakSquareLand* BreakLand = Cast<ABreakSquareLand>(Actor);
+		if (!BreakLand) continue;
+
+		if (Actor->OnGround(worldPos, Radius))
+		{
+			BreakLand->Break();
+		}
+	}
 }
 
 float AWaterSurface::GetWaveHeight(const FVector & worldPos)

@@ -158,7 +158,7 @@ private:
 	UPlayerAnimInstance* AnimInst;
 
 	//水面に波をたてる
-	void WaterAttack(FVector Point, float Power);
+	void WaterAttack(FVector Point, float Power, float Radius);
 	//ハンマー消費ゲージをマイナス
 	void MinusHammerGauge(const float Power);
 	// プレイヤーから下にレイを飛ばして陸の上かどうか調べる

@@ -48,14 +48,14 @@ public:
 	FVector GetCenterPos();
 	FVector GetStartPos() { return StartPoint->GetActorLocation(); };
 	void SetSquareLand(FVector SquareLocation, float XLength, float YLength, VertexType Type);
+	void HammerBreakLand(const FVector & worldPos, float Radius);
+
 private:
 	void CreateWave(int32 x, int32 y, float pawer);
 	void SetCircleLand(FVector CirclePostion, float Radius, VertexType Type);
 	void SetLand(int X, int Y, float Z, VertexType Type);
 
 	void TickFlashFloodWave(AFlashFlood* FlashFlood);
-
-	void HammerBreakLand(const FVector & worldPos);
 
 	int32 CalcIndex(int32 x, int32 y);
 

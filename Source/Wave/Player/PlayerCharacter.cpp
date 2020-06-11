@@ -337,7 +337,7 @@ void APlayerCharacter::HummerAttackEnd()
 		// ハンマーの先端を取得
 		FVector AttackPoint = HummerTipPoint->GetComponentLocation();
 		// 波を起こす
-		WaterAttack(AttackPoint, HammerPower * HammerPowerValue);
+		WaterAttack(AttackPoint, HammerPower * HammerPowerValue, 20.0f);
 		// エフェクトを生成
 		ImpactEmmiterCreate(AttackPoint);
 		//UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, AttackEffect, AttackPoint, GetActorRotation(), FVector::OneVector * AttackEffectScale, true);
@@ -447,11 +447,12 @@ void APlayerCharacter::SetLookAt(FVector Direction, float Speed)
 	SetActorRotation(FQuat::Slerp(GetActorQuat(), LookAt, Speed));
 }
 
-void APlayerCharacter::WaterAttack(FVector Point, float Power)
+void APlayerCharacter::WaterAttack(FVector Point, float Power, float Radius)
 {
 	if (!Water) return;
 
 	Water->AddPower(Point, Power * 100.0f);
+	Water->HammerBreakLand(Point, Radius);
 
 	if (Water->IsInLand(Point))
 	{
