@@ -69,6 +69,8 @@ struct InputState
 	InputActionState Left;
 	// 決定ボタン
 	InputActionState Select;
+	// 戻るボタン
+	InputActionState Back;
 };
 
 //@brief 入力管理クラス
@@ -136,4 +138,7 @@ private:
 	//決定ボタン入力情報受け取り
 	void InputSelectPress() { State.Select.Press(); };
 	void InputSelectRelease() { State.Select.Release(); };
+	//戻るボタン入力情報受け取り
+	void InputBackPress() { State.Back.Press(); };
+	void InputBackRelease() { State.Back.Release(); };
 };
