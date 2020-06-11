@@ -47,11 +47,11 @@ void ATitleCamera::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	GetAllTitleMemo();
-	//ステージを選んだらカメラを引く
-	//if (IsSelectMap)
-	//{
-	//	CameraBoom->TargetArmLength += 1.0f;
-	//}
+	//戻るボタンを押したらカメラを引く
+	if (IsBack)
+	{
+		CameraBoom->TargetArmLength += 0.5f;
+	}
 }
 
 

@@ -15,11 +15,21 @@ void UResultUI::NativeConstruct()
 void UResultUI::NextSelectState()
 {
 	if (State != ResultState::INPUT)return;
-	if (!IsDataTable)return;
-	SelectNumber++;
-	if (SelectNumber > static_cast<int>(ResultSelectState::STAGESELECT))
+	if (!IsDataTable)
 	{
-		SelectNumber = static_cast<int>(ResultSelectState::NEXTSTAGE);
+		SelectNumber++;
+		if (SelectNumber > static_cast<int>(ResultSelectState2::STAGESELECT))
+		{
+			SelectNumber = static_cast<int>(ResultSelectState2::RESTART);
+		}
+		ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
+		ImageSizeChenge();
+		return;
+	}
+	SelectNumber++;
+	if (SelectNumber > static_cast<int>(ResultSelectState2::STAGESELECT))
+	{
+		SelectNumber = static_cast<int>(ResultSelectState2::NEXTSTAGE);
 	}
 	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
 	ImageSizeChenge();
@@ -28,11 +38,21 @@ void UResultUI::NextSelectState()
 void UResultUI::BackSelectState()
 {
 	if (State != ResultState::INPUT)return;
-	if (!IsDataTable)return;
-	SelectNumber--;
-	if (SelectNumber < static_cast<int>(ResultSelectState::NEXTSTAGE))
+	if (!IsDataTable)
 	{
-		SelectNumber = static_cast<int>(ResultSelectState::STAGESELECT);
+		SelectNumber--;
+		if (SelectNumber < static_cast<int>(ResultSelectState2::RESTART))
+		{
+			SelectNumber = static_cast<int>(ResultSelectState2::STAGESELECT);
+		}
+		ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
+		ImageSizeChenge();
+		return;
+	}
+	SelectNumber--;
+	if (SelectNumber < static_cast<int>(ResultSelectState2::NEXTSTAGE))
+	{
+		SelectNumber = static_cast<int>(ResultSelectState2::STAGESELECT);
 	}
 	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
 	ImageSizeChenge();
@@ -40,20 +60,19 @@ void UResultUI::BackSelectState()
 
 void UResultUI::SelectStateAction()
 {
-	//if (State == ResultState::ENTER_WAIT)
-	//{
-	//	State = ResultState::INPUT;
-	//	return;
-	//}
 	if (State != ResultState::INPUT)return;
 	//次のステージがなかったら次のステージへを出さないこと
 	switch (SelectNumber)
 	{
-		case static_cast<int>(ResultSelectState::NEXTSTAGE) :
+		case static_cast<int>(ResultSelectState2::NEXTSTAGE) :
 			NextStageChenge();
 			ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
 			break;
-			case static_cast<int>(ResultSelectState::STAGESELECT) :
+			case static_cast<int>(ResultSelectState2::RESTART) :
+				Retry();
+				ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
+				break;
+			case static_cast<int>(ResultSelectState2::STAGESELECT) :
 				ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
 				StageSelectChenge();
 				break;
@@ -63,6 +82,6 @@ void UResultUI::SelectStateAction()
 
 void  UResultUI::SetStageSelectState()
 {
-	SelectNumber = static_cast<int>(ResultSelectState::STAGESELECT);
+	SelectNumber = static_cast<int>(ResultSelectState2::STAGESELECT);
 	ImageSizeChenge();
 }

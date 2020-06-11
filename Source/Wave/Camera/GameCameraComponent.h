@@ -39,14 +39,14 @@ private:
 
 	void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	// カメラの回転処理
-	void UpdateRotation();
 	// カメラの角度が制限内かチェックする関数
 	// CheckQuat : 確認する角度
 	// OverQuat : オーバーした時のみオーバーした分の角度を返す
 	bool CheckVerticalLimit(const FQuat & CheckQuat, FQuat & OutOverQuat);
 public:	
 
+	// カメラの回転処理
+	void InputUpdateRotation();
 	void SetCamera(UCameraComponent * Camera) { FollowCamera = Camera; }
 	float GetVerticalDegree();
 	void SetTargetDistance(float Dist, float Speed = 0.1f) 

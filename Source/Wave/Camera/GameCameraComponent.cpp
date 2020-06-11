@@ -28,8 +28,6 @@ void UGameCameraComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	UpdateRotation();
-
 	// CameraBoom‚Ìƒ[ƒJƒ‹‹óŠÔ‚Å‹——£‚ğİ’è
 	if (FollowCamera)
 	{
@@ -39,7 +37,7 @@ void UGameCameraComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	}
 }
 
-void UGameCameraComponent::UpdateRotation()
+void UGameCameraComponent::InputUpdateRotation()
 {
 	const AInputManager * inputManager = AInputManager::GetInstance();
 	if (!inputManager) return;

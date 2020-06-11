@@ -48,7 +48,7 @@ FVector ACircleLand::AdjustMoveInLand(const FVector & Pos, float CircleRadius)
 	return Result;
 }
 
-FVector ACircleLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius)
+FVector ACircleLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius, float Repulsion)
 {
 	float distance = FVector::Distance(MovedPos, GetActorLocation());
 	float judgDistance = CircleRadius + GetRadius();
@@ -61,14 +61,14 @@ FVector ACircleLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos
 
 	MovedPos = MovedPos + outDirection * landingDistance;
 
-	FVector2D MoveDirection = FVector2D(MovedPos - OldPos);
-	FVector2D Ref = (MoveDirection - 2.0f * FVector2D::DotProduct(MoveDirection, FVector2D(outDirection)) * FVector2D(outDirection));
+	FVector2D Ref = MyFunc::GetReflectVector2D((FVector2D)MoveVec, FVector2D(outDirection));
 	MoveVec = FVector(Ref, 0.0f);
+	MoveVec -= outDirection * FVector::DotProduct(MoveVec, outDirection) * (1.0f - Repulsion);
 
 	return MovedPos;
 }
 
-FVector ACircleLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen)
+FVector ACircleLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen, float Repulsion)
 {
 	FVector2D CirclePos = FVector2D(GetActorLocation());
 	XLen = XLen * 0.5f;
@@ -97,6 +97,7 @@ FVector ACircleLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos
 	float PushValue = (Radius - Info.HitDist);
 	MovedPos += FVector(Info.NearNormal * PushValue, 0.0f);
 	MoveVec = FVector(MyFunc::GetReflectVector2D((FVector2D)MoveVec, Info.NearNormal), 0.0f);
+	MoveVec -= FVector(Info.NearNormal, 0.0f) * FVector::DotProduct(MoveVec, FVector(Info.NearNormal, 0.0f)) * (1.0f - Repulsion);
 
 	return MovedPos;
 }

@@ -86,8 +86,8 @@ void AFloatActor::Tick(float DeltaTime)
 		return;
 	}
 
-	if (Type == FloatType::Circle) SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, Radius));
-	else if (Type == FloatType::Square) SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, XLength, YLength));
+	if (Type == FloatType::Circle) SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, Radius, Repulsion));
+	else if (Type == FloatType::Square) SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, XLength, YLength, Repulsion));
 	Velocity *= 1.0f - Friction;
 
 	// îgÇÃçÇÇ≥Ç…çáÇÌÇπÇÈ
@@ -123,7 +123,7 @@ FVector AFloatActor::AdjustMove_VS_Circle(const FVector & OldPos, FVector MovedP
 		// ëäå›Ç…óÕÇâ¡Ç¶ÇÈ
 		FVector Power = outDirection * landingDistance * 0.5f;
 		MoveVec += Power;
-		Velocity -= Power;
+		Velocity -= Power * Repulsion;
 	}
 	break;
 	case FloatType::Square:
@@ -157,7 +157,7 @@ FVector AFloatActor::AdjustMove_VS_Circle(const FVector & OldPos, FVector MovedP
 		MovedPos += FVector(-Info.NearNormal * PushValue, 0.0f);
 		FVector Ref = FVector(MyFunc::GetReflectVector2D((FVector2D)MoveVec, -Info.NearNormal), 0.0f);
 		MoveVec = Ref * 0.5f;
-		Velocity -= MoveVec;
+		Velocity -= MoveVec * Repulsion;
 	}
 	break;
 	}
@@ -199,7 +199,7 @@ FVector AFloatActor::AdjustMove_VS_Square(const FVector & OldPos, FVector MovedP
 		float PushValue = (Radius - Info.HitDist);
 		MovedPos += FVector(Info.NearNormal * PushValue, 0.0f);
 		MoveVec = FVector(MyFunc::GetReflectVector2D((FVector2D)MoveVec, Info.NearNormal), 0.0f) * 0.5f;
-		Velocity -= MoveVec;
+		Velocity -= MoveVec * Repulsion;
 	}
 	break;
 	case FloatType::Square:
@@ -230,7 +230,7 @@ FVector AFloatActor::AdjustMove_VS_Square(const FVector & OldPos, FVector MovedP
 		// îΩéÀï˚å¸ÇåvéZ
 		FVector Ref = FVector(MyFunc::GetReflectVector2D((FVector2D)MoveVec, PushVec.GetSafeNormal()), 0.0f);
 		MoveVec = Ref * 0.5f;
-		Velocity -= MoveVec;
+		Velocity -= MoveVec * Repulsion;
 
 		return MovedPos;
 	}

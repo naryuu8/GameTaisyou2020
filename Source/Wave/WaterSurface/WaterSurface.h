@@ -33,8 +33,8 @@ public:
 	float GetMaxWaveHeight() { return MaxWaveHight; };	// ”g‚ÌÅ‘å‚‚³‚ðŽæ“¾
 	float GetWaveSpeed() { return WaveSpeed; }
 	FVector AdjustMoveInField(const FVector & worldPos, float circleRadius);
-	FVector AdjustMoveInWater(const AActor * Object, FVector& moveVec, float circleRadius);
-	FVector AdjustMoveInWater(const AActor * Object, FVector& moveVec, float XLen, float YLen);
+	FVector AdjustMoveInWater(const AActor * Object, FVector& moveVec, float circleRadius, float Repulsion);
+	FVector AdjustMoveInWater(const AActor * Object, FVector& moveVec, float XLen, float YLen, float Repulsion);
 	FVector AdjustMoveInLand(const FVector & worldPos, const FVector & moveVec, float circleRadius, const FVector & WaterCheckPos, float WaterCheckRadius);
 	bool IsInWater(FVector worldPos);
 	bool IsInLand(FVector worldPos);
@@ -48,14 +48,14 @@ public:
 	FVector GetCenterPos();
 	FVector GetStartPos() { return StartPoint->GetActorLocation(); };
 	void SetSquareLand(FVector SquareLocation, float XLength, float YLength, VertexType Type);
+	void HammerBreakLand(const FVector & worldPos, float Radius);
+
 private:
 	void CreateWave(int32 x, int32 y, float pawer);
 	void SetCircleLand(FVector CirclePostion, float Radius, VertexType Type);
 	void SetLand(int X, int Y, float Z, VertexType Type);
 
 	void TickFlashFloodWave(AFlashFlood* FlashFlood);
-
-	void HammerBreakLand(const FVector & worldPos);
 
 	int32 CalcIndex(int32 x, int32 y);
 

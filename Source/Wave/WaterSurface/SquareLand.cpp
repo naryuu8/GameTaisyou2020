@@ -79,7 +79,7 @@ FVector ASquareLand::AdjustMoveInLand(const FVector & Pos, float CircleRadius)
 	return Result;
 }
 
-FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius)
+FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius, float Repulsion)
 {
 	FVector2D SquarePos = FVector2D(GetActorLocation());
 	float XLen = GetXLength() * 0.5f;
@@ -106,14 +106,15 @@ FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos
 	}
 
 	// 衝突している
-	float PushValue = (CircleRadius - Info.HitDist);
+	float PushValue = (CircleRadius - Info.HitDist) * Repulsion;
 	MovedPos += FVector(-Info.NearNormal * PushValue, 0.0f);
 	MoveVec = FVector(MyFunc::GetReflectVector2D((FVector2D)MoveVec, -Info.NearNormal), 0.0f);
+	MoveVec -= FVector(-Info.NearNormal, 0.0f) * FVector::DotProduct(MoveVec, FVector(-Info.NearNormal, 0.0f)) * (1.0f - Repulsion);
 
 	return MovedPos;
 }
 
-FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen)
+FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen, float Repulsion)
 {
 	FVector2D MyPos = (FVector2D)GetActorLocation();
 	float MyXLen = GetXLength() * 0.5f;
@@ -130,16 +131,18 @@ FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos
 		return MovedPos;
 
 	// 押し出す量を計算
-	FVector2D PushVec = FVector2D::ZeroVector;
+	FVector PushVec = FVector::ZeroVector;
 	PushVec.X = (MoveVec.X > 0) ? -X_Left : X_Right;	// true:左側にいる時, false:右側にいる時
 	PushVec.Y = (MoveVec.Y > 0) ? -Y_Down : Y_Up;		// true:下側にいる時, false:上側にいる時
 
 	// 押し出す量が大きい方向は無効にする
 	(FMath::Abs(PushVec.X) >= FMath::Abs(PushVec.Y)) ? PushVec.X = 0.0f : PushVec.Y = 0.0f;
-	MovedPos += FVector(PushVec, 0.0f);
+	MovedPos += PushVec;
 
 	// 反射方向を計算
-	MoveVec = FVector(MyFunc::GetReflectVector2D((FVector2D)MoveVec, PushVec.GetSafeNormal()), 0.0f);
+	PushVec.Normalize();
+	MoveVec = FVector(MyFunc::GetReflectVector2D((FVector2D)MoveVec, (FVector2D)PushVec), 0.0f);
+	MoveVec -= PushVec * FVector::DotProduct(MoveVec, PushVec) * (1.0f - Repulsion);
 
 	return MovedPos;
 }

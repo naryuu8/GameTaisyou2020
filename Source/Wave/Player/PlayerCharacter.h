@@ -13,6 +13,7 @@ class UPlayerAnimInstance;
 class UHammerCountBarUI;
 class AWaterSurface;
 class ARaft;
+class AGameCameraActor;
 
 UCLASS(config = Game)
 class APlayerCharacter : public ACharacter
@@ -21,7 +22,7 @@ class APlayerCharacter : public ACharacter
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Camera)
-		class AGameCameraActor* FollowCamera;
+		AGameCameraActor* FollowCamera;
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool IsDeth;	// 場外に出たまたは水に落ちた時
@@ -59,7 +60,7 @@ private:
 
 	float HammerHP;
 	float MoveAmount;	// 移動量の割合
-	void CreateHammerCountBarUI();
+	
 	void UpdateGaugeHP();
 	AWaterSurface* Water;
 
@@ -157,7 +158,7 @@ private:
 	UPlayerAnimInstance* AnimInst;
 
 	//水面に波をたてる
-	void WaterAttack(FVector Point, float Power);
+	void WaterAttack(FVector Point, float Power, float Radius);
 	//ハンマー消費ゲージをマイナス
 	void MinusHammerGauge(const float Power);
 	// プレイヤーから下にレイを飛ばして陸の上かどうか調べる
@@ -168,6 +169,7 @@ private:
 	void SetLookAt(FVector Direction, float Speed);
 public:
 	float GetMoveAmount() { return MoveAmount; };
+	void CreateHammerCountBarUI();
 	//ゲージUIを非表示にする
 	void HammerCountBarParent();
 	//ゲージUIを非表示にする(デバッグ用）
@@ -190,4 +192,6 @@ public:
 		FORCEINLINE	bool GetIsDeth() const { return IsDeth; };
 	bool GetIsAttack() const;
 	bool GetIsCharge() const;
+
+	AGameCameraActor* GetCameraActor();
 };

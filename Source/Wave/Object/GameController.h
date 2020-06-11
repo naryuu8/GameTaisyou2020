@@ -63,6 +63,7 @@ private:
 	int GameMaxNimotu = 0;
 	bool IsPause = false;
 	bool IsResult = false;
+	bool IsStartResultEvent = false;
 	// 表示するUI　エディタで指定する
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UGameTimeUI> GameTimeUIClass;
@@ -126,6 +127,7 @@ public:
 	//ゲージのパーセントとクリアに必要な荷物数取得（デバッグの時は読み込まない）
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void DataTableLoad();
+
 	//タイムカウントアニメが再生されていたら一時停止する
 	void SetTimeCountPause();
 	//タイムカウントアニメが止まっていたら続きから再生する

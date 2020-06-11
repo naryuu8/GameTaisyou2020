@@ -16,6 +16,7 @@
 #include "../SoundManager.h"
 #include "../Camera/GameCameraFocusPoint.h"
 #include "../UI/FadeUI.h"
+#include "../Camera/GameCameraActor.h"
 // Sets default values
 
 AGameController::AGameController()
@@ -31,6 +32,7 @@ void AGameController::BeginPlay()
 	GetPlayer = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	IsGameClear = false;
 	IsGameOver = false;
+	IsStartResultEvent = false;
 	NotExplotionCount = 0;
 	DataTableLoad();
 
@@ -64,7 +66,12 @@ void AGameController::BeginPlay()
 	}
 	CreateNimotuCountUI();
 	CreateGameTimeUI();
+	GetPlayer->CreateHammerCountBarUI();
+	//最後にフェードアウトを出すため最後に生成
 	InitFadeOut();
+
+	AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::STAGE_BGM);
+	AudioComponent->Play(0.0f);
 }
 
 // Called every frame
@@ -82,14 +89,33 @@ void AGameController::Tick(float DeltaTime)
 	//{
 	////	InputPause();
 	//}
+
 	//カメラの注目ポイントが存在する場合はゲームの判定をしない
-	TArray<AActor*> FocusPoints;
-	UGameplayStatics::GetAllActorsOfClass(this, AGameCameraFocusPoint::StaticClass(), FocusPoints);
-	if (FocusPoints.Num() == 0)
+	if (!IsStartResultEvent && GetPlayer->GetCameraActor()->FocusPoints.Num() == 0)
 	{
-		GameOverCheck();
-		GameClearCheck();
+		//指定の時間後に関数を実行する
+		// ゲームオーバーを優先して判定する（全てゴール後に家が落ちたり壊れたりするため）
+		if (IsGameOver)
+		{
+			FTimerManager& timerManager = GetWorld()->GetTimerManager();
+			FTimerHandle handle;
+			timerManager.SetTimer(handle, this, &AGameController::GameOver, 1.0f);
+			IsStartResultEvent = true;
+		}
+		else if (IsGameClear)
+		{
+			GetPlayer->SetGameClear();
+		    ASoundManager::GetInstance()->PlaySound(SOUND_TYPE::CLEAR_BGM);
+			FTimerManager& timerManager = GetWorld()->GetTimerManager();
+			FTimerHandle handle;
+			timerManager.SetTimer(handle, this, &AGameController::GameClear, 2.8f);
+			IsStartResultEvent = true;
+		}
 	}
+
+	GameOverCheck();
+	GameClearCheck();
+
 	//InputGameOverUI();
 	UpdateTime();
 }
@@ -365,17 +391,14 @@ int AGameController::GetMaxNimotu()
 
 void AGameController::GameClearCheck()
 {
-	if (IsGameOver)return;
+	//if (IsGameOver)return;
 	if (IsGameClear)return;
 	auto gameclear = [=]
 	{
 		//指定の時間後ゲームクリアにする
-		GetPlayer->SetGameClear();
 		IsGameClear = true;
 		SetTimeCountPause();
-		FTimerManager& timerManager = GetWorld()->GetTimerManager();
-		FTimerHandle handle;
-		timerManager.SetTimer(handle, this, &AGameController::GameClear, 2.8f);
+		AudioComponent->FadeOut(1.0f, 0.0f);
 	};
 	// ゲームクリア条件
 	//①ノルマ以上荷物を入れている時かつ残り時間が0になったら
@@ -402,41 +425,35 @@ void AGameController::GameClearCheck()
 
 void AGameController::GameOverCheck()
 {
-	if (IsGameClear)return;
+	//if (IsGameClear)return;
 	if (IsGameOver)return;
 	// ゲームオーバー条件
 	//ノルマを1つも達成できなくなったらゲームオーバー
-	auto gameover = [=] (const float time)
+	auto gameover = [=] ()
 	{ 
 		IsGameOver = true;
 		SetTimeCountPause();
-		//指定の時間後ゲームオーバーにする
-		FTimerManager& timerManager = GetWorld()->GetTimerManager();
-		FTimerHandle handle;
-		timerManager.SetTimer(handle, this, &AGameController::GameOver, time);
+		AudioComponent->FadeOut(2.0f, 0.0f);
 	};
 	//①ノルマまで荷物を運んでおらず残り時間が0になったら
 	if (GoalCount < NormaGoalCount && GetLimitTimeZero())
 	{
-		IsGameOver = true;
-		GameOver();
+		gameover();
 	}
 	//②プレイヤーが落下した時
 	else if (GetPlayer->GetIsDeth())
 	{
-		IsGameOver = true;
-		GameOver();
+		gameover();
 	}
 	//③荷物がノルマ数達成できないほど無くなった時(ゴールに入った荷物と合わせる)
 	else if (GameMaxNimotu + GoalCount < NormaGoalCount)
-	{//このゲームオーバーの時はTimerを使わない
-		IsGameOver = true;
-		GameOver();
+	{
+		gameover();
 	}
 	//④ゴールがノルマの荷物より少なくなった時
 	else if (NotExplotionCount < NormaGoalCount && GoalCount - NotExplotionCount < NormaGoalCount)
 	{
-		gameover(3.0f);
+		gameover();
 	}
 }
 

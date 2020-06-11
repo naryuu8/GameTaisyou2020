@@ -362,17 +362,23 @@ void AWaterSurface::AddPower(FVector worldPos, float power)
 	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 	float HeightPower = FMath::Abs(worldPos.Z);
 	HeightPower = (HeightPower > MaxWaveHight) ? 0.0f : (MaxWaveHight - HeightPower) / MaxWaveHight;
-	
-	HammerBreakLand(worldPos);
 
 	CreateWave(WaveX, WaveY, power * HeightPower);
 }
 
-void AWaterSurface::HammerBreakLand(const FVector & worldPos)
+void AWaterSurface::HammerBreakLand(const FVector & worldPos, float Radius)
 {
-	ABreakSquareLand* BreakLand = Cast<ABreakSquareLand>(GetLandPoint(worldPos, true));
-	if (!BreakLand)return;
-	BreakLand->Break();
+	for (auto Actor : LandPointActors)
+	{
+		if (!Actor->IsLand) continue;
+		ABreakSquareLand* BreakLand = Cast<ABreakSquareLand>(Actor);
+		if (!BreakLand) continue;
+
+		if (Actor->OnGround(worldPos, Radius))
+		{
+			BreakLand->Break();
+		}
+	}
 }
 
 float AWaterSurface::GetWaveHeight(const FVector & worldPos)
@@ -507,8 +513,8 @@ FVector AWaterSurface::AdjustMoveInLand(const FVector & worldPos, const FVector 
 				// ’nŒ`‚ÌŒ`‚É‚æ‚Á‚Ä‚»‚ê‚¼‚êˆ—‚ð‘‚­
 				ALandPoint * LandActor = GetLandPoint(worldPos);
 
-				// Šù‚É…‚Ìã‚É‘¶Ý‚µ‚Ä‚¢‚éŽž‚Í‚»‚Ì‚Ü‚ÜˆÚ“®‚·‚é
-				if (!LandActor) return movedPos;
+				/// Šù‚É…‚Ìã‚É‘¶Ý‚µ‚Ä‚¢‚éŽž‚Í‚»‚Ì‚Ü‚ÜˆÚ“®‚·‚é
+				if (!LandActor) return worldPos;
 
 				return LandActor->AdjustMoveInLand(movedPos, circleRadius);
 			}
@@ -519,7 +525,7 @@ FVector AWaterSurface::AdjustMoveInLand(const FVector & worldPos, const FVector 
 	return movedPos;
 }
 
-FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector& moveVec, float circleRadius)
+FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector& moveVec, float circleRadius, float Repulsion)
 {
 	FVector actorPos = Object->GetActorLocation();
 	FVector movedPos = actorPos + moveVec;
@@ -542,13 +548,13 @@ FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector& moveVec
 
 		if (!Actor->GetIsUse()) continue;
 
-		movedPos = Actor->AdjustMoveOutWater(actorPos, movedPos, moveVec, circleRadius);
+		movedPos = Actor->AdjustMoveOutWater(actorPos, movedPos, moveVec, circleRadius, Repulsion);
 	}
 	
 	return movedPos;
 }
 
-FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector & moveVec, float XLen, float YLen)
+FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector & moveVec, float XLen, float YLen, float Repulsion)
 {
 	FVector actorPos = Object->GetActorLocation();
 	FVector movedPos = actorPos + moveVec;
@@ -570,7 +576,7 @@ FVector AWaterSurface::AdjustMoveInWater(const AActor * Object, FVector & moveVe
 		if (!Actor->IsLand) continue;
 
 		if (!Actor->GetIsUse()) continue;
-		movedPos = Actor->AdjustMoveOutWater(actorPos, movedPos, moveVec, XLen, YLen);
+		movedPos = Actor->AdjustMoveOutWater(actorPos, movedPos, moveVec, XLen, YLen, Repulsion);
 	}
 
 	return movedPos;

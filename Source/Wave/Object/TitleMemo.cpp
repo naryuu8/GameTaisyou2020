@@ -61,6 +61,6 @@ void ATitleMemo::FadeStart()
 			instance->SetStageNumber(MyStageNumber);
 		}
 		fade->AddToViewport();
-		fade->SetFadeLevel(FColor::Black, 1.5f, FName(*StageLevelPath), true);
+		fade->SetFadeLevel(FColor::Black, 1.0f, FName(*StageLevelPath), true);
 	}
 }
