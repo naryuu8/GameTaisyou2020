@@ -13,6 +13,7 @@ class UPlayerAnimInstance;
 class UHammerCountBarUI;
 class AWaterSurface;
 class ARaft;
+class AGameCameraActor;
 
 UCLASS(config = Game)
 class APlayerCharacter : public ACharacter
@@ -21,7 +22,7 @@ class APlayerCharacter : public ACharacter
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Camera)
-		class AGameCameraActor* FollowCamera;
+		AGameCameraActor* FollowCamera;
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool IsDeth;	// èÍäOÇ…èoÇΩÇ‹ÇΩÇÕêÖÇ…óéÇøÇΩéû
@@ -190,4 +191,6 @@ public:
 		FORCEINLINE	bool GetIsDeth() const { return IsDeth; };
 	bool GetIsAttack() const;
 	bool GetIsCharge() const;
+
+	AGameCameraActor* GetCameraActor();
 };

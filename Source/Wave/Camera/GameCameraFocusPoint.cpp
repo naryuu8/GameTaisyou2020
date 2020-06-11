@@ -2,8 +2,9 @@
 
 
 #include "GameCameraFocusPoint.h"
-#include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "../Object/GameController.h"
 
 // Sets default values
 AGameCameraFocusPoint::AGameCameraFocusPoint()
@@ -16,6 +17,10 @@ AGameCameraFocusPoint::AGameCameraFocusPoint()
 
 void AGameCameraFocusPoint::SpawnFocusPoint(const AActor * Object, const FVector & Pos, float Time)
 {
+	AGameController * Controller = Cast<AGameController>(UGameplayStatics::GetActorOfClass(Object->GetWorld(), AGameController::StaticClass()));
+	if (!Controller) return;
+	if (Controller->GetIsClear() || Controller->GetIsGameOver()) return;
+
 	AGameCameraFocusPoint * Actor = Cast<AGameCameraFocusPoint>(
 		Object->GetWorld()->SpawnActor<AGameCameraFocusPoint>(Pos, FRotator::ZeroRotator));
 

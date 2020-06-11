@@ -564,6 +564,11 @@ bool APlayerCharacter::GetIsCharge() const
 	return AnimInst->IsCharge;
 }
 
+AGameCameraActor * APlayerCharacter::GetCameraActor()
+{
+	return FollowCamera;
+}
+
 void APlayerCharacter::UpdateGaugeHP()
 {
 	if (AnimInst->IsCharge || AnimInst->IsAttack)return;
