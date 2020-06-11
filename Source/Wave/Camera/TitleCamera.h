@@ -23,6 +23,7 @@ private:
 	ATitleMemo* TitleMemo;
 	int MemoNum;//ステージ選択伝票の総数を格納
 	bool IsSelectMap = false;
+	bool IsBack = false;
 	int MyStageNumber = 0;
 	void GetAllTitleMemo();
 public:	
@@ -44,6 +45,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	//カメラ位置を補完せず配達紙の前に置く
 	void SetCenterTitleMemo();
+	void SetBack() { IsBack = true; }
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/

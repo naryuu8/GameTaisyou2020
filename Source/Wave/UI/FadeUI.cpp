@@ -32,7 +32,6 @@ void UFadeUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 		if (FadeColor.A <= 0.0f)
 		{
 			IsEnable = false;
-			RemoveFromParent();
 		}
 	}
 	
