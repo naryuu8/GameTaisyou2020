@@ -66,6 +66,8 @@ void AGameController::BeginPlay()
 	}
 	CreateNimotuCountUI();
 	CreateGameTimeUI();
+	GetPlayer->CreateHammerCountBarUI();
+	//最後にフェードアウトを出すため最後に生成
 	InitFadeOut();
 
 	AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::STAGE_BGM);

@@ -59,6 +59,10 @@ public:
 	void SetIsUse(bool isUse) { IsUse = isUse; }
 	bool GetIsUse() { return IsUse; }
 
+
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		bool GetIsLand() const { return IsLand; }
+
 private:
 	UPROPERTY(EditAnywhere)
 		TEnumAsByte<ELandType> LandType = ELandType::Grass;
