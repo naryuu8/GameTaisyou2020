@@ -9,6 +9,7 @@
 #include "../UI/ResultUI.h"
 #include "../UI/NimotuCountUI.h"
 #include "../UI/PauseUI.h"
+#include "../UI/ControlTipsUI.h"
 #include "../InputManager.h"
 #include "../Player/PlayerCharacter.h"
 #include "../WaterSurface/FloatActor.h"
@@ -67,6 +68,10 @@ void AGameController::BeginPlay()
 	CreateNimotuCountUI();
 	CreateGameTimeUI();
 	GetPlayer->CreateHammerCountBarUI();
+	if (IsTips)
+	{
+		CreateControlTipsUI();
+	}
 	//最後にフェードアウトを出すため最後に生成
 	InitFadeOut();
 
@@ -175,7 +180,6 @@ void AGameController::CreateResultUI()
 		if (ResultUI != nullptr)
 		{
 			ResultUI->AddToViewport();
-			GetPlayer->HammerCountBarParent();
 			//このステージをクリアした時の制限時間、クリア時の針アングル、ノルマ針アングル、ノルマ時間をセット
 			ResultUI->SetResultTokeiAnimeCheckEvent(TimeLimit, GetNowTimeAngle(), GetNormaTimeAngle(),NormaTime);
 			ResultUI->SetResultNowNimotuCheckEvent(GoalCount);
@@ -350,6 +354,27 @@ void AGameController::InputPause()
 	}
 }
 
+void AGameController::CreateControlTipsUI()
+{
+	if (ControlTipsUI)return;
+	if (ControlTipsUIClass != nullptr)
+	{
+		ControlTipsUI = CreateWidget<UControlTipsUI>(GetWorld(), ControlTipsUIClass);
+		if (ControlTipsUI != nullptr)
+		{
+			ControlTipsUI->AddToViewport();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("ControlTipsUIClass : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ControlTipsUIClass : %s"), L"UIClass is nullptr");
+	}
+}
+
 void AGameController::UpdateTime()
 {
 	//ゲームが終了していたら時計を進めない
@@ -395,6 +420,7 @@ void AGameController::GameClearCheck()
 	if (IsGameClear)return;
 	auto gameclear = [=]
 	{
+		RemoveUI();
 		//指定の時間後ゲームクリアにする
 		IsGameClear = true;
 		SetTimeCountPause();
@@ -429,8 +455,9 @@ void AGameController::GameOverCheck()
 	if (IsGameOver)return;
 	// ゲームオーバー条件
 	//ノルマを1つも達成できなくなったらゲームオーバー
-	auto gameover = [=] ()
+	auto gameover = [=]
 	{ 
+		RemoveUI();
 		IsGameOver = true;
 		SetTimeCountPause();
 		AudioComponent->FadeOut(2.0f, 0.0f);
@@ -460,28 +487,11 @@ void AGameController::GameOverCheck()
 void AGameController::GameClear()
 {
 	CreateResultUI();
-	if (GameTimeUI)
-	{
-		GameTimeUI->RemoveFromParent();
-	}
-	if (NimotuCountUI)
-	{
-		NimotuCountUI->RemoveFromParent();
-	}
 }
 
 void AGameController::GameOver()
 {
 	CreateGameOverUI();
-	if (GameTimeUI)
-	{
-		GameTimeUI->RemoveFromParent();
-	}
-	if (NimotuCountUI)
-	{
-		NimotuCountUI->RemoveFromParent();
-	}
-	GetPlayer->HammerCountBarParent();
 }
 
 int AGameController::CountGameNimotu()
@@ -695,4 +705,21 @@ void AGameController::InputSelectCall()
 		if (!ResultUI)return;
 		ResultUI->SelectStateAction();
 	}
+}
+
+void AGameController::RemoveUI()
+{
+	if (GameTimeUI)
+	{
+		GameTimeUI->RemoveFromParent();
+	}
+	if (NimotuCountUI)
+	{
+		NimotuCountUI->RemoveFromParent();
+	}
+	if (ControlTipsUI)
+	{
+		ControlTipsUI->RemoveFromParent();
+	}
+	GetPlayer->HammerCountBarParent();
 }

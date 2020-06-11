@@ -14,6 +14,7 @@ class APlayerCharacter;
 class UNimotuCountUI;
 class UPauseUI;
 class UFadeUI;
+class UControlTipsUI;
 // ゲーム中のクリア条件などを管理するクラス
 
 UCLASS()
@@ -44,6 +45,9 @@ protected:
 	//スクリーンショット用デバッグフラグ
 	UPROPERTY(EditAnywhere, Category = "Game")
 		bool DebugScreenMode = false;
+	//操作説明表示フラグ
+	UPROPERTY(EditAnywhere, Category = "Game")
+		bool IsTips = false;
 	// BGM用
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game")
 		class UAudioComponent* AudioComponent;
@@ -77,6 +81,8 @@ private:
 		TSubclassOf<UPauseUI> PauseUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UFadeUI> FadeUIClass;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UControlTipsUI> ControlTipsUIClass;
 	//勝手に開放されることがあるのでガベージコレクションの対象外にする
 	UPROPERTY()
 	UPauseUI* PauseUI = nullptr;
@@ -88,6 +94,8 @@ private:
 	UResultUI* ResultUI = nullptr;
 	UPROPERTY()
 	UNimotuCountUI* NimotuCountUI = nullptr;
+	UPROPERTY()
+	UControlTipsUI* ControlTipsUI = nullptr;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -150,6 +158,7 @@ private:
 	void CreateGameOverUI();
 	void CreateResultUI();
 	void CreateNimotuCountUI();
+	void CreateControlTipsUI();
 	//ゲーム開始時のフェードアウト
 	void InitFadeOut();
 	void InputGameOverUI();
@@ -167,4 +176,6 @@ private:
 	int CountGameNimotu();
 	//カウントダウンの残り時間0の時trueを返す
 	bool GetLimitTimeZero();
+	//表示しているUIを非表示にする
+	void RemoveUI();
 };
