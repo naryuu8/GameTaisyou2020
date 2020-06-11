@@ -59,7 +59,7 @@ private:
 
 	float HammerHP;
 	float MoveAmount;	// 移動量の割合
-	void CreateHammerCountBarUI();
+	
 	void UpdateGaugeHP();
 	AWaterSurface* Water;
 
@@ -168,6 +168,7 @@ private:
 	void SetLookAt(FVector Direction, float Speed);
 public:
 	float GetMoveAmount() { return MoveAmount; };
+	void CreateHammerCountBarUI();
 	//ゲージUIを非表示にする
 	void HammerCountBarParent();
 	//ゲージUIを非表示にする(デバッグ用）
