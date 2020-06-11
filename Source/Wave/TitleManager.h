@@ -44,6 +44,7 @@ private:
 	bool IsNoInput;//true時キー入力を無効にする
 	UTitleUI* TitleUI = nullptr;
 	UFadeUI* FadeUI = nullptr;
+	UTitleTipsUI* TitleTipsUI = nullptr;
 private:
 	void TitleInput();
 	//移動先のカメラと移行スピードを設定

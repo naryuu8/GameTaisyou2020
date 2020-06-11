@@ -7,9 +7,9 @@ void UTimeUI::SetOneFrameAngle(const int time_limit)
 {
 	LimitTime = time_limit;
 	//1秒で回転する値を求める
-	float one = 360.0f / time_limit;
+	OneLimitAngle = 360.0f / time_limit;
 	//1フレームで回転する値を求める
-	OneFrameAngle = one / 60.0f;
+	OneFrameAngle = OneLimitAngle / 60.0f;
 }
 
 void UTimeUI::SetCountDownAngle(const int countdown)

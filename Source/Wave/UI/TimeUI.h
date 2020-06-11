@@ -19,6 +19,9 @@ public:
 	//制限時間
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		int LimitTime;
+	//1秒で回転する量
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		float OneLimitAngle;
 	//1フレームで回転する量
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float OneFrameAngle;
@@ -36,6 +39,9 @@ public:
 	//時計のアニメが終わったらTrue
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		bool IsTokeiAnimeEnd = false;
+	//360度になったらtrue
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		bool IsTimeEnd = false;
 	//クリア時の針の位置
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float ClearAngle;
@@ -73,6 +79,8 @@ public:
 		void SetNeedleAndBG_Material(const float angle);
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE bool GetIsTokeiAnimeEnd() const { return IsTokeiAnimeEnd; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE bool GetIsTimeEnd() const { return IsTimeEnd; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	float GetNowTimeAngle() const { return NowTimeAngle; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
