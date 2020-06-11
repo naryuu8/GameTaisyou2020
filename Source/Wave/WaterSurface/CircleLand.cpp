@@ -61,10 +61,9 @@ FVector ACircleLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos
 
 	MovedPos = MovedPos + outDirection * landingDistance;
 
-	FVector2D MoveDirection = FVector2D(MovedPos - OldPos);
-
-	FVector2D Ref = MyFunc::GetReflectVector2D(MoveDirection, FVector2D(outDirection));
-	MoveVec = FVector(Ref * Repulsion, 0.0f);
+	FVector2D Ref = MyFunc::GetReflectVector2D((FVector2D)MoveVec, FVector2D(outDirection));
+	MoveVec = FVector(Ref, 0.0f);
+	MoveVec -= outDirection * FVector::DotProduct(MoveVec, outDirection) * (1.0f - Repulsion);
 
 	return MovedPos;
 }
@@ -97,7 +96,8 @@ FVector ACircleLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos
 	// è’ìÀÇµÇƒÇ¢ÇÈ
 	float PushValue = (Radius - Info.HitDist);
 	MovedPos += FVector(Info.NearNormal * PushValue, 0.0f);
-	MoveVec = FVector(MyFunc::GetReflectVector2D((FVector2D)MoveVec, Info.NearNormal) * Repulsion, 0.0f);
+	MoveVec = FVector(MyFunc::GetReflectVector2D((FVector2D)MoveVec, Info.NearNormal), 0.0f);
+	MoveVec -= FVector(Info.NearNormal, 0.0f) * FVector::DotProduct(MoveVec, FVector(Info.NearNormal, 0.0f)) * (1.0f - Repulsion);
 
 	return MovedPos;
 }

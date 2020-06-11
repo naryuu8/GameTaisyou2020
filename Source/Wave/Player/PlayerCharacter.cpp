@@ -23,6 +23,7 @@
 #include "Runtime/Engine/Classes/Engine/Engine.h"
 #include "GameFramework/PlayerController.h"
 #include "../SoundManager.h"
+#include "Components/SkeletalMeshComponent.h"
 
 #include "../Camera/State/GameCameraStateFall.h"
 #include "../Camera/State/GameCameraStateClear.h"
@@ -120,7 +121,16 @@ void APlayerCharacter::Tick(float DeltaTime)
 			AnimInst->IsDeth = true;
 			PlayerDeth();
 			UCapsuleComponent * Collision = Cast<UCapsuleComponent>(GetComponentByClass(UCapsuleComponent::StaticClass()));
-			if (Collision)Collision->SetActive(false);
+			if (Collision)
+			{
+				Collision->ComponentVelocity = FVector::ZeroVector;
+				Collision->SetActive(false);
+			}
+			USkeletalMeshComponent * SkeletalMesh = Cast<USkeletalMeshComponent>(GetComponentByClass(USkeletalMeshComponent::StaticClass()));
+			if (SkeletalMesh)
+			{
+				SkeletalMesh->ComponentVelocity = FVector::ZeroVector;
+			}
 			return;
 		}
 	}
