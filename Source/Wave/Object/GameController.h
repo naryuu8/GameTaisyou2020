@@ -161,9 +161,6 @@ private:
 	void CreateControlTipsUI();
 	//ゲーム開始時のフェードアウト
 	void InitFadeOut();
-	void InputGameOverUI();
-	void InputResultUI();
-	void InputPause();
 	//時計の針を進める
 	void UpdateTime();
 	//ゲームクリア条件確認

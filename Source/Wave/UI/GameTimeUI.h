@@ -17,6 +17,9 @@ public:
 	//カウントが0になったらtrue
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		bool IsCountZero = false;
+	//時計の針が360度になったらtrue
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		bool IsTimeEnd = false;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		float NowTimeAngle = 0.0f;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
@@ -35,6 +38,8 @@ public:
 		void AnimationRePlay();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsCountZero() const { return IsCountZero; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE bool GetIsTimeEnd() const { return IsTimeEnd; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	float GetNowTimeAngle() const { return NowTimeAngle; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")

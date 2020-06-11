@@ -89,12 +89,6 @@ void AGameController::Tick(float DeltaTime)
 	{
 		GetPlayer = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	}
-	////アタックアニメ中はポーズを開けないようにする
-	//if (!GetPlayer->GetIsAttack() && !GetPlayer->GetIsCharge())
-	//{
-	////	InputPause();
-	//}
-
 	//カメラの注目ポイントが存在する場合はゲームの判定をしない
 	if (!IsStartResultEvent && GetPlayer->GetCameraActor()->FocusPoints.Num() == 0)
 	{
@@ -120,8 +114,6 @@ void AGameController::Tick(float DeltaTime)
 
 	GameOverCheck();
 	GameClearCheck();
-
-	//InputGameOverUI();
 	UpdateTime();
 }
 
@@ -241,116 +233,6 @@ void AGameController::InitFadeOut()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("FadeUIClass : %s"), L"UIClass is nullptr");
-	}
-}
-
-void AGameController::InputGameOverUI()
-{
-	if (!IsGameOver)return;
-	if (!GameOverUI)return;
-	if (GameOverUI->GetIsPlayAnimation())return;
-	const AInputManager * inputManager = AInputManager::GetInstance();
-	if (!inputManager)return;
-	const InputState * input = inputManager->GetState();
-	if (input->Left.IsPress)
-	{
-		GameOverUI->BackSelectState();
-	}
-	if (input->Right.IsPress)
-	{
-		GameOverUI->NextSelectState();
-	}
-	if (input->Select.IsPress)
-	{
-		GameOverUI->SelectStateAction();
-	}
-}
-
-void AGameController::InputResultUI()
-{
-	if (!IsGameClear)return;
-	if (!ResultUI)return;
-	const AInputManager * inputManager = AInputManager::GetInstance();
-	if (!inputManager)return;
-	const InputState * input = inputManager->GetState();
-	if (input->Left.IsPress)
-	{
-		ResultUI->BackSelectState();
-	}
-	if (input->Right.IsPress)
-	{
-		ResultUI->NextSelectState();
-	}
-	if (input->Select.IsPress)
-	{
-		ResultUI->SelectStateAction();
-	}
-}
-
-void AGameController::InputPause()
-{
-	const AInputManager * inputManager = AInputManager::GetInstance();
-	if (!inputManager)return;
-	const InputState * input = inputManager->GetState();
-	if (input->Pause.IsPress)
-	{//ポーズ中でなければポーズ画面を開き、ポーズ中だったらポーズ画面を閉じる
-		//ゲーム終了条件を満たしていたらポーズを開けないようにする
-		if (GetIsClear() || GetIsGameOver())return;
-		if (!UGameplayStatics::IsGamePaused(GetWorld()))
-		{
-			if (PauseUIClass != nullptr)
-			{//初めてポーズ画面を開くときはUIを生成する
-				if (!PauseUI)
-				{
-					PauseUI = CreateWidget<UPauseUI>(GetWorld(), PauseUIClass);
-					PauseUI->AddToViewport();
-					PauseUI->SetNormaAngle(GetNormaTimeAngle());
-					PauseUI->SetNeedleAndBG_Material(GetNowTimeAngle());
-					PauseUI->SetTimeLimit(TimeLimit);
-					PauseUI->SetNormaTime(TimeLimit - NormaTime);
-					SetTimeCountPause();
-				}
-				else if (PauseUI)
-				{
-					if (PauseUI->GetIsPlayAnimation())return;
-					PauseUI->AddToViewport();
-					PauseUI->SetNormaAngle(GetNormaTimeAngle());
-					PauseUI->SetNeedleAndBG_Material(GetNowTimeAngle());
-					PauseUI->SetTimeLimit(TimeLimit);
-					PauseUI->SetNormaTime(TimeLimit - NormaTime);
-					SetTimeCountPause();
-				}
-				//生成してもnullptrだったらエラー文表示
-				if (PauseUI == nullptr)
-				{
-					UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"Widget cannot create");
-				}
-			}
-			else
-			{
-				UE_LOG(LogTemp, Error, TEXT("PauseUI : %s"), L"PauseUIClass is nullptr");
-			}
-		}
-		else if (UGameplayStatics::IsGamePaused(GetWorld()))
-		{
-			if (!PauseUI)return;
-			if (PauseUI->GetIsPlayAnimation())return;
-			PauseUI->EndAnimation();
-		}
-	}
-	if (!UGameplayStatics::IsGamePaused(GetWorld()))return;
-	if (!PauseUI)return;
-	if (input->Left.IsPress)
-	{
-		PauseUI->BackSelectState();
-	}
-	if (input->Right.IsPress)
-	{
-		PauseUI->NextSelectState();
-	}
-	if (input->Select.IsPress)
-	{
-		PauseUI->SelectStateAction();
 	}
 }
 
@@ -516,8 +398,11 @@ int AGameController::CountGameNimotu()
 bool AGameController::GetLimitTimeZero()
 {
 	if (GameTimeUI)
-	{
-		return GameTimeUI->GetIsCountZero();
+	{//カウントダウンと針が0を指していたら時間終了とする
+		if (GameTimeUI->GetIsCountZero() && GameTimeUI->GetIsTimeEnd())
+		{
+			return true;
+		}
 	}
 	return false;
 }

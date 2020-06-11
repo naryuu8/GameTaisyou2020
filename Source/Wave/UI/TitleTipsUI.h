@@ -13,5 +13,9 @@ UCLASS()
 class WAVE_API UTitleTipsUI : public UUserWidget
 {
 	GENERATED_BODY()
-	
+public:
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetNoDraw();
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetDraw();
 };
