@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "../Camera/GameCameraFocusPoint.h"
 #include "../SoundManager.h"
+#include "Components/MaterialBillboardComponent.h"
 
 // Sets default values for this component's properties
 UGoalComponent::UGoalComponent()
@@ -46,6 +47,7 @@ void UGoalComponent::OnFloatActorCheck(AActor * OtherActor)
 		SetGoalMinus();
 		OtherFloat->Destroy();
 		AGameCameraFocusPoint::SpawnFocusPoint(GetOwner(), GetOwner()->GetActorLocation());
+		SetInvisibleBillbord();
 		//BreakHome();
 		return;
 	}
@@ -61,6 +63,7 @@ void UGoalComponent::OnFloatActorCheck(AActor * OtherActor)
 		game->MinusGameMaxNimotu();
 		// 衝突した荷物を削除
 		OtherFloat->Destroy();
+		SetInvisibleBillbord();
 
 		AGameCameraFocusPoint::SpawnFocusPoint(GetOwner(), GetOwner()->GetActorLocation());
 		// ここでドアが閉まるアニメーション開始
@@ -74,6 +77,17 @@ void UGoalComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void UGoalComponent::SetInvisibleBillbord()
+{
+	TArray<UActorComponent*> Billboards;
+	GetOwner()->GetComponents(UMaterialBillboardComponent::StaticClass(), Billboards);
+
+	for (auto Billboard : Billboards)
+	{
+		Cast<UMaterialBillboardComponent>(Billboard)->SetRenderInMainPass(false);
+	}
 }
 
 void UGoalComponent::SetGoalMinus()

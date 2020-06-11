@@ -31,6 +31,9 @@ protected:
 	// イベント：家が破壊される
 	//UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		//void BreakHome();
+
+	void SetInvisibleBillbord();
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

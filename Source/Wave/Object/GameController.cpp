@@ -18,6 +18,7 @@
 #include "../Camera/GameCameraFocusPoint.h"
 #include "../UI/FadeUI.h"
 #include "../Camera/GameCameraActor.h"
+#include "Components/MaterialBillboardComponent.h"
 // Sets default values
 
 AGameController::AGameController()
@@ -425,6 +426,7 @@ void AGameController::GameClearCheck()
 		IsGameClear = true;
 		SetTimeCountPause();
 		AudioComponent->FadeOut(1.0f, 0.0f);
+		SetAllInvisibleStageIcon();
 	};
 	// ƒQ[ƒ€ƒNƒŠƒAðŒ
 	//‡@ƒmƒ‹ƒ}ˆÈã‰×•¨‚ð“ü‚ê‚Ä‚¢‚éŽž‚©‚ÂŽc‚èŽžŠÔ‚ª0‚É‚È‚Á‚½‚ç
@@ -461,6 +463,7 @@ void AGameController::GameOverCheck()
 		IsGameOver = true;
 		SetTimeCountPause();
 		AudioComponent->FadeOut(2.0f, 0.0f);
+		SetAllInvisibleStageIcon();
 	};
 	//‡@ƒmƒ‹ƒ}‚Ü‚Å‰×•¨‚ð‰^‚ñ‚Å‚¨‚ç‚¸Žc‚èŽžŠÔ‚ª0‚É‚È‚Á‚½‚ç
 	if (GoalCount < NormaGoalCount && GetLimitTimeZero())
@@ -722,4 +725,21 @@ void AGameController::RemoveUI()
 		ControlTipsUI->RemoveFromParent();
 	}
 	GetPlayer->HammerCountBarParent();
+}
+
+void AGameController::SetAllInvisibleStageIcon()
+{
+	TArray<AActor*> Actors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), Actors);
+
+	for (auto Actor : Actors)
+	{
+		TArray<UActorComponent*> Billboards;
+		Actor->GetComponents(UMaterialBillboardComponent::StaticClass(), Billboards);
+
+		for (auto Billboard : Billboards)
+		{
+			Cast<UMaterialBillboardComponent>(Billboard)->SetRenderInMainPass(false);
+		}
+	}
 }

@@ -178,4 +178,6 @@ private:
 	bool GetLimitTimeZero();
 	//表示しているUIを非表示にする
 	void RemoveUI();
+	// ステージ上のアイコンを非表示
+	void SetAllInvisibleStageIcon();
 };
