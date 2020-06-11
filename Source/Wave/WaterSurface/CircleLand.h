@@ -20,8 +20,8 @@ public:
 	bool OnGround(const FVector & Pos, float CircleRadius) override;
 	bool InGround(const FVector & Pos, float CircleRadius) override;
 	FVector AdjustMoveInLand(const FVector & Pos, float CircleRadius) override;
-	FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius) override;
-	FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen) override;
+	FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius, float Repulsion) override;
+	FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen, float Repulsion) override;
 
 private:
 	UPROPERTY(EditAnywhere)

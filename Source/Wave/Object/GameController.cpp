@@ -398,7 +398,7 @@ void AGameController::GameClearCheck()
 		//指定の時間後ゲームクリアにする
 		IsGameClear = true;
 		SetTimeCountPause();
-		AudioComponent->FadeOut(2.0f, 0.0f);
+		AudioComponent->FadeOut(1.0f, 0.0f);
 	};
 	// ゲームクリア条件
 	//①ノルマ以上荷物を入れている時かつ残り時間が0になったら

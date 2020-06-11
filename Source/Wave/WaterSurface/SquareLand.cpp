@@ -79,7 +79,7 @@ FVector ASquareLand::AdjustMoveInLand(const FVector & Pos, float CircleRadius)
 	return Result;
 }
 
-FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius)
+FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius, float Repulsion)
 {
 	FVector2D SquarePos = FVector2D(GetActorLocation());
 	float XLen = GetXLength() * 0.5f;
@@ -106,14 +106,14 @@ FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos
 	}
 
 	// è’ìÀÇµÇƒÇ¢ÇÈ
-	float PushValue = (CircleRadius - Info.HitDist);
+	float PushValue = (CircleRadius - Info.HitDist) * Repulsion;
 	MovedPos += FVector(-Info.NearNormal * PushValue, 0.0f);
 	MoveVec = FVector(MyFunc::GetReflectVector2D((FVector2D)MoveVec, -Info.NearNormal), 0.0f);
 
 	return MovedPos;
 }
 
-FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen)
+FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen, float Repulsion)
 {
 	FVector2D MyPos = (FVector2D)GetActorLocation();
 	float MyXLen = GetXLength() * 0.5f;
@@ -139,7 +139,7 @@ FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos
 	MovedPos += FVector(PushVec, 0.0f);
 
 	// îΩéÀï˚å¸ÇåvéZ
-	MoveVec = FVector(MyFunc::GetReflectVector2D((FVector2D)MoveVec, PushVec.GetSafeNormal()), 0.0f);
+	MoveVec = FVector(MyFunc::GetReflectVector2D((FVector2D)MoveVec, PushVec.GetSafeNormal()) * Repulsion, 0.0f);
 
 	return MovedPos;
 }

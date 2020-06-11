@@ -48,8 +48,8 @@ void ADestructionObject::Tick(float DeltaTime)
 	FVector WavePower = WaterSurface->GetWavePower(GetActorLocation());
 	FVector MoveVec = WavePower * FloatSpeed * 0.01f;
 	Velocity += MoveVec;
-	if (Velocity.Size() > MinFloatWavePower)
-		SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, FloatScale));
+	//if (Velocity.Size() > MinFloatWavePower)
+		//SetActorLocation(WaterSurface->AdjustMoveInWater(this, Velocity, FloatScale));
 	Velocity *= 0.98f;
 
 	// ”g‚Ì‚‚³‚É‡‚í‚¹‚é

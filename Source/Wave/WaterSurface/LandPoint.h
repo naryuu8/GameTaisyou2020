@@ -53,8 +53,8 @@ public:
 	virtual bool InGround(const FVector & Pos, float CircleRadius) { return false; };
 	// この地面の外に出ないように移動する際のチェック
 	virtual FVector AdjustMoveInLand(const FVector & Pos, float CircleRadius) { return FVector::ZeroVector; };
-	virtual FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius) { return FVector::ZeroVector; };
-	virtual FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen) { return FVector::ZeroVector; };
+	virtual FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius, float Repulsion) { return FVector::ZeroVector; };
+	virtual FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen, float Repulsion) { return FVector::ZeroVector; };
 
 	void SetIsUse(bool isUse) { IsUse = isUse; }
 	bool GetIsUse() { return IsUse; }

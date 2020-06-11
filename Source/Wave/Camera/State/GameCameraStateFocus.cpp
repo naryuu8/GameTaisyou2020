@@ -68,4 +68,6 @@ void GameCameraStateFocus::OnUpdate(AGameCameraActor * Actor)
 	Actor->SetActorLocation(FMath::Lerp<FVector>(Actor->GetActorLocation(), CenterPos, 0.05f));
 	// カメラの距離をセット
 	Actor->GameCameraBoom->SetTargetDistance(FollowDist, 0.05f);
+
+	Actor->GameCameraBoom->InputUpdateRotation();
 }

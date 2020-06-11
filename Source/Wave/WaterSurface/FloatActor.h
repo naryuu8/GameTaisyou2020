@@ -41,6 +41,8 @@ protected:
 		float FloatSpeed = 0.7f;
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0"))
 		float Friction = 0.02f;	// –€ŽC
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0"))
+		float Repulsion = 1.0f;
 	
 	UPROPERTY(EditAnywhere)
 		TEnumAsByte<FloatType> Type = FloatType::Circle;

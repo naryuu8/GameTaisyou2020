@@ -33,8 +33,8 @@ public:
 	float GetMaxWaveHeight() { return MaxWaveHight; };	// îgÇÃç≈ëÂçÇÇ≥ÇéÊìæ
 	float GetWaveSpeed() { return WaveSpeed; }
 	FVector AdjustMoveInField(const FVector & worldPos, float circleRadius);
-	FVector AdjustMoveInWater(const AActor * Object, FVector& moveVec, float circleRadius);
-	FVector AdjustMoveInWater(const AActor * Object, FVector& moveVec, float XLen, float YLen);
+	FVector AdjustMoveInWater(const AActor * Object, FVector& moveVec, float circleRadius, float Repulsion);
+	FVector AdjustMoveInWater(const AActor * Object, FVector& moveVec, float XLen, float YLen, float Repulsion);
 	FVector AdjustMoveInLand(const FVector & worldPos, const FVector & moveVec, float circleRadius, const FVector & WaterCheckPos, float WaterCheckRadius);
 	bool IsInWater(FVector worldPos);
 	bool IsInLand(FVector worldPos);
