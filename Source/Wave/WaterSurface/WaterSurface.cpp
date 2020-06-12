@@ -300,10 +300,12 @@ void AWaterSurface::SetLand(int X, int Y, float Z, VertexType Type)
 		UV0[index] = FVector2D((X / SplitPointNum.X) * 0.5f, (Y / SplitPointNum.Y));
 		break;
 	case VertexType::Land:
-		Vertices[index].Z = Z;
-		VertexColors[index] = FLinearColor::Black;
+		//Vertices[index].Z = Z;
+		//VertexColors[index] = FLinearColor::Black;
+		VertexColors[index] = WaterColor;
 		VertexTypes[index] = VertexType::Land;
-		UV0[index] = FVector2D((X / SplitPointNum.X) * 0.5f + 0.5f, (Y / SplitPointNum.Y));
+		//UV0[index] = FVector2D((X / SplitPointNum.X) * 0.5f + 0.5f, (Y / SplitPointNum.Y));
+		UV0[index] = FVector2D((X / SplitPointNum.X) * 0.5f, (Y / SplitPointNum.Y));
 		break;
 	case VertexType::Cliff:
 		// ä˘Ç…äRÇ©ó§Ç…ê›íËçœÇ›Ç»ÇÁâΩÇ‡ÇµÇ»Ç¢

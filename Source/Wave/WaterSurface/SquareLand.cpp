@@ -132,8 +132,8 @@ FVector ASquareLand::AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos
 
 	// 押し出す量を計算
 	FVector PushVec = FVector::ZeroVector;
-	PushVec.X = (MoveVec.X > 0) ? -X_Left : X_Right;	// true:左側にいる時, false:右側にいる時
-	PushVec.Y = (MoveVec.Y > 0) ? -Y_Down : Y_Up;		// true:下側にいる時, false:上側にいる時
+	PushVec.X = (FMath::Abs(X_Left) < FMath::Abs(X_Right)) ? -X_Left : X_Right;	// true:左側にいる時, false:右側にいる時
+	PushVec.Y = (FMath::Abs(Y_Down) < FMath::Abs(Y_Up)) ? -Y_Down : Y_Up;		// true:下側にいる時, false:上側にいる時
 
 	// 押し出す量が大きい方向は無効にする
 	(FMath::Abs(PushVec.X) >= FMath::Abs(PushVec.Y)) ? PushVec.X = 0.0f : PushVec.Y = 0.0f;

@@ -77,6 +77,7 @@ public:
 	//FloatType GetType() { return Type; }
 
 	bool GetIsDeth() { return IsDeth; };
+	bool GetIsFall() { return IsFall; };
 
 protected:
 	AWaterSurface* WaterSurface;
