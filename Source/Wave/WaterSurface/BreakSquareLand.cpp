@@ -39,6 +39,7 @@ void ABreakSquareLand::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 	// Õ“Ë‚µ‚½ƒAƒNƒ^[‚ª”š’e‚ÌŽž”š”­‚µ‚ÄƒS[ƒ‹Ï‚Ý‚Å‚àƒS[ƒ‹‚µ‚Ä‚¢‚È‚¢‚±‚Æ‚É‚·‚é
 	if (OtherFloat->ActorHasTag("Bom"))
 	{
+		BreakEffect();
 		Break();
 		OtherFloat->Destroy();
 	}
