@@ -191,11 +191,11 @@ void AWaterSurface::Tick(float DeltaTime)
 	if (isSoundPlay)
 	{
 		if(!AudioComponent) AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::WAVE);
-		AudioComponent->Play();		
+		if(!(AudioComponent->IsPlaying()))AudioComponent->Play();		
 	}
 	else
 	{
-		if (AudioComponent) AudioComponent->Stop();
+		if (AudioComponent) AudioComponent->FadeOut(0.5f,0.0f, EAudioFaderCurve::Linear);
 	}
 
 	// •’Ê‚Ì”g‚É‚È‚ç‚È‚¢‚æ‚¤…—¬‚ÍÅŒã‚ÉŒvZ
@@ -209,8 +209,6 @@ void AWaterSurface::Tick(float DeltaTime)
 
 void AWaterSurface::CreateWave(int32 x, int32 y, float power)
 {
-	ASoundManager::SafePlaySound(SOUND_TYPE::WAVE);
-
 	// ƒKƒEƒX‰‰Z
 	auto gauss = [](float distance, float sigma)
 	{

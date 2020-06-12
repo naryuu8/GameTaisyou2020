@@ -16,6 +16,7 @@ enum class SOUND_TYPE : uint8
 	STAGE_BGM		UMETA(DisplayName = "StageBGM"),
 	SELECT_BGM		UMETA(DisplayName = "SelectBGM"),
 	CLEAR_BGM		UMETA(DisplayName = "ClearBGM"),
+	OVER_BGM		UMETA(DisplayName = "OverBGM"),
 	WALK_WOOD		UMETA(DisplayName = "WalkWood"),
 	STAGE_SELECT	UMETA(DisplayName = "StageSelect"),
 	WALK_GRASS		UMETA(DisplayName = "WalkGrass"),
