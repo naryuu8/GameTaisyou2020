@@ -42,7 +42,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 		float FieldDistance = 800.0f; // ステージ見降ろし視点でのカメラの距離
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+		float FieldDistanceOffset = 200.0f; // ステージ見降ろし視点でのカメラの距離
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 		float CharacterDistance_Far = 500.0f; // プレイヤー見降ろし視点でのカメラの距離
 	

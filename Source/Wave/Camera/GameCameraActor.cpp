@@ -39,7 +39,7 @@ void AGameCameraActor::BeginPlay()
 	// 初めの位置をステージの中心として保持しておく
 	FieldCenterPos = Center;
 	float Distance = FVector::Dist(Water->GetStartPos(), Center);
-	this->FieldDistance = Distance * 1.2f;
+	this->FieldDistance = Distance + FieldDistanceOffset;
 
 	// カメラのビューポートをセット
 	APlayerController *playerControtller = UGameplayStatics::GetPlayerController(this, 0);
