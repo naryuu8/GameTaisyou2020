@@ -9,6 +9,7 @@ static TCHAR* FileNames[] =
 	TEXT("SoundCue'/Game/Main/Sound/BGM/stage_Cue.stage_Cue'"),
 	TEXT("SoundWave'/Game/Main/Sound/BGM/stage_select_BGM.stage_select_BGM'"),
 	TEXT("SoundCue'/Game/Main/Sound/BGM/game_clear_Cue.game_clear_Cue'"),
+	TEXT("SoundWave'/Game/Main/Sound/BGM/game_over.game_over'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/walk_wood/walk_wood_1.walk_wood_1'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/system_kirikae_1.system_kirikae_1'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/walk_sougen/walk_sougen_1.walk_sougen_1'"),
