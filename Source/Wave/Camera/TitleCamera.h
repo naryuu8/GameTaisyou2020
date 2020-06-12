@@ -51,4 +51,5 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE bool GetIsSelectMap() const { return IsSelectMap; }
+	void SetMyStageNumber(const int num) { MyStageNumber = num; }
 };
