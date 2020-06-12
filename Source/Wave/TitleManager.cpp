@@ -64,6 +64,7 @@ void ATitleManager::BeginPlay()
 			{
 				TitleTipsUI->SetNoDraw();
 			}
+			StageSelectCamera->SetMyStageNumber(0);
 			CreateFadeUI(false);
 		}
 	}	
