@@ -595,6 +595,12 @@ void AGameController::InputSelectCall()
 	}
 }
 
+void AGameController::StopBGM()
+{
+	if (!AudioComponent) return;
+	if (!(AudioComponent->IsPlaying())) AudioComponent->Stop();
+}
+
 void AGameController::RemoveUI()
 {
 	if (GameTimeUI)

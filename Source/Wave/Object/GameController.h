@@ -152,6 +152,8 @@ public:
 		void InputLeftCall();
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void InputSelectCall();
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void StopBGM();
 private:
 
 	void CreateGameTimeUI();
