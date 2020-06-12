@@ -410,9 +410,12 @@ bool APlayerCharacter::CheckGround()
 		// イカダなら登録しておく
 		CurrentRaft = HitRaft;
 
-		if(CurrentRaft && !Water->GetLandPoint(Pos))
+		if (CurrentRaft && !Water->GetLandPoint(Pos))
+		{
 			Water->SetCollisionEnabled(false);	// 何かの上に乗ってる場合はWaterSurfaceコリジョンをオフにしておく
-
+			if (CurrentRaft->GetIsFall())
+				return false;
+		}
 		//DISPLAY_LOG("HitGroundActor : %s", HitData.GetActor()->GetName().GetCharArray().GetData());
 		return true;
 	}
