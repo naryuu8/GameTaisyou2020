@@ -63,9 +63,6 @@ public:
 		float DownGauge(const float DamageX,const float HpX);
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		float DownGaugeTime(const float DamageX, const float HpX,const float Speed);
-	//ノルマバーの位置をセット
-	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
-		void SetNormaPercent(const float Percent);
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void SetMaxHammerHP(const float hp) { MaxHammerHP = hp; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
