@@ -38,7 +38,9 @@ enum class SOUND_TYPE : uint8
 	MENU_SELECT		UMETA(DisplayName = "MenuSelect"),
 	MENU_DECISION	UMETA(DisplayName = "MenuDecision"),
 	HAMMER_CHARGE	UMETA(DisplayName = "HammerChage"),
-	QUOTA_TIME		UMETA(DisplayName = "QuotaTime")
+	QUOTA_TIME		UMETA(DisplayName = "QuotaTime"),
+	ALL_STAMP		UMETA(DisplayName = "AllStamp"),
+	TIME_CHECK		UMETA(DisplayName = "TimeCheck")
 };
 
 UCLASS()
