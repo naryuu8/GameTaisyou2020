@@ -46,6 +46,8 @@ void ABreakSquareLand::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 
 void ABreakSquareLand::Break()
 {
+	if (!GetIsUse()) return; //‚·‚Å‚É‰ó‚ê‚Ä‚¢‚é‚©‚ç
+
 	BreakAnime();
 	TArray<AActor*> WaterSurface;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), WaterSurface);
@@ -53,6 +55,7 @@ void ABreakSquareLand::Break()
 	{
 		AWaterSurface * Water = Cast<AWaterSurface>(Actor);
 		if (!Water)continue;
+		IsLand = false;
 		Water->SetSquareLand(GetActorLocation(), XLength, YLength, VertexType::Water);
 	}
 	SetIsUse(false);
