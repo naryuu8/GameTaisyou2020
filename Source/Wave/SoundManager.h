@@ -41,7 +41,9 @@ enum class SOUND_TYPE : uint8
 	HAMMER_CHARGE	UMETA(DisplayName = "HammerChage"),
 	QUOTA_TIME		UMETA(DisplayName = "QuotaTime"),
 	ALL_STAMP		UMETA(DisplayName = "AllStamp"),
-	TIME_CHECK		UMETA(DisplayName = "TimeCheck")
+	TIME_CHECK		UMETA(DisplayName = "TimeCheck"),
+	FADE_IN			UMETA(DisplayName = "FadeIn"),
+	FADE_OUT		UMETA(DisplayName = "FadeOut")
 };
 
 UCLASS()

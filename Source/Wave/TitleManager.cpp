@@ -99,6 +99,7 @@ void ATitleManager::TitleInput()
 		{
 			if (!StageSelectCamera->GetIsSelectMap())
 			{
+				ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
 				StageSelectCamera->SelectInput();
 			}
 		}
