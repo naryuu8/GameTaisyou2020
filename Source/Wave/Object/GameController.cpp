@@ -449,6 +449,7 @@ void AGameController::AddGoalCount()
 
 void AGameController::MinusGoalCount()
 { 
+	if (IsGameClear || IsGameOver)return;
 	//現在ノルマと同じ数を入れていたらノルマ以下の荷物になったことを示すアニメーション再生
 	if (NormaGoalCount == GoalCount)
 	{
