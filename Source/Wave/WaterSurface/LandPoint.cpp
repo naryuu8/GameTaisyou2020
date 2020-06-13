@@ -22,7 +22,7 @@ void ALandPoint::BeginPlay()
 void ALandPoint::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	DebugDraw();
+//	DebugDraw();
 }
 
 bool ALandPoint::ShouldTickIfViewportsOnly() const

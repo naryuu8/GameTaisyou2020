@@ -28,16 +28,16 @@ void AFlashFlood::Tick(float DeltaTime)
 	// 時間の計測
 	CurrentTime += (DeltaTime * Speed);
 
-	FVector Pos = GetActorLocation();
-	float XOffset = GetActorScale().X * 0.5f * ScaleInterpolation;
-	float YOffset = GetActorScale().Y * 0.5f * ScaleInterpolation;
-	FVector X_Vector = GetActorForwardVector() * XOffset;
-	FVector Y_Vector = GetActorRightVector() * YOffset;
-	// デバッグ用の四角を描画(高さや太さは決め打ち）
-	UKismetSystemLibrary::DrawDebugLine(this, Pos + X_Vector + Y_Vector, Pos + X_Vector - Y_Vector, FLinearColor::Blue, 0.0f, 3.0f);
-	UKismetSystemLibrary::DrawDebugLine(this, Pos + X_Vector - Y_Vector, Pos - X_Vector - Y_Vector, FLinearColor::Blue, 0.0f, 3.0f);
-	UKismetSystemLibrary::DrawDebugLine(this, Pos - X_Vector - Y_Vector, Pos - X_Vector + Y_Vector, FLinearColor::Blue, 0.0f, 3.0f);
-	UKismetSystemLibrary::DrawDebugLine(this, Pos - X_Vector + Y_Vector, Pos + X_Vector + Y_Vector, FLinearColor::Blue, 0.0f, 3.0f);
+	//FVector Pos = GetActorLocation();
+	//float XOffset = GetActorScale().X * 0.5f * ScaleInterpolation;
+	//float YOffset = GetActorScale().Y * 0.5f * ScaleInterpolation;
+	//FVector X_Vector = GetActorForwardVector() * XOffset;
+	//FVector Y_Vector = GetActorRightVector() * YOffset;
+	//// デバッグ用の四角を描画(高さや太さは決め打ち）
+	//UKismetSystemLibrary::DrawDebugLine(this, Pos + X_Vector + Y_Vector, Pos + X_Vector - Y_Vector, FLinearColor::Blue, 0.0f, 3.0f);
+	//UKismetSystemLibrary::DrawDebugLine(this, Pos + X_Vector - Y_Vector, Pos - X_Vector - Y_Vector, FLinearColor::Blue, 0.0f, 3.0f);
+	//UKismetSystemLibrary::DrawDebugLine(this, Pos - X_Vector - Y_Vector, Pos - X_Vector + Y_Vector, FLinearColor::Blue, 0.0f, 3.0f);
+	//UKismetSystemLibrary::DrawDebugLine(this, Pos - X_Vector + Y_Vector, Pos + X_Vector + Y_Vector, FLinearColor::Blue, 0.0f, 3.0f);
 }
 
 bool AFlashFlood::ShouldTickIfViewportsOnly() const
