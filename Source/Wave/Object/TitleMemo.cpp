@@ -15,21 +15,6 @@ ATitleMemo::ATitleMemo()
 
 }
 
-// Called when the game starts or when spawned
-void ATitleMemo::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void ATitleMemo::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-
 void ATitleMemo::CreateUI()
 {
 	if (!TitleMemoUI)
