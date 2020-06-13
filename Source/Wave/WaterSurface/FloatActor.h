@@ -79,6 +79,12 @@ public:
 	bool GetIsDeth() { return IsDeth; };
 	bool GetIsFall() { return IsFall; };
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game")
+	UAudioComponent* FloatAudio;
+	   
+	UFUNCTION(BlueprintCallable, Category = "Game")
+		void StopFallSound();
+
 protected:
 	AWaterSurface* WaterSurface;
 	bool IsFloating = false;
