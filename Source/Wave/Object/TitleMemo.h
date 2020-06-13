@@ -21,8 +21,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		FSaveDataStruct Save;
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Instanced")
 		int MyStageNumber;
 	UPROPERTY(EditAnywhere)
@@ -38,8 +36,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		UTexture2D* GetTexture2D(const FName AssetPath);
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 	void FadeStart();
 	int GetStageNumber() { return MyStageNumber; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
