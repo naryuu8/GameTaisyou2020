@@ -4,6 +4,7 @@
 #include "GameOverUI.h"
 #include "../GlobalGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "../SoundManager.h"
 
 ESlateVisibility UGameOverUI::GetGameOverTextVisibility()
 {
@@ -22,6 +23,7 @@ void UGameOverUI::NextSelectState()
 		SelectNumber = static_cast<int>(GameOverState::RESTART);
 	}
 	ImageSizeChenge();
+	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
 }
 
 void UGameOverUI::BackSelectState()
@@ -36,6 +38,7 @@ void UGameOverUI::BackSelectState()
 
 void UGameOverUI::SelectStateAction()
 {
+	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
 	EndPlayAnimation();
 }
 
