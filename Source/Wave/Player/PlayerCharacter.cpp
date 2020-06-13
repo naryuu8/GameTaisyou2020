@@ -252,7 +252,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 				}
 				else
 				{//最大溜め時はゲージを点滅させる
-					HammerCountBarUI->PlayGaugeAnimation();
+					if (HammerCountBarUI)
+					{
+						HammerCountBarUI->PlayGaugeAnimation();
+					}
 				}
 			}
 		}
@@ -330,6 +333,7 @@ void APlayerCharacter::TriggerHammerAttack(void)
 	//if (HammerCountBarUI->GetIsDamage())return;
 	
 	AnimInst->IsCharge = true;
+	if (!HammerCountBarUI)return;
 	HammerCountBarUI->FirstEvent();
 }
 
@@ -361,6 +365,7 @@ void APlayerCharacter::HummerAttackEnd()
 			PlayerController->PlayDynamicForceFeedback(power, 0.35f, true, true, true, true);
 		}	
 	}
+	if (!HammerCountBarUI)return;
 	//最大溜め状態だったら点滅アニメを停止
 	if (HammerPower >= ChargePowerMax)
 	{
@@ -390,9 +395,10 @@ void APlayerCharacter::MinusHammerGauge(const float Power)
 			}
 		}
 	}
-
-	HammerCountBarUI->UpdateGauge(HammerHP);
-	//HammerCountBarUI->UpdateCoolTime(CoolTime);
+	if (HammerCountBarUI)
+	{
+		HammerCountBarUI->UpdateGauge(HammerHP);
+	}
 }
 
 bool APlayerCharacter::CheckGround()
@@ -527,6 +533,7 @@ void APlayerCharacter::HammerCountBarParent()
 	if (HammerCountBarUI)
 	{
 		HammerCountBarUI->RemoveFromParent();
+		HammerCountBarUI = nullptr;
 	}
 }
 
