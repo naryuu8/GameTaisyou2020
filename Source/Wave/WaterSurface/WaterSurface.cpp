@@ -493,6 +493,9 @@ FVector AWaterSurface::AdjustMoveInLand(const FVector & worldPos, const FVector 
 	if (GetLandPointInside(movedPos, circleRadius) != nullptr) 
 		return movedPos;
 
+	if (GetLandPoint(WaterCheckPos) != nullptr)
+		return movedPos;
+
 	// フィールドのメッシュ全体を検索
 	for (int xi = 0; xi < SplitPointNum.X; ++xi)
 	{
