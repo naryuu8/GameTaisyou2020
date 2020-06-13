@@ -19,6 +19,7 @@
 #include "../UI/FadeUI.h"
 #include "../Camera/GameCameraActor.h"
 #include "Components/MaterialBillboardComponent.h"
+#include "../SoundManager.h"
 // Sets default values
 
 AGameController::AGameController()
@@ -309,6 +310,14 @@ void AGameController::GameClearCheck()
 		SetTimeCountPause();
 		AudioComponent->FadeOut(1.0f, 0.0f);
 		SetAllInvisibleStageIcon();
+		
+		TArray<AActor*> FloatActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFloatActor::StaticClass(), FloatActors);
+		for (auto Actor : FloatActors)
+		{
+			AFloatActor * FloatActor = Cast<AFloatActor>(Actor);
+			FloatActor->StopFallSound();
+		}
 	};
 	// ƒQ[ƒ€ƒNƒŠƒAðŒ
 	//‡@ƒmƒ‹ƒ}ˆÈã‰×•¨‚ð“ü‚ê‚Ä‚¢‚éŽž‚©‚ÂŽc‚èŽžŠÔ‚ª0‚É‚È‚Á‚½‚ç
@@ -346,6 +355,14 @@ void AGameController::GameOverCheck()
 		SetTimeCountPause();
 		AudioComponent->FadeOut(2.0f, 0.0f);
 		SetAllInvisibleStageIcon();
+
+		TArray<AActor*> FloatActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFloatActor::StaticClass(), FloatActors);
+		for (auto Actor : FloatActors)
+		{
+			AFloatActor * FloatActor = Cast<AFloatActor>(Actor);
+			FloatActor->StopFallSound();
+		}
 	};
 	//‡@ƒmƒ‹ƒ}‚Ü‚Å‰×•¨‚ð‰^‚ñ‚Å‚¨‚ç‚¸Žc‚èŽžŠÔ‚ª0‚É‚È‚Á‚½‚ç
 	if (GoalCount < NormaGoalCount && GetLimitTimeZero())
