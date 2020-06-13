@@ -19,6 +19,7 @@ class WAVE_API UPauseUI : public UUserWidget
 	GENERATED_BODY()
 private:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	int SelectNumber = 0;
 	bool IsNoInput;//true時インプットを受け付けない
 protected:

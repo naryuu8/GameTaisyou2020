@@ -83,3 +83,8 @@ void UPauseUI::EndAnimation()
 		game->SetTimeCountRePlay();
 	}
 }
+
+void UPauseUI::NativeDestruct()
+{
+	SelectNumber = static_cast<int>(PauseSelectState::GAMEBACK);
+}
