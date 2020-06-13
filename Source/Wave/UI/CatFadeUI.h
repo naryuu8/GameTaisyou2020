@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "../SoundManager.h"
 #include "CatFadeUI.generated.h"
 
 /**
@@ -22,6 +23,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE bool GetFadeIsEnable() const { return IsEnable; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE bool GetIsFadeIn() const { return IsFadeIn; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		float UpdateFadeTime(const float InDeltaTime);
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 	void SetFade(const bool fade_in, const float fade_speed)
@@ -32,6 +35,7 @@ public:
 		FadeSpeed = 100.0f / fade_speed;
 		if (IsFadeIn)
 		{
+			ASoundManager::SafePlaySound(SOUND_TYPE::FADE_IN);
 			Scale = 0.0f;
 		}
 		else
