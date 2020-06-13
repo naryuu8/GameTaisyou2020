@@ -93,6 +93,7 @@ void ATitleManager::TitleInput()
 	{
 		if (State == ETitleState::Title)
 		{
+			StageSelectCamera->SetMyStageNumber(0);
 			CheckTitleSelectNumber();
 		}
 		if (State == ETitleState::StageSelect)
