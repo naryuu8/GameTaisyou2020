@@ -65,6 +65,7 @@ void AGameController::BeginPlay()
 		GetPlayer->SetPlayerHiddenInGame();
 		GetPlayer->DebugHammerCountBarParent();
 		GetPlayer->SetNoTick();
+		SetAllInvisibleStageIcon();
 		return;
 	}
 	CreateNimotuCountUI();
