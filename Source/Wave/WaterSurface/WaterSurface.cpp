@@ -241,7 +241,7 @@ int32 AWaterSurface::CalcIndex(int32 x, int32 y)
 {
 	int32 index = x + (y * SplitPointNum.X);
 	if (index < 0 ) return 0;
-	if (index > SplitPointNum.X * SplitPointNum.Y) return 0;
+	if (index > SplitPointNum.X * SplitPointNum.Y - 1) return SplitPointNum.X * SplitPointNum.Y - 1;
 	return index;
 }
 
