@@ -29,6 +29,9 @@ public:
 	FVector GetFloatVec(FVector worldPos);	// 座標から範囲内なら方向ベクトルを返す
 	FVector GetFloatVector() { return GetActorForwardVector(); };	// 流れる方向
 
+	FVector GetMinPos() const;
+	FVector GetMaxPos() const;
+
 	float GetCurrentTime() { return CurrentTime; }
 
 	float GetHeight(const FVector & worldPos);

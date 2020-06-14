@@ -73,6 +73,56 @@ FVector AFlashFlood::GetFloatVec(FVector worldPos)
 	return CheckRange(worldPos) ? GetFloatVector() * Speed * Power * Percent : FVector::ZeroVector;
 }
 
+FVector AFlashFlood::GetMinPos() const
+{
+	FVector2D Pos = (FVector2D)GetActorLocation();
+	float XOffset = GetActorScale().X * 0.5f * ScaleInterpolation;
+	float YOffset = GetActorScale().Y * 0.5f * ScaleInterpolation;
+	FVector2D X_Vector = (FVector2D)GetActorForwardVector() * XOffset;
+	FVector2D Y_Vector = (FVector2D)GetActorRightVector() * YOffset;
+	FVector2D A = Pos + X_Vector + Y_Vector;
+	FVector2D B = Pos + X_Vector - Y_Vector;
+	FVector2D C = Pos - X_Vector - Y_Vector;
+	FVector2D D = Pos - X_Vector + Y_Vector;
+
+	if (Pos.X > A.X) Pos.X = A.X;
+	if (Pos.X > B.X) Pos.X = B.X;
+	if (Pos.X > C.X) Pos.X = C.X;
+	if (Pos.X > D.X) Pos.X = D.X;
+
+	if (Pos.Y > A.Y) Pos.Y = A.Y;
+	if (Pos.Y > B.Y) Pos.Y = B.Y;
+	if (Pos.Y > C.Y) Pos.Y = C.Y;
+	if (Pos.Y > D.Y) Pos.Y = D.Y;
+
+	return FVector(Pos, 0.0f);
+}
+
+FVector AFlashFlood::GetMaxPos() const
+{
+	FVector2D Pos = (FVector2D)GetActorLocation();
+	float XOffset = GetActorScale().X * 0.5f * ScaleInterpolation;
+	float YOffset = GetActorScale().Y * 0.5f * ScaleInterpolation;
+	FVector2D X_Vector = (FVector2D)GetActorForwardVector() * XOffset;
+	FVector2D Y_Vector = (FVector2D)GetActorRightVector() * YOffset;
+	FVector2D A = Pos + X_Vector + Y_Vector;
+	FVector2D B = Pos + X_Vector - Y_Vector;
+	FVector2D C = Pos - X_Vector - Y_Vector;
+	FVector2D D = Pos - X_Vector + Y_Vector;
+
+	if (Pos.X < A.X) Pos.X = A.X;
+	if (Pos.X < B.X) Pos.X = B.X;
+	if (Pos.X < C.X) Pos.X = C.X;
+	if (Pos.X < D.X) Pos.X = D.X;
+			  
+	if (Pos.Y < A.Y) Pos.Y = A.Y;
+	if (Pos.Y < B.Y) Pos.Y = B.Y;
+	if (Pos.Y < C.Y) Pos.Y = C.Y;
+	if (Pos.Y < D.Y) Pos.Y = D.Y;
+
+	return FVector(Pos, 0.0f);
+}
+
 float AFlashFlood::GetHeight(const FVector & worldPos)
 {
 	// —¬‚ê‚Ì•ûŒü‚Æ‹——£‚Ì“àÏ‚©‚ç—¬‚ê•ûŒü‚Ì’†S“_‚©‚ç‚Ì‹——£‚ðŽæ“¾

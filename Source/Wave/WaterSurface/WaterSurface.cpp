@@ -330,9 +330,13 @@ void AWaterSurface::SetLand(int X, int Y, float Z, VertexType Type)
 
 void AWaterSurface::TickFlashFloodWave(AFlashFlood* FlashFlood)
 {
-	for (int xi = 1; xi < SplitPointNum.X - 1; ++xi)
+	FVector Offset = FVector(20.0f, 20.0f, 0.0);
+	FIntPoint InitFloodPoint = GetVertexPos(FlashFlood->GetMinPos() - Offset);
+	FIntPoint EndFloodPoint = GetVertexPos(FlashFlood->GetMaxPos() + Offset);
+	
+	for (int xi = InitFloodPoint.X; xi < EndFloodPoint.X; ++xi)
 	{
-		for (int yi = 1; yi < SplitPointNum.Y - 1; ++yi)
+		for (int yi = InitFloodPoint.Y; yi < EndFloodPoint.Y; ++yi)
 		{
 			int index = CalcIndex(xi, yi);
 
@@ -379,6 +383,19 @@ void AWaterSurface::HammerBreakLand(const FVector & worldPos, float Radius)
 			BreakLand->Break();
 		}
 	}
+}
+
+FIntPoint AWaterSurface::GetVertexPos(const FVector & worldPos)
+{
+	int32 X = (worldPos.X - Vertices[0].X) / SplitSpace;
+	int32 Y = (worldPos.Y - Vertices[0].Y) / SplitSpace;
+
+	if (X < 1) X = 1;
+	if (X > SplitPointNum.X - 1)  X = SplitPointNum.X - 1;
+	if (Y < 1) Y = 1;
+	if (Y > SplitPointNum.Y - 1)  Y = SplitPointNum.Y - 1;
+
+	return FIntPoint(X, Y);
 }
 
 float AWaterSurface::GetWaveHeight(const FVector & worldPos)
