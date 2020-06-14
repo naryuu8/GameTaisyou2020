@@ -45,5 +45,5 @@ protected:
 	// ÚüŒQ
 	TArray<FProcMeshTangent> Tangents;
 	// “–‚½‚è”»’è¶¬ƒtƒ‰ƒO
-	bool IsCreateCollision = true;
+	bool IsCreateCollision = false;
 };
