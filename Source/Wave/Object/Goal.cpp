@@ -5,9 +5,10 @@
 #include "UObject/ConstructorHelpers.h"
 #include "UObject/UObjectGlobals.h"
 #include "Blueprint/UserWidget.h"
-#include "../UI/HammerCountUI.h"
 #include "../WaterSurface/FloatActor.h"
-
+#include "GameController.h"
+#include "Kismet/GameplayStatics.h"
+#include "../SoundManager.h"
 // Sets default values
 AGoal::AGoal()
 {
@@ -30,10 +31,27 @@ void AGoal::BeginPlay()
 
 void AGoal::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-
-	// 衝突したアクターが荷物ならゴール済みにする
 	AFloatActor* OtherFloat = Cast<AFloatActor>(OtherActor);
-	if (OtherFloat->ActorHasTag("Bom")) {
+	// 荷物以外は判定しない
+	if (isExplotion) return; //すでに壊れているから
+	if (!OtherFloat) return;
+	AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+	//ゲーム終了条件を満たしていたら当たり判定を行わない
+	if (game->GetIsClear() || game->GetIsGameOver())return;
+	// 衝突したアクターが爆弾の時爆発してゴール済みでもゴールしていないことにする
+	if (OtherFloat->ActorHasTag("Bom"))
+	{
+		if (game)
+		{
+			if (isGoal)
+			{
+				game->MinusGoalCount();
+			}
+			game->MinusNotExplotionCount();
+		}
+		ASoundManager::SafePlaySound(SOUND_TYPE::EXPLOSION);
+		isGoal = false;
+		isExplotion = true;
 		OtherFloat->Destroy();
 		BreakHome();
 		return;
@@ -41,16 +59,20 @@ void AGoal::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 
 	if (isGoal) return;
 	
-	if (OtherFloat)
+	if (OtherFloat->ActorHasTag("Nimotu"))
 	{
+		// 衝突したアクターが荷物ならゴール済みにする
 		isGoal = true;
+		ASoundManager::SafePlaySound(SOUND_TYPE::GOAL);
+		if (game)
+		{
+			game->AddGoalCount();
+			game->MinusGameMaxNimotu();
+		}
 		// 衝突した荷物を削除
 		OtherFloat->Destroy();
-
 		// ここでドアが閉まるアニメーション開始
 		PlayAnimationDoorClose();
-
-		
 	}
 }
 

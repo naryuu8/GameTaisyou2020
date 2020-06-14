@@ -55,10 +55,17 @@ public:
 
 	OBB2D GetOBB() { return Obb; }
 
-private:
-	UPROPERTY(EditAnywhere)
+	bool OnGround(const FVector & Pos) override;
+	bool OnGround(const FVector & Pos, float CircleRadius) override;
+	bool InGround(const FVector & Pos, float CircleRadius) override;
+	FVector AdjustMoveInLand(const FVector & Pos, float CircleRadius) override;
+	FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius, float Repulsion) override;
+	FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen, float Repulsion) override;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float XLength = 100.0f;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float YLength = 100.0f;
 
 	OBB2D Obb;

@@ -19,20 +19,10 @@ public class Wave : ModuleRules
             "InputCore",
             "ProceduralMeshComponent",
             "Slate",
-            "EditorStyle",
             "Niagara"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] {
-            "EditorStyle",
-            "KismetCompiler",
-            "UnrealEd",
-            "GraphEditor",
-            "SlateCore",
-            "Kismet",
-            "KismetWidgets",
-            "PropertyEditor",
-            "BlueprintGraph",
         });
  
         // Uncomment if you are using Slate UI

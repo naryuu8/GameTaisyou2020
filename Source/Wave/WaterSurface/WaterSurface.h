@@ -6,7 +6,17 @@
 #include "../ProceduralMesh/ProceduralMeshActor.h"
 #include "WaterSurface.generated.h"
 
-class ACircleLandPoint;
+class ALandPoint;
+class AFlashFlood;
+class ABreakSquareLand;
+
+enum class VertexType
+{
+	Water,	// 水
+	Land,	// 陸
+	Cliff,	// 崖
+	None
+};
 
 UCLASS()
 class WAVE_API AWaterSurface : public AProceduralMeshActor
@@ -18,29 +28,46 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	void AddPower(FVector worldPos, float pawer);
-	FVector GetWavePower(FVector worldPos);
+	FVector GetWavePower(const FVector & worldPos);
+	float GetWaveHeight(const FVector & worldPos);	// 波の高さを取得
+	float GetMaxWaveHeight() { return MaxWaveHight; };	// 波の最大高さを取得
 	float GetWaveSpeed() { return WaveSpeed; }
-	FVector GetOutLandPos(FVector worldPos, float circleRadius);
-	FVector AdjustMoveInWater(FVector worldPos, FVector moveVec, float circleRadius);
-	FVector AdjustMoveInLand(FVector worldPos, FVector moveVec, float circleRadius);
+	FVector AdjustMoveInField(const FVector & worldPos, float circleRadius);
+	FVector AdjustMoveInWater(const AActor * Object, FVector& moveVec, float circleRadius, float Repulsion);
+	FVector AdjustMoveInWater(const AActor * Object, FVector& moveVec, float XLen, float YLen, float Repulsion);
+	FVector AdjustMoveInLand(const FVector & worldPos, const FVector & moveVec, float circleRadius, const FVector & WaterCheckPos, float WaterCheckRadius);
 	bool IsInWater(FVector worldPos);
-	bool IsLand(FVector worldPos);
-	FVector GetGetOffPos(FVector WorldPos, float Radius);
+	bool IsInLand(FVector worldPos);
+	VertexType GetVertexType(FVector worldPos);
+	bool IsInField(FVector worldPos);	// ステージ外かどうか調べる
+	bool IsInField(FVector worldPos, float CircleRadius);	// ステージ外かどうか調べる
+	FVector GetGetOffPos(FVector WorldPos, float Radius);	// 筏から降りれる場所を取得
+	ALandPoint * GetLandPoint(const FVector & WorldPos, bool IsLand = true);	// 指定した座標に接している地面を取得
+	ALandPoint * GetLandPoint(const FVector & WorldPos, float Radius, bool IsLand = true);	// 指定した座標に接している地面を取得
+	ALandPoint * GetLandPointInside(const FVector & WorldPos, float Radius, bool IsLand = true);	// 指定した座標に完全に入ってる地面を取得
+	FVector GetCenterPos();
+	FVector GetStartPos() { return StartPoint->GetActorLocation(); };
+	void SetSquareLand(FVector SquareLocation, float XLength, float YLength, VertexType Type);
+	void HammerBreakLand(const FVector & worldPos, float Radius);
+
+	FIntPoint GetVertexPos(const FVector & worldPos);
+
+	void StopWaveSound();
 
 private:
 	void CreateWave(int32 x, int32 y, float pawer);
-	void SetCircleLand(FVector CirclePostion, float Radius);
-	void SetSquareLand(FVector SquareLocation, float XLength, float YLength);
+	void SetCircleLand(FVector CirclePostion, float Radius, VertexType Type);
+	void SetLand(int X, int Y, float Z, VertexType Type);
+
+	void TickFlashFloodWave(AFlashFlood* FlashFlood);
 
 	int32 CalcIndex(int32 x, int32 y);
-	FVector2D LocationToVertices(FVector Location);
 
 private:
-	float X_Size;
-	float Y_Size;
+	FIntPoint SplitPointNum = FIntPoint(0,0);
 
-	UPROPERTY(EditAnywhere)
-		FVector2D SplitVector = FVector2D(100,100);
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "5.0", ClampMax = "100.0"))
+		float SplitSpace = 10.0f;	// 頂点の間隔
 	UPROPERTY(EditAnywhere)
 		AActor* StartPoint;
 	UPROPERTY(EditAnywhere)
@@ -52,15 +79,25 @@ private:
 	UPROPERTY(EditAnywhere)
 		float WaveSpeed = 10.0f;
 	UPROPERTY(EditAnywhere)
+		float WavePower = 1.0f;
+	UPROPERTY(EditAnywhere)
 		float MaxWaveHight = 100.0f;
 	UPROPERTY(EditAnywhere)
 		FLinearColor WaterColor = FLinearColor::Blue;
 	UPROPERTY(EditAnywhere)
 		FLinearColor WaveColor = FLinearColor::White;
+	UPROPERTY(EditAnywhere)
+		float SoundPlayWaveHight = 10.0f;
 
-	TArray<bool> IsLands;
+	UAudioComponent* AudioComponent;
+
+	TArray<VertexType> VertexTypes;
 
 	TArray<float> CurrentHeights;
 	TArray<float> PrevHeights;
 	TArray<float> NewHeights;
+
+	TArray<ALandPoint*> LandPointActors;	// 衝突処理などに使うのでメンバにする
+	TArray<AFlashFlood*> FlashFloods;		// 水流の計算に使うのでメンバにする
+	TArray<ABreakSquareLand*> BreakLands;	// ハンマーで床壊すときに使う
 };

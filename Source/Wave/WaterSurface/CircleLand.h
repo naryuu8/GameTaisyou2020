@@ -16,6 +16,13 @@ public:
 
 	float GetRadius() { return Radius; }
 
+	bool OnGround(const FVector & Pos) override;
+	bool OnGround(const FVector & Pos, float CircleRadius) override;
+	bool InGround(const FVector & Pos, float CircleRadius) override;
+	FVector AdjustMoveInLand(const FVector & Pos, float CircleRadius) override;
+	FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius, float Repulsion) override;
+	FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen, float Repulsion) override;
+
 private:
 	UPROPERTY(EditAnywhere)
 		float Radius = 100.0f;

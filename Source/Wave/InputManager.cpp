@@ -32,18 +32,18 @@ const AInputManager * AInputManager::GetInstance()
 
 void AInputManager::Tick(float DeltaTime)
 {
-	//ポーズ中ならポーズボタン入力情報のみ更新
-	if (UGameplayStatics::IsGamePaused(GetWorld()))
-	{	
-		State.Pause.Refresh();
-		State.Up.Refresh();
-		State.Down.Refresh();
-		State.Select.Refresh();
-		return;
-	}
+	State.Pause.Refresh();
+	State.Up.Refresh();
+	State.Down.Refresh();
+	State.Select.Refresh();
+	State.Back.Refresh();
 	State.Right.Refresh();
 	State.Left.Refresh();
+//ポーズ中ならポーズボタン入力情報のみ更新
+	if (UGameplayStatics::IsGamePaused(GetWorld()))return;
 	State.Attack.Refresh();
+	State.AttackCancel.Refresh();
+	State.RightStickButton.Refresh();
 
 }
 
@@ -60,6 +60,12 @@ void AInputManager::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AInputManager::InputAttackPress);
 	PlayerInputComponent->BindAction("Attack", IE_Released, this, &AInputManager::InputAttackRelease);
 
+	PlayerInputComponent->BindAction("AttackCancel", IE_Pressed, this, &AInputManager::InputAttackCancelPress);
+	PlayerInputComponent->BindAction("AttackCancel", IE_Released, this, &AInputManager::InputAttackCancelRelease);
+
+	PlayerInputComponent->BindAction("ChangeCameraType", IE_Pressed, this, &AInputManager::InputRightStickButtonPress);
+	PlayerInputComponent->BindAction("ChangeCameraType", IE_Released, this, &AInputManager::InputRightStickButtonRelease);
+
 	//ポーズインプット
 	//ポーズ中でもインプットが反応するようにbExecuteWhenPausedをtrueにする
 	PlayerInputComponent->BindAction("Pause", IE_Pressed, this, &AInputManager::InputPausePress).bExecuteWhenPaused = true;
@@ -75,5 +81,8 @@ void AInputManager::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	//決定ボタンインプット
 	PlayerInputComponent->BindAction("Select", IE_Pressed, this, &AInputManager::InputSelectPress).bExecuteWhenPaused = true;
 	PlayerInputComponent->BindAction("Select", IE_Released, this, &AInputManager::InputSelectRelease).bExecuteWhenPaused = true;
+	//戻るボタンインプット
+	PlayerInputComponent->BindAction("Back", IE_Pressed, this, &AInputManager::InputBackPress).bExecuteWhenPaused = true;
+	PlayerInputComponent->BindAction("Back", IE_Released, this, &AInputManager::InputBackRelease).bExecuteWhenPaused = true;
 }
 

@@ -27,6 +27,8 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	
+	void SetCollisionEnabled(bool Flag);
+
 protected:
 	UProceduralMeshComponent* Mesh;
 
@@ -43,5 +45,5 @@ protected:
 	// ÚüŒQ
 	TArray<FProcMeshTangent> Tangents;
 	// “–‚½‚è”»’è¶¬ƒtƒ‰ƒO
-	bool IsCreateCollision = true;
+	bool IsCreateCollision = false;
 };

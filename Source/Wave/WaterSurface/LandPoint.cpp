@@ -15,14 +15,14 @@ ALandPoint::ALandPoint()
 void ALandPoint::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	IsUse = true;
 }
 
 // Called every frame
 void ALandPoint::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	DebugDraw();
+//	DebugDraw();
 }
 
 bool ALandPoint::ShouldTickIfViewportsOnly() const

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "../SaveData.h"
 #include "TitleMemo.generated.h"
 //タイトル用ステージ選択の伝票クラス
 class UTitleMemoUI;
@@ -17,12 +18,11 @@ class WAVE_API ATitleMemo : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ATitleMemo();
-
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		FSaveDataStruct Save;
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Instanced")
-		int StageNumber;
+		int MyStageNumber;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UTitleMemoUI> UIClass;
 	UPROPERTY(EditAnywhere)
@@ -36,10 +36,8 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		UTexture2D* GetTexture2D(const FName AssetPath);
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 	void FadeStart();
-	int GetStageNumber() { return StageNumber; }
+	int GetStageNumber() { return MyStageNumber; }
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
-	FORCEINLINE UUserWidget* GetUserWidgetObject2(UWidgetComponent* widget)const;
+		UUserWidget* GetUserWidgetObject2(UWidgetComponent* widget)const;
 };

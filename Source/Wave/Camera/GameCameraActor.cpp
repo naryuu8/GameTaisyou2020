@@ -2,9 +2,11 @@
 
 #include "GameCameraActor.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameCameraComponent.h"
 #include "Camera/CameraComponent.h"
-
+#include "../InputManager.h"
+#include "../WaterSurface/WaterSurface.h"
+#include "State/GameCameraStateIdle.h"
+#include "GameCameraFocusPoint.h"
 
 // Sets default values
 AGameCameraActor::AGameCameraActor()
@@ -22,7 +24,8 @@ AGameCameraActor::AGameCameraActor()
 	Camera->bUsePawnControlRotation = false;
 
 	// カメラブームのメンバにアタッチ
-	GameCameraBoom->FollowCamera = Camera;
+	GameCameraBoom->SetCamera(Camera);
+	//AActor * Actor = GetWorld()->SpawnActor<AActor>(FVector::ZeroVector, FRotator::ZeroRotator);
 }
 
 // Called when the game starts or when spawned
@@ -30,11 +33,35 @@ void AGameCameraActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	AWaterSurface * Water = Cast<AWaterSurface>(UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass()));
+	FVector Center = Water->GetCenterPos();
+	SetActorLocation(Center);
+	// 初めの位置をステージの中心として保持しておく
+	FieldCenterPos = Center;
+	float Distance = FVector::Dist(Water->GetStartPos(), Center);
+	this->FieldDistance = Distance + FieldDistanceOffset;
+
 	// カメラのビューポートをセット
 	APlayerController *playerControtller = UGameplayStatics::GetPlayerController(this, 0);
 	if (playerControtller)
 	{
 		playerControtller->SetViewTarget(this);
+	}
+
+	ChangeState(new GameCameraStateIdle());
+}
+
+void AGameCameraActor::InputChangeType()
+{
+	auto IM = AInputManager::GetInstance();
+	if (!IM) return;
+
+	auto input = IM->GetState();
+	if (input->RightStickButton.IsPress)
+	{
+		int value = (int)Type + 1;
+		if (value >= (int)FollowType::Num) value = 0;
+		Type = (FollowType)value;
 	}
 }
 
@@ -43,5 +70,18 @@ void AGameCameraActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!State) return;
+
+	// 注目するポイントがあるか確かめる
+	UGameplayStatics::GetAllActorsOfClass(this, AGameCameraFocusPoint::StaticClass(), FocusPoints);
+
+	State->OnUpdate(this);
+}
+
+void AGameCameraActor::ChangeState(GameCameraState * NewState)
+{
+	if (!NewState) return;
+	this->State = NewState;
+	this->State->OnStart(this);
 }
 

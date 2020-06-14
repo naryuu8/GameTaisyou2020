@@ -53,18 +53,24 @@ struct InputState
 	InputDirection RightStick;
 	// プレイヤーアタック
 	InputActionState Attack;
-	//ポーズボタン
+	// プレイヤーアタックキャンセル
+	InputActionState AttackCancel;
+	// カメラの追従タイプ切り替え（右スティック押し込みボタン）
+	InputActionState RightStickButton;
+	// ポーズボタン
 	InputActionState Pause;
-	//ステージ選択画面やポーズ画面の上入力情報
+	// ステージ選択画面やポーズ画面の上入力情報
 	InputActionState Up;
-	//ステージ選択画面やポーズ画面の下入力情報
+	// ステージ選択画面やポーズ画面の下入力情報
 	InputActionState Down;
-	//ステージ選択画面やポーズ画面の右入力情報
+	// ステージ選択画面やポーズ画面の右入力情報
 	InputActionState Right;
-	//ステージ選択画面やポーズ画面の左入力情報
+	// ステージ選択画面やポーズ画面の左入力情報
 	InputActionState Left;
-	//決定ボタン
+	// 決定ボタン
 	InputActionState Select;
+	// 戻るボタン
+	InputActionState Back;
 };
 
 //@brief 入力管理クラス
@@ -107,6 +113,12 @@ private:
 	// ハンマーでたたく入力情報受け取り
 	void InputAttackPress() { State.Attack.Press(); };
 	void InputAttackRelease() { State.Attack.Release(); };
+	void InputAttackCancelPress() { State.AttackCancel.Press(); };
+	void InputAttackCancelRelease() { State.AttackCancel.Release(); };
+	
+	// カメラの追従タイプ切り替え入力情報受け取り（右スティック押し込みボタン）
+	void InputRightStickButtonPress() { State.RightStickButton.Press(); };
+	void InputRightStickButtonRelease() { State.RightStickButton.Release(); };
 
 	//ポーズボタン入力情報受け取り
 	void InputPausePress() { State.Pause.Press(); };
@@ -126,4 +138,7 @@ private:
 	//決定ボタン入力情報受け取り
 	void InputSelectPress() { State.Select.Press(); };
 	void InputSelectRelease() { State.Select.Release(); };
+	//戻るボタン入力情報受け取り
+	void InputBackPress() { State.Back.Press(); };
+	void InputBackRelease() { State.Back.Release(); };
 };

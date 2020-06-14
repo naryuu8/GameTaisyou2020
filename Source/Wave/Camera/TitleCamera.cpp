@@ -6,8 +6,8 @@
 #include "Camera/CameraComponent.h"
 #include "../Object/TitleMemo.h"
 #include "Kismet/GameplayStatics.h"
-#include "../InputManager.h"
 #include "Math/UnrealMathUtility.h"
+#include "../GlobalGameInstance.h"
 // Sets default values
 ATitleCamera::ATitleCamera()
 {
@@ -31,13 +31,15 @@ ATitleCamera::ATitleCamera()
 void ATitleCamera::BeginPlay()
 {
 	Super::BeginPlay();
-	// カメラのビューポートをセット
-	APlayerController *playerControtller = UGameplayStatics::GetPlayerController(this, 0);
-	if (playerControtller)
+	MyStageNumber = DefaultStageNumber;
+	UGlobalGameInstance* instance = UGlobalGameInstance::GetInstance();
+	if (instance)
 	{
-		playerControtller->SetViewTargetWithBlend(this, 1.0f, EViewTargetBlendFunction::VTBlend_Linear, 0.0f, false);
+		if (instance->GetStageNumber() > -1)
+		{
+			MyStageNumber = instance->GetStageNumber();
+		}
 	}
-	
 }
 
 // Called every frame
@@ -45,44 +47,13 @@ void ATitleCamera::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	GetAllTitleMemo();
-	TitleInput();
-	if (IsSelectMap)
+	//戻るボタンを押したらカメラを引く
+	if (IsBack)
 	{
-		CameraBoom->TargetArmLength += 1.0f;
+		CameraBoom->TargetArmLength += 0.5f;
 	}
 }
 
-void ATitleCamera::TitleInput()
-{
-	if (IsSelectMap)return;
-	const AInputManager * inputManager = AInputManager::GetInstance();
-	if (!inputManager)return;
-	const InputState * input = inputManager->GetState();
-	if (input->Select.IsPress)
-	{
-		if (TitleMemo)
-		{
-			TitleMemo->FadeStart();
-			IsSelectMap = true;
-		}
-	}
-	if (input->Right.IsPress)
-	{
-		MyStageNumber++;
-		if (MyStageNumber == MemoNum)
-		{
-			MyStageNumber = 0;
-		}
-	}
-	if (input->Left.IsPress)
-	{
-		MyStageNumber--;
-		if (MyStageNumber < 0)
-		{
-			MyStageNumber = MemoNum - 1;
-		}
-	}
-}
 
 void ATitleCamera::GetAllTitleMemo()
 {
@@ -96,9 +67,55 @@ void ATitleCamera::GetAllTitleMemo()
 		{
 			if (MyStageNumber == memo->GetStageNumber())
 			{
-				//this->SetActorLocation(memo->GetActorLocation());
 				TitleMemo = memo;
-				this->SetActorLocation(FMath::Lerp(this->GetActorLocation(), memo->GetActorLocation(), 0.1f));
+				this->SetActorLocation(FMath::Lerp(this->GetActorLocation(), memo->GetActorLocation(), CameraSpeed));
+			}
+		}
+	}
+}
+
+void ATitleCamera::SelectInput()
+{
+	if (TitleMemo)
+	{
+		TitleMemo->FadeStart();
+		IsSelectMap = true;
+	}
+}
+
+void ATitleCamera::RightInput()
+{
+	MyStageNumber++;
+	if (MyStageNumber == MemoNum)
+	{
+		MyStageNumber = 0;
+	}
+}
+
+void ATitleCamera::LeftInput()
+{
+	MyStageNumber--;
+	if (MyStageNumber < 0)
+	{
+		MyStageNumber = MemoNum - 1;
+	}
+}
+
+
+void ATitleCamera::SetCenterTitleMemo()
+{
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATitleMemo::StaticClass(), FoundActors);
+	MemoNum = FoundActors.Num();
+	for (auto Actor : FoundActors)
+	{
+		ATitleMemo* memo = Cast<ATitleMemo>(Actor);
+		if (memo)
+		{
+			if (MyStageNumber == memo->GetStageNumber())
+			{
+				TitleMemo = memo;
+				this->SetActorLocation(memo->GetActorLocation());
 			}
 		}
 	}

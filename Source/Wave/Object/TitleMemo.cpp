@@ -6,6 +6,7 @@
 #include "../MyFunc.h"
 #include "Components/WidgetComponent.h"
 #include "../UI/FadeUI.h"
+#include "../GlobalGameInstance.h"
 // Sets default values
 ATitleMemo::ATitleMemo()
 {
@@ -13,21 +14,6 @@ ATitleMemo::ATitleMemo()
 	PrimaryActorTick.bCanEverTick = true;	
 
 }
-
-// Called when the game starts or when spawned
-void ATitleMemo::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void ATitleMemo::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
 
 void ATitleMemo::CreateUI()
 {
@@ -54,7 +40,12 @@ void ATitleMemo::FadeStart()
 	if (fade)
 	{
 		if (fade->GetFadeIsEnable())return;
+		UGlobalGameInstance* instance = UGlobalGameInstance::GetInstance();
+		if (instance)
+		{//ステージ番号をセット
+			instance->SetStageNumber(MyStageNumber);
+		}
 		fade->AddToViewport();
-		fade->SetFadeLevel(FColor::Black, 0.5f, FName(*StageLevelPath));
+		fade->SetFadeLevel(FColor::Black, 1.0f, FName(*StageLevelPath), true);
 	}
 }

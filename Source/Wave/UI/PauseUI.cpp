@@ -3,22 +3,16 @@
 
 #include "PauseUI.h"
 #include "Kismet/GameplayStatics.h"
+#include "../Object/GameController.h"
+#include "../SoundManager.h"
 
 void UPauseUI::NativeConstruct()
 {
 	IsPlayAnimation = false;
+	IsNoInput = false;
 	InitPlayAnimation();
-	SelectNumber = static_cast<int>(PauseState::GAMEBACK);
+	SelectNumber = static_cast<int>(PauseSelectState::GAMEBACK);
 	UGameplayStatics::SetGamePaused(GetWorld(),true);
-}
-
-FSlateColor UPauseUI::SelectTextColor(const PauseState state)
-{
-	if (SelectNumber == static_cast<int>(state))
-	{
-		return FSlateColor(FLinearColor(1.0f, 0.0f, 0.0f, 1.0f));
-	}
-	return FSlateColor(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 ESlateVisibility UPauseUI::GetPauseTextVisibility()
@@ -33,38 +27,64 @@ ESlateVisibility UPauseUI::GetPauseTextVisibility()
 void UPauseUI::NextSelectState()
 {
 	if (IsPlayAnimation)return;
+	if (IsNoInput)return;
 	SelectNumber++;
-	if (SelectNumber > static_cast<int>(PauseState::STAGESELECT))
+	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
+	if (SelectNumber > static_cast<int>(PauseSelectState::STAGESELECT))
 	{
-		SelectNumber = static_cast<int>(PauseState::GAMEBACK);
+		SelectNumber = static_cast<int>(PauseSelectState::GAMEBACK);
 	}
+	ImageSizeChenge();
 }
 
 void UPauseUI::BackSelectState()
 {
 	if (IsPlayAnimation)return;
+	if (IsNoInput)return;
 	SelectNumber--;
+	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
 	if (SelectNumber < 0)
 	{
-		SelectNumber = static_cast<int>(PauseState::STAGESELECT);
+		SelectNumber = static_cast<int>(PauseSelectState::STAGESELECT);
 	}
+	ImageSizeChenge();
 }
 
 void UPauseUI::SelectStateAction()
 {
+	if (IsPlayAnimation)return;
+	if (IsNoInput)return;
+	IsNoInput = true;
 	switch (SelectNumber)
 	{
-		case static_cast<int>(PauseState::GAMEBACK):
-			EndPlayAnimation();
+		case static_cast<int>(PauseSelectState::GAMEBACK):
+		{
+			EndAnimation();
 			break;
-		case static_cast<int>(PauseState::RESTART) :
-				TestStampPlayAnimation();
+		}
+		case static_cast<int>(PauseSelectState::RESTART) :
+			ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
+			Retry();
 			break;
-		case static_cast<int>(PauseState::SCORE):
-
-			break;
-		case static_cast<int>(PauseState::STAGESELECT):
-
+			case static_cast<int>(PauseSelectState::STAGESELECT) :
+			ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
+			StageSelectChenge();
 			break;
 	}
+}
+
+void UPauseUI::EndAnimation()
+{
+	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
+	EndPlayAnimation();
+	AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
+	if (game)
+	{
+		game->SetTimeCountRePlay();
+	}
+}
+
+void UPauseUI::NativeDestruct()
+{
+	SelectNumber = static_cast<int>(PauseSelectState::GAMEBACK);
 }

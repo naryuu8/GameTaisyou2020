@@ -5,6 +5,8 @@
 #include "GameFramework/Actor.h"
 #include "Math/Vector.h"
 #include "UObject/ConstructorHelpers.h"
+#include "PlayerCharacter.h"
+#include "Animation/AnimNode_StateMachine.h"
 
 UPlayerAnimInstance::UPlayerAnimInstance(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -16,7 +18,13 @@ void UPlayerAnimInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
 	Speed = 0.0f;
-	IsAttackAnime = false;
+	IsCharge = false;
+	IsAttack = false;
+	IsDeth = false;
+	IsClear = false;
+
+	// ステートマシンを取得
+	AnimState = GetStateMachineInstanceFromName(FName("Cat State Machine"));
 }
 
 void UPlayerAnimInstance::NativeInitializeAnimation()
@@ -28,12 +36,20 @@ void UPlayerAnimInstance::NativeInitializeAnimation()
 void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
+
+	APlayerCharacter * OwnerPlayer = Cast<APlayerCharacter>(GetOwningActor());
+
 	//実行中であればアニメーション参照先の移動スピードを受け取る
-	if (TryGetPawnOwner())
+	if (OwnerPlayer)
 	{
-		FVector vec_speed = TryGetPawnOwner()->GetVelocity();
-		//FVectorの長さを取得
-		vec_speed.FVector::ToDirectionAndLength(vec_speed, Speed);
+		// 0.0f ～ 100.0fの値にする
+		Speed = OwnerPlayer->GetMoveAmount() * 100.0f;
+	}
+
+	// 通常状態時
+	if (IsCurrentStateName("Normal State"))
+	{
+		IsAttack = false;
 	}
 }
 
@@ -49,30 +65,15 @@ void UPlayerAnimInstance::NativeUninitializeAnimation()
 
 }
 
-void UPlayerAnimInstance::HummerChergeEvent()
+bool UPlayerAnimInstance::IsCurrentStateName(FName StateName) const
 {
-	//アニメモンタージュを参照
-	if (!AnimMontage)
-	{
-		const FName AnimMontageAssetPath(TEXT("AnimMontage'/Game/Main/Player/HummerAttackMontage.HummerAttackMontage'"));
-		AnimMontage = Cast<UAnimMontage>(StaticLoadObject(UObject::StaticClass(), nullptr, *AnimMontageAssetPath.ToString()));
-	}
-	Montage_Play(AnimMontage, 0.4f);
-	Montage_JumpToSection("Charge", AnimMontage);
-	IsAttackAnime = true;
-	Montage_Pause(AnimMontage);
-}
-
-void UPlayerAnimInstance::HummerAttackEvent()
-{
-	Montage_Play(AnimMontage, 0.4f);
-	Montage_JumpToSection("Attack", AnimMontage);
+	if (!AnimState)
+		return false;
+	return AnimState->GetCurrentStateName().IsEqual(StateName);
 }
 
 void UPlayerAnimInstance::AttackAnimEnd()
 {
-	IsAttackAnime = false;
-
 	if (AttackEndCallBack.IsBound())
 		AttackEndCallBack.Execute();
 }

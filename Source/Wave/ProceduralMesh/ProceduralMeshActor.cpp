@@ -8,21 +8,23 @@ AProceduralMeshActor::AProceduralMeshActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	// mesh の中身を作る。
+	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("generated-mesh"));
+	// とりあえず RootComponent として mesh をつっこむ。
+	RootComponent = Mesh;
 }
 
 // Called when the game starts or when spawned
 void AProceduralMeshActor::BeginPlay()
 {
 	Super::BeginPlay();
+	/// このメッシュコリジョンはあレイキャストを無視する
+	Mesh->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
 }
 
 void AProceduralMeshActor::CreateMesh()
 {
-	// mesh の中身を作る。
-	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("generated-mesh"));
-	// とりあえず RootComponent として mesh をつっこむ。
-	RootComponent = Mesh;
-
 	// UProceduralMeshComponent::CreateMeshSection_LinearColor でメッシュを生成。
 	// 第1引数: セクション番号; 0, 1, 2, ... を与える事で1つの UProceduralMeshComponent に複数のメッシュを内部的に同時に生成できます。
 	// 第2引数: 頂点群
@@ -44,5 +46,13 @@ void AProceduralMeshActor::UpdateMesh()
 void AProceduralMeshActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void AProceduralMeshActor::SetCollisionEnabled(bool Flag)
+{
+	if (Flag)
+		Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	else 
+		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
