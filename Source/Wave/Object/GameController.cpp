@@ -355,7 +355,7 @@ void AGameController::GameOverCheck()
 		RemoveUI();
 		IsGameOver = true;
 		SetTimeCountPause();
-		AudioComponent->FadeOut(5.0f, 0.0f);
+		AudioComponent->FadeOut(3.0f, 0.0f);
 		SetAllInvisibleStageIcon();
 
 		TArray<AActor*> FloatActors;
@@ -394,11 +394,31 @@ void AGameController::GameOverCheck()
 void AGameController::GameClear()
 {
 	CreateResultUI();
+
+	if(AudioComponent)AudioComponent->FadeOut(1.0f, 0.0f);
+
+	TArray<AActor*> FloatActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFloatActor::StaticClass(), FloatActors);
+	for (auto Actor : FloatActors)
+	{
+		AFloatActor * FloatActor = Cast<AFloatActor>(Actor);
+		FloatActor->StopFallSound();
+	}
 }
 
 void AGameController::GameOver()
 {
 	CreateGameOverUI();
+
+	AudioComponent->FadeOut(1.0f, 0.0f);
+
+	TArray<AActor*> FloatActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFloatActor::StaticClass(), FloatActors);
+	for (auto Actor : FloatActors)
+	{
+		AFloatActor * FloatActor = Cast<AFloatActor>(Actor);
+		FloatActor->StopFallSound();
+	}
 }
 
 int AGameController::CountGameNimotu()
