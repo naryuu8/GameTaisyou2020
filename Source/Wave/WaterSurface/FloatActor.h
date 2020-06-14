@@ -89,4 +89,5 @@ protected:
 	AWaterSurface* WaterSurface;
 	bool IsFloating = false;
 private:
+	bool IsTick = true;
 };

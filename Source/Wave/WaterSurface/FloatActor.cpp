@@ -33,6 +33,7 @@ void AFloatActor::BeginPlay()
 
 	IsFall = false;
 	IsDeth = false;
+	IsTick = true;
 }
 
 // Called every frame
@@ -76,8 +77,11 @@ void AFloatActor::Tick(float DeltaTime)
 		IsFall = true;
 		
 		AGameCameraFocusPoint::SpawnFocusPoint(this, GetActorLocation() + Velocity);
-		if(!FloatAudio) FloatAudio = ASoundManager::CreateAudioComponent(SOUND_TYPE::FALL_ACTOR);
-		if (!(FloatAudio->IsPlaying())) FloatAudio->Play();
+		if (IsTick)
+		{
+			if (!FloatAudio) FloatAudio = ASoundManager::CreateAudioComponent(SOUND_TYPE::FALL_ACTOR);
+			if (!(FloatAudio->IsPlaying())) FloatAudio->Play();
+		}
 
 		Velocity = Velocity.GetSafeNormal() * 8.0f;
 		// 数秒後にオブジェクトを削除
@@ -259,12 +263,12 @@ void AFloatActor::MyDestroy()
 			Goal->SetGoalMinus();
 	}
 
-	StopFallSound();
 	this->Destroy();
 }
 
 void AFloatActor::StopFallSound()
 {
+	IsTick = false;
 	if (!FloatAudio) return;
 	FloatAudio->Stop();
 }
