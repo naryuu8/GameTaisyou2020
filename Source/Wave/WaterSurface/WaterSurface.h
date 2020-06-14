@@ -50,6 +50,8 @@ public:
 	void SetSquareLand(FVector SquareLocation, float XLength, float YLength, VertexType Type);
 	void HammerBreakLand(const FVector & worldPos, float Radius);
 
+	FIntPoint GetVertexPos(const FVector & worldPos);
+
 private:
 	void CreateWave(int32 x, int32 y, float pawer);
 	void SetCircleLand(FVector CirclePostion, float Radius, VertexType Type);
