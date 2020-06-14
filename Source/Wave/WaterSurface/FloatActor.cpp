@@ -44,7 +44,7 @@ void AFloatActor::Tick(float DeltaTime)
 
 	if (IsFall)
 	{
-		Velocity.Z -= 0.5f;
+		Velocity.Z -= 0.6f;
 		//SetActorLocation(GetActorLocation() + Velocity);
 		// 移動と回転
 		FVector RotAxis = FVector::CrossProduct(Velocity, FVector::UpVector);
@@ -52,7 +52,7 @@ void AFloatActor::Tick(float DeltaTime)
 		AddRot = AddRot * GetActorRotation().Quaternion();
 		SetActorLocationAndRotation(GetActorLocation() + Velocity, AddRot);
 
-		Velocity *= 1.0f - Friction;
+		Velocity *= 0.98f;
 		return;
 	}// 既に落下した
 
@@ -83,7 +83,7 @@ void AFloatActor::Tick(float DeltaTime)
 		// 数秒後にオブジェクトを削除
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
 		FTimerHandle handle;
-		timerManager.SetTimer(handle, this, &AFloatActor::MyDestroy, 3.0f);
+		timerManager.SetTimer(handle, this, &AFloatActor::MyDestroy, 3.5f);
 		return;
 	}
 
