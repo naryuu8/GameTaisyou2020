@@ -355,7 +355,7 @@ void AGameController::GameOverCheck()
 		RemoveUI();
 		IsGameOver = true;
 		SetTimeCountPause();
-		AudioComponent->FadeOut(2.0f, 0.0f);
+		AudioComponent->FadeOut(5.0f, 0.0f);
 		SetAllInvisibleStageIcon();
 
 		TArray<AActor*> FloatActors;
