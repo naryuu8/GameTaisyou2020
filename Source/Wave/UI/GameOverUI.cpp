@@ -34,6 +34,7 @@ void UGameOverUI::BackSelectState()
 		SelectNumber = static_cast<int>(GameOverState::STAGESELECT);
 	}
 	ImageSizeChenge();
+	ASoundManager::SafePlaySound(SOUND_TYPE::MENU_SELECT);
 }
 
 void UGameOverUI::SelectStateAction()
