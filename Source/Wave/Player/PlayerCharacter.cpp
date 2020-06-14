@@ -124,6 +124,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			if (Collision)
 			{
 				Collision->ComponentVelocity = FVector::ZeroVector;
+				Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				Collision->SetActive(false);
 			}
 			USkeletalMeshComponent * SkeletalMesh = Cast<USkeletalMeshComponent>(GetComponentByClass(USkeletalMeshComponent::StaticClass()));
