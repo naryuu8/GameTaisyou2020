@@ -171,6 +171,7 @@ private:
 	void GameOverCheck();
 	void GameClear();
 	void GameOver();
+	void AddGameOverUI();
 	//ゲームプレイ中の荷物数確認
 	int CountGameNimotu();
 	//カウントダウンの残り時間0の時trueを返す
