@@ -747,3 +747,8 @@ FVector AWaterSurface::GetCenterPos()
 {
 	return (StartPoint->GetActorLocation() + EndPoint->GetActorLocation()) * 0.5f;
 }
+
+void AWaterSurface::StopWaveSound()
+{
+	if (AudioComponent) AudioComponent->FadeOut(0.5f, 0.0f, EAudioFaderCurve::Linear);
+}

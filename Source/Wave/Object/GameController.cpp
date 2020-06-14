@@ -20,6 +20,7 @@
 #include "../Camera/GameCameraActor.h"
 #include "Components/MaterialBillboardComponent.h"
 #include "../SoundManager.h"
+#include "../WaterSurface/WaterSurface.h"
 // Sets default values
 
 AGameController::AGameController()
@@ -364,6 +365,9 @@ void AGameController::GameOverCheck()
 			AFloatActor * FloatActor = Cast<AFloatActor>(Actor);
 			FloatActor->StopFallSound();
 		}
+
+		AWaterSurface* WaterSurface = Cast<AWaterSurface>(UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass()));
+		if (WaterSurface) WaterSurface->StopWaveSound();
 	};
 	//‡@ƒmƒ‹ƒ}‚Ü‚Å‰×•¨‚ð‰^‚ñ‚Å‚¨‚ç‚¸Žc‚èŽžŠÔ‚ª0‚É‚È‚Á‚½‚ç
 	if (GoalCount < NormaGoalCount && GetLimitTimeZero())
