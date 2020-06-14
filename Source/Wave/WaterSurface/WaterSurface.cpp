@@ -493,9 +493,6 @@ FVector AWaterSurface::AdjustMoveInLand(const FVector & worldPos, const FVector 
 	if (GetLandPointInside(movedPos, circleRadius) != nullptr) 
 		return movedPos;
 
-	if (GetLandPoint(WaterCheckPos) != nullptr)
-		return movedPos;
-
 	// フィールドのメッシュ全体を検索
 	for (int xi = 0; xi < SplitPointNum.X; ++xi)
 	{
@@ -516,8 +513,14 @@ FVector AWaterSurface::AdjustMoveInLand(const FVector & worldPos, const FVector 
 				// 地形の形によってそれぞれ処理を書く
 				ALandPoint * LandActor = GetLandPoint(worldPos);
 
-				/// 既に水の上に存在している時はそのまま移動する
-				if (!LandActor) return worldPos;
+				// 既に水の上に存在している時はそのまま移動する
+				if (!LandActor)
+				{
+					if (GetLandPoint(WaterCheckPos) != nullptr)
+						return movedPos;
+
+					return worldPos;
+				}
 
 				return LandActor->AdjustMoveInLand(movedPos, circleRadius);
 			}

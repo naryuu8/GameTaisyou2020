@@ -21,7 +21,7 @@ void ARaft::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (IsFloating && GetActorLocation().Z > -10.0f)
+	if (IsFloating && GetActorLocation().Z > -10.0f && !UGameplayStatics::IsGamePaused(GetWorld()))
 	{
 		if (!AudioComponent) AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::MOVE_RAFT);
 		if (!AudioComponent->IsPlaying())AudioComponent->Play();
@@ -68,6 +68,11 @@ bool ARaft::IsInRaft(const FVector & worldPos, float CircleRadius)
 			SquarePos.X + XLen > worldPos.X + CircleRadius &&
 			SquarePos.Y - YLen < worldPos.Y - CircleRadius &&
 			SquarePos.Y + YLen > worldPos.Y + CircleRadius;
+}
+
+void ARaft::StopRaftAudio()
+{
+	if (AudioComponent) AudioComponent->Stop();
 }
 
 bool ARaft::IsOnRaft(FVector worldPos)

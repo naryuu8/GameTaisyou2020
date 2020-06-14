@@ -22,6 +22,7 @@ public:
 	FVector AdjustMoveOnRaft(const FVector & actorPos, const FVector & moveVec, float CircleRadius);
 	bool IsOnRaft(FVector worldPos);
 	bool IsInRaft(const FVector & worldPos, float CircleRadius);
+	void StopRaftAudio();
 private:
 	class UAudioComponent* AudioComponent;
 };

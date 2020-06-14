@@ -565,6 +565,7 @@ void APlayerCharacter::SetGameClear()
 	// プレイヤーがイカダに乗っていたらイカダの更新を止める
 	if (CurrentRaft != nullptr)
 	{
+		CurrentRaft->StopRaftAudio();
 		CurrentRaft->SetActorTickEnabled(false);
 	}
 	ChageDestroyEmmiter();
