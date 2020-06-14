@@ -153,7 +153,9 @@ void AGameController::CreateGameOverUI()
 		GameOverUI = CreateWidget<UGameOverUI>(GetWorld(), GameOverUIClass);
 		if (GameOverUI != nullptr)
 		{
-			GameOverUI->AddToViewport();
+			FTimerManager& timerManager = GetWorld()->GetTimerManager();
+			FTimerHandle handle;
+			timerManager.SetTimer(handle, this, &AGameController::AddGameOverUI, 3.0f);
 			GetPlayer->SetNoTick();
 		}
 		else
@@ -410,7 +412,7 @@ void AGameController::GameOver()
 {
 	CreateGameOverUI();
 
-	AudioComponent->FadeOut(1.0f, 0.0f);
+	AudioComponent->FadeOut(4.0f, 0.0f);
 
 	TArray<AActor*> FloatActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFloatActor::StaticClass(), FloatActors);
@@ -676,4 +678,9 @@ void AGameController::SetAllInvisibleStageIcon()
 			Cast<UMaterialBillboardComponent>(Billboard)->SetRenderInMainPass(false);
 		}
 	}
+}
+
+void AGameController::AddGameOverUI()
+{
+	GameOverUI->AddToViewport();
 }
