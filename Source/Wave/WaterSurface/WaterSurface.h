@@ -52,6 +52,8 @@ public:
 
 	FIntPoint GetVertexPos(const FVector & worldPos);
 
+	void StopWaveSound();
+
 private:
 	void CreateWave(int32 x, int32 y, float pawer);
 	void SetCircleLand(FVector CirclePostion, float Radius, VertexType Type);

@@ -266,7 +266,5 @@ void AFloatActor::MyDestroy()
 void AFloatActor::StopFallSound()
 {
 	if (!FloatAudio) return;
-	if (!(FloatAudio->IsPlaying())) return;
-
 	FloatAudio->Stop();
 }
