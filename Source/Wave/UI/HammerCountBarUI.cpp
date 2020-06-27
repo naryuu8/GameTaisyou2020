@@ -25,5 +25,5 @@ float UHammerCountBarUI::DownGaugeTime(const float DamageX, const float HpX, con
 	}
 	//1ƒtƒŒ[ƒ€‚ÅŒ¸‚ç‚·—Ê‚ğŒvZ
 	//float AddBar = NowHp * Speed;
-	return DamageX - Speed;
+	return DamageX + Speed;
 }

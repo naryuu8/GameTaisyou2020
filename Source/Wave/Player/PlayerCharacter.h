@@ -31,6 +31,9 @@ private:
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UHammerCountBarUI> HammerCountBarUIClass;
 	UHammerCountBarUI* HammerCountBarUI = nullptr;
+	//段階ごとのハンマーパワーを格納
+	UPROPERTY(EditAnywhere)
+		TArray<float> HammerPowerArray;
 	//ゲージで表示する用のプレイヤーのハンマーMAXHP
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 		float MaxHammerHP = 100.0f;
@@ -103,7 +106,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
 		void ImpactEmmiterCreate(const FVector & Pos);
 
-
 	static FORCEINLINE bool Trace(
 		UWorld* World,
 		AActor* ActorToIgnore,
@@ -167,6 +169,8 @@ private:
 	FVector GetInputDirection(float VerticalValue, float HolizontalValue);
 	// 移動方向にプレイヤーを向かせる関数
 	void SetLookAt(FVector Direction, float Speed);
+	//ハンマーパワー配列からパワーを受け取る
+	float GetArrayHammerPower();
 public:
 	float GetMoveAmount() { return MoveAmount; };
 	void CreateHammerCountBarUI();

@@ -24,11 +24,11 @@
 #include "GameFramework/PlayerController.h"
 #include "../SoundManager.h"
 #include "Components/SkeletalMeshComponent.h"
-
+#include "GenericPlatform/GenericPlatformMath.h"
 #include "../Camera/State/GameCameraStateFall.h"
 #include "../Camera/State/GameCameraStateClear.h"
 #include "../Camera/GameCameraFocusPoint.h"
-
+#define ARRAY_HAMMER_POWER_MAX (10)
 #define DISPLAY_LOG(fmt, ...) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT(fmt), __VA_ARGS__));
 //////////////////////////////////////////////////////////////////////////
 // APlayerCharacter
@@ -51,6 +51,8 @@ APlayerCharacter::APlayerCharacter()
 
 	//ポーズ中でもTickが来るようにする
 	SetTickableWhenPaused(true);
+	//ハンマーパワー配列初期化
+	HammerPowerArray.Init(0.0f, ARRAY_HAMMER_POWER_MAX);
 }
 
 void APlayerCharacter::BeginPlay_C()
@@ -74,7 +76,7 @@ void APlayerCharacter::BeginPlay_C()
 		cameraActor->SetFollowTarget(this);
 	}
 	HammerPower = 0.0f;
-	HammerHP = MaxHammerHP;
+	HammerHP = 0.0f;
 
 	CreateHammerCountBarUI();
 	Water = Cast<AWaterSurface>(UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass()));
@@ -85,6 +87,7 @@ void APlayerCharacter::BeginPlay_C()
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
 	if (NoTick)return;
 	if (UGameplayStatics::IsGamePaused(GetWorld()))
 	{//ポーズ中はリターン	
@@ -230,9 +233,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 			if (input->AttackCancel.IsPress)
 			{
 				AnimInst->IsCharge = false;
-				HammerHP += HammerPower;
+				HammerHP = 0;
 				HammerPower = 0.0f;
 				ChargeCount = 0.0f;
+				HammerCountBarUI->UpdateGauge(HammerHP);
 			}
 			else
 			{
@@ -242,7 +246,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 				{
 					//ハンマーを溜めていたら力を足す
 					//体力がほぼ0なら溜めても加算しない
-					if (HammerHP > 0.1f)
+					if (HammerHP < MaxHammerHP - 0.1f)
 					{
 						if (!AudioComponent)AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::HAMMER_CHARGE);
 						if (!AudioComponent->IsPlaying())AudioComponent->Play();
@@ -327,11 +331,7 @@ void APlayerCharacter::ResetRaftParam()
 void APlayerCharacter::TriggerHammerAttack(void)
 {
 	if (AnimInst->IsAttack || AnimInst->IsCharge)return;
-	//クールタイムがあるときと最大HPとHPが同じなら構えれない
-	//if (MaxHammerHP == HammerHP)return;
-	if (HammerHP <= 0.0f)return;
-	//赤いバーがあるときも構えれないようにする
-	//if (HammerCountBarUI->GetIsDamage())return;
+	if (HammerHP >= MaxHammerHP)return;
 	
 	AnimInst->IsCharge = true;
 	if (!HammerCountBarUI)return;
@@ -352,7 +352,8 @@ void APlayerCharacter::HummerAttackEnd()
 		// ハンマーの先端を取得
 		FVector AttackPoint = HummerTipPoint->GetComponentLocation();
 		// 波を起こす
-		WaterAttack(AttackPoint, HammerPower * HammerPowerValue, 15.0f);
+		//WaterAttack(AttackPoint, HammerPower * HammerPowerValue, 15.0f);
+		WaterAttack(AttackPoint, GetArrayHammerPower(), 15.0f);
 		// エフェクトを生成
 		ImpactEmmiterCreate(AttackPoint);
 		//UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, AttackEffect, AttackPoint, GetActorRotation(), FVector::OneVector * AttackEffectScale, true);
@@ -375,6 +376,8 @@ void APlayerCharacter::HummerAttackEnd()
 	HammerCountBarUI->ReflectionGauge();
 	HammerPower = 0.0f;
 	ChargeCount = 0.0f;
+	HammerHP = 0;
+	HammerCountBarUI->UpdateGauge(HammerHP);
 }
 
 void APlayerCharacter::MinusHammerGauge(const float Power)
@@ -382,9 +385,9 @@ void APlayerCharacter::MinusHammerGauge(const float Power)
 	if (!HammerCountBarUI)return;
 	if (ChargeCount < ChargePowerMax)
 	{//最大溜め時はクールタイムを加算しない
-		if (HammerHP > 0.0f)
+		if (HammerHP < MaxHammerHP)
 		{
-			HammerHP -= ChargeSpeed;
+			HammerHP += ChargeSpeed;
 			if (HammerHP >= MaxHammerHP)
 			{
 				HammerHP = MaxHammerHP;
@@ -465,6 +468,25 @@ void APlayerCharacter::SetLookAt(FVector Direction, float Speed)
 	float angle = FMath::Atan2(Direction.Y, Direction.X);
 	FQuat LookAt = MyFunc::FromAxisAngleToQuaternion(FVector::UpVector, angle);
 	SetActorRotation(FQuat::Slerp(GetActorQuat(), LookAt, Speed));
+}
+
+float APlayerCharacter::GetArrayHammerPower()
+{
+	//まず現在の溜めている力と最大パワーを割り×10をし整数部分を作る
+	float power = (HammerHP / ChargePowerMax) * 10.0f;
+	//1に満たない場合は配列0番目を返す
+	if (power < 1.0f)
+	{
+		return HammerPowerArray[0];
+	}
+	//配列の最大数を超える力を持っていたら配列の最大値を返す
+	else if (power >= ARRAY_HAMMER_POWER_MAX)
+	{
+		return HammerPowerArray[ARRAY_HAMMER_POWER_MAX - 1];	
+	}
+	//小数部分を切り捨て整数に変換
+	int index = FMath::TruncToInt(power);
+	return HammerPowerArray[index];
 }
 
 void APlayerCharacter::WaterAttack(FVector Point, float Power, float Radius)
@@ -600,10 +622,10 @@ void APlayerCharacter::UpdateGaugeHP()
 	{
 		if (!HammerCountBarUI->GetIsDamage())
 		{
-			HammerHP += HpHealSpped;
-			if (HammerHP > MaxHammerHP)
+			HammerHP -= HpHealSpped;
+			if (HammerHP < 0)
 			{
-				HammerHP = MaxHammerHP;
+				HammerHP = 0;
 			}
 			HammerCountBarUI->UpdateGauge(HammerHP);
 			HammerCountBarUI->UpdateDamageGauge(HammerHP);
