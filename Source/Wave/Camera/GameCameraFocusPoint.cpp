@@ -21,8 +21,7 @@ void AGameCameraFocusPoint::SpawnFocusPoint(const AActor * Object, const FVector
 	if (!Controller) return;
 	if (Controller->GetIsClear() || Controller->GetIsGameOver()) return;
 
-	AGameCameraFocusPoint * Actor = Cast<AGameCameraFocusPoint>(
-		Object->GetWorld()->SpawnActor<AGameCameraFocusPoint>(Pos, FRotator::ZeroRotator));
+	AGameCameraFocusPoint * Actor =	Object->GetWorld()->SpawnActor<AGameCameraFocusPoint>(Pos, FRotator::ZeroRotator);
 
 	FTimerManager& timerManager = Object->GetWorld()->GetTimerManager();
 	FTimerHandle handle;

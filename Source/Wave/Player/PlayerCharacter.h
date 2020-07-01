@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Niagara/Classes/NiagaraSystem.h"	// エフェクト用
+#include "../InputManager.h"
 //generated.hは一番最後にかかないといけない
 #include "PlayerCharacter.generated.h"
 class UPauseUI;
@@ -31,6 +32,9 @@ private:
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UHammerCountBarUI> HammerCountBarUIClass;
 	UHammerCountBarUI* HammerCountBarUI = nullptr;
+	//段階ごとのハンマーパワーを格納
+	UPROPERTY(EditAnywhere)
+		TArray<float> HammerPowerArray;
 	//ゲージで表示する用のプレイヤーのハンマーMAXHP
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 		float MaxHammerHP = 100.0f;
@@ -51,6 +55,9 @@ private:
 	// 波を起こす力
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 		float HammerPowerValue = 1.0f;
+	// バトルモードでの番号(0なら通常モード)
+	UPROPERTY(EditAnywhere)
+		int BattleNumber = 0;
 	// プレイヤーの当たり判定の半径
 	//UPROPERTY(EditAnywhere, Category = "Parameter")
 		float CollisionRadius = 0.0f;
@@ -67,6 +74,8 @@ private:
 	ARaft* CurrentRaft = nullptr;	// 乗っていない時は常にnullptr
 	bool IsInRaft = false;
 	void ResetRaftParam();
+
+	EAutoReceiveInput::Type InputManagerIndex = EAutoReceiveInput::Player0;
 
 	UAudioComponent* AudioComponent;
 public:
@@ -103,7 +112,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++Library", BlueprintImplementableEvent)
 		void ImpactEmmiterCreate(const FVector & Pos);
 
-
 	static FORCEINLINE bool Trace(
 		UWorld* World,
 		AActor* ActorToIgnore,
@@ -134,6 +142,9 @@ public:
 
 		return (HitOut.GetActor() != NULL);
 	}
+
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void PlayerRespawn(const FVector & location);
 
 protected:
 
@@ -167,6 +178,8 @@ private:
 	FVector GetInputDirection(float VerticalValue, float HolizontalValue);
 	// 移動方向にプレイヤーを向かせる関数
 	void SetLookAt(FVector Direction, float Speed);
+	//ハンマーパワー配列からパワーを受け取る
+	float GetArrayHammerPower();
 public:
 	float GetMoveAmount() { return MoveAmount; };
 	void CreateHammerCountBarUI();
@@ -190,6 +203,8 @@ public:
 		FORCEINLINE	float GetChargeCount() const { return ChargeCount; };
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsDeth() const { return IsDeth; };
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	float GetBattleNumber() const { return BattleNumber; };
 	bool GetIsAttack() const;
 	bool GetIsCharge() const;
 

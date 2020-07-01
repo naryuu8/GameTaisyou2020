@@ -91,7 +91,8 @@ protected:
 
 public:
 	// インスタンスを取得する
-	static const AInputManager* GetInstance();
+	// Param : Index -> プレイヤー番号
+	static const AInputManager* GetInstance(EAutoReceiveInput::Type Index = EAutoReceiveInput::Player0);
 
 	const InputState * GetState() const { return &State; };
 

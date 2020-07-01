@@ -3,8 +3,12 @@
 #include "InputManager.h"
 #include "Components/InputComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Runtime/Engine/Classes/Engine/World.h"
+
+#define MAX_INPUT_INSTANCE (2)
+
 //入力クラスへのインスタンス
-static AInputManager* InputManagerInstance = nullptr;
+static AInputManager* InputManagerInstances[MAX_INPUT_INSTANCE] = {};
 
 AInputManager::AInputManager()
 {
@@ -15,19 +19,38 @@ AInputManager::AInputManager()
 
 AInputManager::~AInputManager()
 {
-	InputManagerInstance = nullptr;
+	InputManagerInstances[AutoPossessPlayer - 1] = nullptr;
 }
 
 void AInputManager::BeginPlay()
 {
 	Super::BeginPlay();
-	InputManagerInstance = this;
+
+	// 一つ目に生成されたインスタンスが残りのインスタンスを生成する
+	// 二つ目以降は既に登録済みなのでリターン
+	if (InputManagerInstances[0]) return;
+
+	// 入力イベントを受け取る番号を指定
+	this->AutoPossessPlayer = EAutoReceiveInput::Player0;
+	this->AutoReceiveInput = this->AutoPossessPlayer;
+	InputManagerInstances[0] = this;
+	
+	for (int i = 1; i < MAX_INPUT_INSTANCE; i++)
+	{
+		AInputManager * Instance = GetWorld()->SpawnActor<AInputManager>();
+		// 入力イベントを受け取る番号を指定
+		Instance->AutoPossessPlayer = (EAutoReceiveInput::Type)(i + 1);
+		Instance->AutoReceiveInput = Instance->AutoPossessPlayer;
+		InputManagerInstances[i] = Instance;
+	}
 }
 
-const AInputManager * AInputManager::GetInstance()
+const AInputManager * AInputManager::GetInstance(EAutoReceiveInput::Type Index)
 {
-	//check(InputManagerInstance);
-	return InputManagerInstance;
+	if (MAX_INPUT_INSTANCE < Index)
+		return nullptr;
+
+	return InputManagerInstances[Index - 1];
 }
 
 void AInputManager::Tick(float DeltaTime)
