@@ -64,6 +64,10 @@ private:
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UControlTipsUI> ControlTipsUIClass;
 
+	// リスポーン用にいかだを保持
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<AActor> RaftActor;
+
 	//勝手に開放されることがあるのでガベージコレクションの対象外にする
 	UPROPERTY()
 		UPauseUI* PauseUI = nullptr;
@@ -123,6 +127,8 @@ private:
 	// ステージ上のアイコンを非表示
 	void SetAllInvisibleStageIcon();
 
+	// プレイヤーが落ちたかを判定してスコアやリスポーンの処理を行う
+	void CheckPlayerFall();
 	// バトルを終了する
 	void BattleFinish();
 };

@@ -38,9 +38,19 @@ void ABattleController::BeginPlay()
 	{
 		// 取得したアクターがプレイヤーかどうかを判定
 		APlayerCharacter * Player = Cast<APlayerCharacter>(Actor);
-		if (!Actor) continue;
+		if (!Player) continue;
 
-		// TODO::プレイヤー番号を取得して1,2それぞれに保存する
+		// プレイヤー番号を取得して1,2それぞれに保存する
+		if (Player->GetBattleNumber() == 1)
+		{
+			GetPlayer1 = Player;
+			Player1RespawnLocation = Player->GetActorLocation();
+		}
+		else if (Player->GetBattleNumber() == 2)
+		{
+			GetPlayer2 = Player;
+			Player2RespawnLocation = Player->GetActorLocation();
+		}
 	}
 
 	IsStartResultEvent = false;
@@ -85,6 +95,8 @@ void ABattleController::Tick(float DeltaTime)
 {
 	if (DebugScreenMode)return;
 	Super::Tick(DeltaTime);
+
+	CheckPlayerFall();
 	
 	UpdateTime();
 	if (GetLimitTimeZero())
@@ -271,4 +283,30 @@ void ABattleController::BattleFinish()
 	// TODO::勝敗の判定をしてバトル用リザルトUIを開く
 
 	IsBatlleFinish = true;
+}
+
+void ABattleController::CheckPlayerFall()
+{
+	if (!GetPlayer1)return;
+	if (GetPlayer1->GetIsDeth())
+	{
+		// いかだとプレイヤーをリスポーンさせて相手のスコアを加算
+		GetPlayer1->PlayerRespawn(Player1RespawnLocation);
+		AActor* a = GetWorld()->SpawnActor<AActor>(RaftActor); 
+		FVector RaftLocation = Player1RespawnLocation;
+		RaftLocation.Z = 0;
+		a->SetActorLocation(RaftLocation);
+		Player2Score += 1;
+	}
+
+	if (!GetPlayer2)return;
+	if (GetPlayer2->GetIsDeth())
+	{
+		GetPlayer2->PlayerRespawn(Player2RespawnLocation);
+		AActor* a = GetWorld()->SpawnActor<AActor>(RaftActor);
+		FVector RaftLocation = Player1RespawnLocation;
+		RaftLocation.Z = 0;
+		a->SetActorLocation(RaftLocation);
+		Player1Score += 1;
+	}
 }

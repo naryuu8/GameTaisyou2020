@@ -117,24 +117,29 @@ void APlayerCharacter::Tick(float DeltaTime)
 				ASoundManager::SafePlaySound(SOUND_TYPE::FALL_ACTOR);
 			}
 
-			FollowCamera->ChangeState(new GameCameraStateFall(CurPos));
-			AGameCameraFocusPoint::SpawnFocusPoint(this, CurPos, 1.0f);
+			if (BattleNumber == 0)
+			{
+				FollowCamera->ChangeState(new GameCameraStateFall(CurPos));
+				AGameCameraFocusPoint::SpawnFocusPoint(this, CurPos, 1.0f);
+
+				UCapsuleComponent * Collision = Cast<UCapsuleComponent>(GetComponentByClass(UCapsuleComponent::StaticClass()));
+				if (Collision)
+				{
+					Collision->ComponentVelocity = FVector::ZeroVector;
+					Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+					Collision->SetActive(false);
+				}
+				USkeletalMeshComponent * SkeletalMesh = Cast<USkeletalMeshComponent>(GetComponentByClass(USkeletalMeshComponent::StaticClass()));
+				if (SkeletalMesh)
+				{
+					SkeletalMesh->ComponentVelocity = FVector::ZeroVector;
+				}
+
+				AnimInst->IsDeth = true;
+				PlayerDeth();
+			}
 			Water->AddPower(FVector(CurPos.X, CurPos.Y, 0.0f), ChargePowerMax);
 			IsDeth = true;
-			AnimInst->IsDeth = true;
-			PlayerDeth();
-			UCapsuleComponent * Collision = Cast<UCapsuleComponent>(GetComponentByClass(UCapsuleComponent::StaticClass()));
-			if (Collision)
-			{
-				Collision->ComponentVelocity = FVector::ZeroVector;
-				Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				Collision->SetActive(false);
-			}
-			USkeletalMeshComponent * SkeletalMesh = Cast<USkeletalMeshComponent>(GetComponentByClass(USkeletalMeshComponent::StaticClass()));
-			if (SkeletalMesh)
-			{
-				SkeletalMesh->ComponentVelocity = FVector::ZeroVector;
-			}
 			return;
 		}
 	}
@@ -635,4 +640,10 @@ void APlayerCharacter::UpdateGaugeHP()
 			HammerCountBarUI->UpdateCoolTime(CoolTimeHealSpped);
 		}
 	}
+}
+
+void APlayerCharacter::PlayerRespawn(const FVector & location)
+{
+	SetActorLocation(location);
+	IsDeth = false;
 }

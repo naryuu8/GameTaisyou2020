@@ -54,6 +54,9 @@ private:
 	// 波を起こす力
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 		float HammerPowerValue = 1.0f;
+	// バトルモードでの番号(0なら通常モード)
+	UPROPERTY(EditAnywhere)
+		int BattleNumber = 0;
 	// プレイヤーの当たり判定の半径
 	//UPROPERTY(EditAnywhere, Category = "Parameter")
 		float CollisionRadius = 0.0f;
@@ -137,6 +140,9 @@ public:
 		return (HitOut.GetActor() != NULL);
 	}
 
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void PlayerRespawn(const FVector & location);
+
 protected:
 
 	void Move(const FVector & Direction, float Value);
@@ -194,6 +200,8 @@ public:
 		FORCEINLINE	float GetChargeCount() const { return ChargeCount; };
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		FORCEINLINE	bool GetIsDeth() const { return IsDeth; };
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	float GetBattleNumber() const { return BattleNumber; };
 	bool GetIsAttack() const;
 	bool GetIsCharge() const;
 
