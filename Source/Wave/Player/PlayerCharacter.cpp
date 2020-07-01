@@ -83,6 +83,9 @@ void APlayerCharacter::BeginPlay_C()
 
 	CurrentRaft = nullptr;
 	IsDeth = false;
+
+	if(BattleNumber == 2)
+		InputManagerIndex = EAutoReceiveInput::Player1;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -146,7 +149,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 
 
-	const AInputManager * inputManager = AInputManager::GetInstance();
+	const AInputManager * inputManager = AInputManager::GetInstance(InputManagerIndex);
 	if (inputManager)
 	{
 		const InputState * input = inputManager->GetState();

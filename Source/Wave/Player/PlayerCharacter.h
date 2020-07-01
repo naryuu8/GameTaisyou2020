@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Niagara/Classes/NiagaraSystem.h"	// エフェクト用
+#include "../InputManager.h"
 //generated.hは一番最後にかかないといけない
 #include "PlayerCharacter.generated.h"
 class UPauseUI;
@@ -73,6 +74,8 @@ private:
 	ARaft* CurrentRaft = nullptr;	// 乗っていない時は常にnullptr
 	bool IsInRaft = false;
 	void ResetRaftParam();
+
+	EAutoReceiveInput::Type InputManagerIndex = EAutoReceiveInput::Player0;
 
 	UAudioComponent* AudioComponent;
 public:

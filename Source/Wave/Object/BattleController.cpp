@@ -304,7 +304,7 @@ void ABattleController::CheckPlayerFall()
 	{
 		GetPlayer2->PlayerRespawn(Player2RespawnLocation);
 		AActor* a = GetWorld()->SpawnActor<AActor>(RaftActor);
-		FVector RaftLocation = Player1RespawnLocation;
+		FVector RaftLocation = Player2RespawnLocation;
 		RaftLocation.Z = 0;
 		a->SetActorLocation(RaftLocation);
 		Player1Score += 1;
