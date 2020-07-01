@@ -83,6 +83,9 @@ void APlayerCharacter::BeginPlay_C()
 
 	CurrentRaft = nullptr;
 	IsDeth = false;
+
+	if(BattleNumber == 2)
+		InputManagerIndex = EAutoReceiveInput::Player1;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -117,31 +120,36 @@ void APlayerCharacter::Tick(float DeltaTime)
 				ASoundManager::SafePlaySound(SOUND_TYPE::FALL_ACTOR);
 			}
 
-			FollowCamera->ChangeState(new GameCameraStateFall(CurPos));
-			AGameCameraFocusPoint::SpawnFocusPoint(this, CurPos, 1.0f);
+			if (BattleNumber == 0)
+			{
+				FollowCamera->ChangeState(new GameCameraStateFall(CurPos));
+				AGameCameraFocusPoint::SpawnFocusPoint(this, CurPos, 1.0f);
+
+				UCapsuleComponent * Collision = Cast<UCapsuleComponent>(GetComponentByClass(UCapsuleComponent::StaticClass()));
+				if (Collision)
+				{
+					Collision->ComponentVelocity = FVector::ZeroVector;
+					Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+					Collision->SetActive(false);
+				}
+				USkeletalMeshComponent * SkeletalMesh = Cast<USkeletalMeshComponent>(GetComponentByClass(USkeletalMeshComponent::StaticClass()));
+				if (SkeletalMesh)
+				{
+					SkeletalMesh->ComponentVelocity = FVector::ZeroVector;
+				}
+
+				AnimInst->IsDeth = true;
+				PlayerDeth();
+			}
 			Water->AddPower(FVector(CurPos.X, CurPos.Y, 0.0f), ChargePowerMax);
 			IsDeth = true;
-			AnimInst->IsDeth = true;
-			PlayerDeth();
-			UCapsuleComponent * Collision = Cast<UCapsuleComponent>(GetComponentByClass(UCapsuleComponent::StaticClass()));
-			if (Collision)
-			{
-				Collision->ComponentVelocity = FVector::ZeroVector;
-				Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				Collision->SetActive(false);
-			}
-			USkeletalMeshComponent * SkeletalMesh = Cast<USkeletalMeshComponent>(GetComponentByClass(USkeletalMeshComponent::StaticClass()));
-			if (SkeletalMesh)
-			{
-				SkeletalMesh->ComponentVelocity = FVector::ZeroVector;
-			}
 			return;
 		}
 	}
 
 
 
-	const AInputManager * inputManager = AInputManager::GetInstance();
+	const AInputManager * inputManager = AInputManager::GetInstance(InputManagerIndex);
 	if (inputManager)
 	{
 		const InputState * input = inputManager->GetState();
@@ -635,4 +643,10 @@ void APlayerCharacter::UpdateGaugeHP()
 			HammerCountBarUI->UpdateCoolTime(CoolTimeHealSpped);
 		}
 	}
+}
+
+void APlayerCharacter::PlayerRespawn(const FVector & location)
+{
+	SetActorLocation(location);
+	IsDeth = false;
 }
