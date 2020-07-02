@@ -34,7 +34,7 @@ void AGameCameraActor::BeginPlay()
 	Super::BeginPlay();
 	
 	AWaterSurface * Water = Cast<AWaterSurface>(UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass()));
-	FVector Center = Water->GetCenterPos();
+	FVector Center = Water->GetCenterPos() + FieldCenterOffset;
 	SetActorLocation(Center);
 	// 初めの位置をステージの中心として保持しておく
 	FieldCenterPos = Center;
