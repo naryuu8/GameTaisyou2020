@@ -41,6 +41,9 @@ public:
 	TArray<AActor*> FocusPoints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+		FVector FieldCenterOffset; // ステージ見降ろし視点でのカメラの距離
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 		float FieldDistance = 800.0f; // ステージ見降ろし視点でのカメラの距離
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 		float FieldDistanceOffset = 200.0f; // ステージ見降ろし視点でのカメラの距離
