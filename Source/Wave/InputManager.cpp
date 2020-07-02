@@ -41,6 +41,9 @@ void AInputManager::BeginPlay()
 		// 入力イベントを受け取る番号を指定
 		Instance->AutoPossessPlayer = (EAutoReceiveInput::Type)(i + 1);
 		Instance->AutoReceiveInput = Instance->AutoPossessPlayer;
+		Instance->SetPlayerState(GetPlayerState());
+		Instance->Controller = UGameplayStatics::CreatePlayer(GetWorld(), i);
+		Instance->SetupPlayerInputComponent(Instance->Controller->InputComponent);
 		InputManagerInstances[i] = Instance;
 	}
 }
