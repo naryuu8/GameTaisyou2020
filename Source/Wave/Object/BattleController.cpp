@@ -6,6 +6,8 @@
 #include "GoalComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "../UI/ControlTipsUI.h"
+#include "../UI/BattleTimeUI.h"
+#include "../UI/BattleResultUI.h"
 #include "../InputManager.h"
 #include "../Player/PlayerCharacter.h"
 #include "../WaterSurface/FloatActor.h"
@@ -81,7 +83,11 @@ void ABattleController::BeginPlay()
 	{
 		CreateControlTipsUI();
 	}
-
+	CreateBattleTimeUI();
+	if (BattleTimeUI)
+	{
+		StartTimeCount();
+	}
 	//最後にフェードアウトを出すため最後に生成
 	InitFadeOut();
 
@@ -102,6 +108,11 @@ void ABattleController::Tick(float DeltaTime)
 	if (GetLimitTimeZero())
 	{
 		BattleFinish();
+	}
+	if (IsTimeOver)
+	{
+		CreateBattleResultUI();
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
 	}
 }
 
@@ -144,6 +155,58 @@ void ABattleController::CreateControlTipsUI()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("ControlTipsUIClass : %s"), L"UIClass is nullptr");
+	}
+}
+
+void ABattleController::CreateBattleTimeUI()
+{
+	if (BattleTimeUI)return;
+	if (BattleTimeUIClass != nullptr)
+	{
+		BattleTimeUI = CreateWidget<UBattleTimeUI>(GetWorld(), BattleTimeUIClass);
+		if (BattleTimeUI != nullptr)
+		{
+			BattleTimeUI->AddToViewport();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("BattleTimeUIClass : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("BattleTimeUIClass : %s"), L"UIClass is nullptr");
+	}
+}
+
+void ABattleController::CreateBattleResultUI()
+{
+	if (BattleResultUI)return;
+	if (BattleResultUIClass != nullptr)
+	{
+		BattleResultUI = CreateWidget<UBattleResultUI>(GetWorld(), BattleResultUIClass);
+		if (BattleResultUI != nullptr)
+		{
+			BattleResultUI->AddToViewport();
+			BattleResultUI->SetPlayerScore(0, Player1Score);
+			BattleResultUI->SetPlayerScore(1, Player2Score);
+			if (Player1Score >= Player2Score)
+			{
+				BattleResultUI->SetWinPlayer(true);
+			}
+			else
+			{
+				BattleResultUI->SetWinPlayer(false);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("BattleResultUIClass : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("BattleResultUIClass : %s"), L"UIClass is nullptr");
 	}
 }
 

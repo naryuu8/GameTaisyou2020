@@ -15,7 +15,8 @@ class UNimotuCountUI;
 class UPauseUI;
 class UFadeUI;
 class UControlTipsUI;
-
+class UBattleTimeUI;
+class UBattleResultUI;
 UCLASS()
 class WAVE_API ABattleController : public AActor
 {
@@ -30,11 +31,8 @@ protected:
 	virtual void BeginPlay() override;
 
 	//制限時間
-	UPROPERTY(EditAnywhere, Category = "Game")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game")
 		int TimeLimit = 60;
-	//カウントダウン表示開始時間
-	UPROPERTY(EditAnywhere, Category = "Game")
-		int CountDownTime = 10;
 	//スクリーンショット用デバッグフラグ
 	UPROPERTY(EditAnywhere, Category = "Game")
 		bool DebugScreenMode = false;
@@ -63,7 +61,10 @@ private:
 		TSubclassOf<UFadeUI> FadeUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UControlTipsUI> ControlTipsUIClass;
-
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UBattleTimeUI> BattleTimeUIClass = nullptr;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UBattleResultUI> BattleResultUIClass = nullptr;
 	// リスポーン用にいかだを保持
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<AActor> RaftActor;
@@ -71,6 +72,8 @@ private:
 	//勝手に開放されることがあるのでガベージコレクションの対象外にする
 	UPROPERTY()
 		UPauseUI* PauseUI = nullptr;
+	UPROPERTY()
+		UBattleResultUI* BattleResultUI = nullptr;
 	UPROPERTY()
 		UGameTimeUI* GameTimeUI = nullptr;
 	UPROPERTY()
@@ -82,7 +85,10 @@ private:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		UBattleTimeUI* BattleTimeUI = nullptr;
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		bool IsTimeOver = false;
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		float GetNowTimeAngle();
 
@@ -112,10 +118,17 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void StopBGM();
+	//時間カウントタイムラインを開始
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void StartTimeCount();
 private:
 
 	// 操作説明UIを作成
 	void CreateControlTipsUI();
+	//時間UIを作成
+	void CreateBattleTimeUI();
+	//リザルトUIを作成
+	void CreateBattleResultUI();
 	//ゲーム開始時のフェードアウト
 	void InitFadeOut();
 	//時計の針を進める
