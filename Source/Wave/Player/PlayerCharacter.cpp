@@ -78,7 +78,7 @@ void APlayerCharacter::BeginPlay_C()
 	HammerPower = 0.0f;
 	HammerHP = 0.0f;
 
-	if (BattleNumber <= 1)
+	//if (BattleNumber <= 1)
 	{
 		CreateHammerCountBarUI();
 	}
@@ -237,7 +237,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		}
 
 		// ƒ`ƒƒ[ƒW’†
-		if (BattleNumber <= 1)
+		//if (BattleNumber <= 1)
 		{
 			UpdateGaugeHP();
 		}
@@ -250,7 +250,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 				HammerHP = 0;
 				HammerPower = 0.0f;
 				ChargeCount = 0.0f;
-				if (BattleNumber <= 1)
+				//if (BattleNumber <= 1)
 				{
 					HammerCountBarUI->UpdateGauge(HammerHP);
 				}
@@ -418,7 +418,7 @@ void APlayerCharacter::MinusHammerGauge(const float Power)
 	}
 	if (HammerCountBarUI)
 	{
-		if (BattleNumber <= 1)
+		//if (BattleNumber <= 1)
 		{
 			HammerCountBarUI->UpdateGauge(HammerHP);
 		}
