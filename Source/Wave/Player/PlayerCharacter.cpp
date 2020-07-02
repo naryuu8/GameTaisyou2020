@@ -78,7 +78,10 @@ void APlayerCharacter::BeginPlay_C()
 	HammerPower = 0.0f;
 	HammerHP = 0.0f;
 
-	CreateHammerCountBarUI();
+	if (BattleNumber <= 1)
+	{
+		CreateHammerCountBarUI();
+	}
 	Water = Cast<AWaterSurface>(UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass()));
 
 	CurrentRaft = nullptr;
@@ -234,7 +237,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 		}
 
 		// チャージ中
-		UpdateGaugeHP();
+		if (BattleNumber <= 1)
+		{
+			UpdateGaugeHP();
+		}
 		if (AnimInst->IsChargeAnim())
 		{
 			// キャンセルが押された時
@@ -244,7 +250,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 				HammerHP = 0;
 				HammerPower = 0.0f;
 				ChargeCount = 0.0f;
-				HammerCountBarUI->UpdateGauge(HammerHP);
+				if (BattleNumber <= 1)
+				{
+					HammerCountBarUI->UpdateGauge(HammerHP);
+				}
 			}
 			else
 			{
@@ -409,7 +418,10 @@ void APlayerCharacter::MinusHammerGauge(const float Power)
 	}
 	if (HammerCountBarUI)
 	{
-		HammerCountBarUI->UpdateGauge(HammerHP);
+		if (BattleNumber <= 1)
+		{
+			HammerCountBarUI->UpdateGauge(HammerHP);
+		}
 	}
 }
 
