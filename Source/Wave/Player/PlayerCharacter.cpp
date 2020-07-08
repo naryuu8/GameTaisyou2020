@@ -144,6 +144,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 				AnimInst->IsDeth = true;
 				PlayerDeth();
 			}
+			else
+			{
+				CurrentRaft->Destroy();
+			}
 			Water->AddPower(FVector(CurPos.X, CurPos.Y, 0.0f), ChargePowerMax);
 			IsDeth = true;
 			return;
