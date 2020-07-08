@@ -17,6 +17,7 @@ class UFadeUI;
 class UControlTipsUI;
 class UBattleTimeUI;
 class UBattleResultUI;
+class UBattleGameStartUI;
 UCLASS()
 class WAVE_API ABattleController : public AActor
 {
@@ -65,6 +66,8 @@ private:
 		TSubclassOf<UBattleTimeUI> BattleTimeUIClass = nullptr;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UBattleResultUI> BattleResultUIClass = nullptr;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UBattleGameStartUI> BattleGameStartUIClass = nullptr;
 	// リスポーン用にいかだを保持
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<AActor> RaftActor;
@@ -82,6 +85,10 @@ private:
 		UResultUI* ResultUI = nullptr;
 	UPROPERTY()
 		UControlTipsUI* ControlTipsUI = nullptr;
+	UPROPERTY()
+		UBattleGameStartUI* BattleGameStartUI = nullptr;
+	UPROPERTY()
+		UFadeUI* FadeUI = nullptr;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -129,6 +136,8 @@ private:
 	void CreateBattleTimeUI();
 	//リザルトUIを作成
 	void CreateBattleResultUI();
+	//開始時のカウントダウン作成
+	void CreateBattleGameStartUI();
 	//ゲーム開始時のフェードアウト
 	void InitFadeOut();
 	//時計の針を進める
