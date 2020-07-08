@@ -189,7 +189,10 @@ public:
 	void DebugHammerCountBarParent();
 	//TickをOFFにする
 	void SetNoTick();
+	//NoTickのみのフラグを引数で与えた値にする
+	void SetNoTickSingle(const bool type) { NoTick = type; };
 	void SetGameClear();
+	FORCEINLINE	bool GetNoTick() const { return NoTick; }
 	//プレイヤーを非表示にする
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 	void SetPlayerHiddenInGame();
