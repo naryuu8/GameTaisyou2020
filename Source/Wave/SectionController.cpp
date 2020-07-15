@@ -4,6 +4,7 @@
 #include "SectionController.h"
 #include "Object/GoalComponent.h"
 #include "Scaffold.h"
+#include "TimerManager.h"
 
 // Sets default values
 ASectionController::ASectionController()
@@ -57,8 +58,12 @@ bool ASectionController::CheckClear()
 
 void ASectionController::OnClear()
 {
+	FTimerManager& timerManager = GetWorld()->GetTimerManager();
+	float time = 0.1f;
 	for (AScaffold* Scaffold : Scaffolds)
 	{
-		Scaffold->Clear();
+		FTimerHandle handle;
+		timerManager.SetTimer(handle, Scaffold, &AScaffold::Clear, time);
+		time += 1.0f;
 	}
 }
