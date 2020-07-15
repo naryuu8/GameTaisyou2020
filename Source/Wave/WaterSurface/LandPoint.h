@@ -57,6 +57,8 @@ public:
 	virtual FVector AdjustMoveOutWater(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float XLen, float YLen, float Repulsion) { return FVector::ZeroVector; };
 
 	void SetIsUse(bool isUse) { IsUse = isUse; }
+
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
 	bool GetIsUse() { return IsUse; }
 
 
