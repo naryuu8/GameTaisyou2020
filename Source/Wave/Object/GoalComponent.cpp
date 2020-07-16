@@ -35,39 +35,50 @@ void UGoalComponent::OnFloatActorCheck(AActor * OtherActor)
 	if (isExplotion) return; //すでに壊れているから
 	if (!OtherFloat) return;
 	AGameController* game = Cast<AGameController>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameController::StaticClass()));
-	if (!game) return;
-
-	//ゲーム終了条件を満たしていたら当たり判定を行わない
-	if (game->GetIsClear() || game->GetIsGameOver())return;
-
-	// 衝突したアクターが爆弾の時爆発してゴール済みでもゴールしていないことにする
-	if (OtherFloat->ActorHasTag("Bom"))
+	if (game)
 	{
-		ASoundManager::SafePlaySound(SOUND_TYPE::EXPLOSION);
-		SetGoalMinus();
-		OtherFloat->Destroy();
-		AGameCameraFocusPoint::SpawnFocusPoint(GetOwner(), GetOwner()->GetActorLocation());
-		SetInvisibleBillbord();
-		//BreakHome();
-		return;
+		//ゲーム終了条件を満たしていたら当たり判定を行わない
+		if (game->GetIsClear() || game->GetIsGameOver())return;
+
+		// 衝突したアクターが爆弾の時爆発してゴール済みでもゴールしていないことにする
+		if (OtherFloat->ActorHasTag("Bom"))
+		{
+			ASoundManager::SafePlaySound(SOUND_TYPE::EXPLOSION);
+			SetGoalMinus();
+			OtherFloat->Destroy();
+			AGameCameraFocusPoint::SpawnFocusPoint(GetOwner(), GetOwner()->GetActorLocation());
+			SetInvisibleBillbord();
+			//BreakHome();
+			return;
+		}
+
+		if (isGoal) return;
+
+		if (OtherFloat->ActorHasTag("Nimotu"))
+		{
+			// 衝突したアクターが荷物ならゴール済みにする
+			ASoundManager::SafePlaySound(SOUND_TYPE::GOAL);
+			isGoal = true;
+			game->AddGoalCount();
+			game->MinusGameMaxNimotu();
+			// 衝突した荷物を削除
+			OtherFloat->Destroy();
+			SetInvisibleBillbord();
+
+			AGameCameraFocusPoint::SpawnFocusPoint(GetOwner(), GetOwner()->GetActorLocation());
+			// ここでドアが閉まるアニメーション開始
+			//PlayAnimationDoorClose();
+		}
 	}
-
-	if (isGoal) return;
-
-	if (OtherFloat->ActorHasTag("Nimotu"))
+	//　対戦モード時
+	else
 	{
-		// 衝突したアクターが荷物ならゴール済みにする
+		// 今荷物の処理だけだけど
+		// 対戦で爆弾使うならその処理もかかなくちゃ・・・
 		ASoundManager::SafePlaySound(SOUND_TYPE::GOAL);
 		isGoal = true;
-		game->AddGoalCount();
-		game->MinusGameMaxNimotu();
-		// 衝突した荷物を削除
 		OtherFloat->Destroy();
 		SetInvisibleBillbord();
-
-		AGameCameraFocusPoint::SpawnFocusPoint(GetOwner(), GetOwner()->GetActorLocation());
-		// ここでドアが閉まるアニメーション開始
-		//PlayAnimationDoorClose();
 	}
 }
 
