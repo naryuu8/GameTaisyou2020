@@ -8,6 +8,7 @@
 #include "../UI/ControlTipsUI.h"
 #include "../UI/BattleTimeUI.h"
 #include "../UI/BattleResultUI.h"
+#include "../UI/BattleGameStartUI.h"
 #include "../InputManager.h"
 #include "../Player/PlayerCharacter.h"
 #include "../WaterSurface/FloatActor.h"
@@ -90,7 +91,8 @@ void ABattleController::BeginPlay()
 	}
 	//最後にフェードアウトを出すため最後に生成
 	InitFadeOut();
-
+	GetPlayer1->SetNoTickSingle(true);
+	GetPlayer2->SetNoTickSingle(true);
 	// BGMを再生
 	AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::STAGE_BGM);
 	AudioComponent->Play(0.0f);
@@ -100,6 +102,20 @@ void ABattleController::BeginPlay()
 void ABattleController::Tick(float DeltaTime)
 {
 	if (DebugScreenMode)return;
+	if (FadeUI->GetFadeIsEnable())return;
+	if (BattleGameStartUIClass != nullptr)
+	{
+		if (!FadeUI->GetFadeIsEnable() && !BattleGameStartUI)
+		{
+			//フェードアウト終了次第カウントダウンを開始するようにする
+			CreateBattleGameStartUI();
+		}
+		if (BattleGameStartUI->GetIsCountDownZero() && GetPlayer1->GetNoTick())
+		{
+			GetPlayer1->SetNoTickSingle(false);
+			GetPlayer2->SetNoTickSingle(false);
+		}
+	}
 	Super::Tick(DeltaTime);
 
 	CheckPlayerFall();
@@ -118,9 +134,10 @@ void ABattleController::Tick(float DeltaTime)
 
 void ABattleController::InitFadeOut()
 {
+	if (FadeUI)return;
 	if (FadeUIClass != nullptr)
 	{
-		UFadeUI* FadeUI = CreateWidget<UFadeUI>(GetWorld(), FadeUIClass);
+		FadeUI = CreateWidget<UFadeUI>(GetWorld(), FadeUIClass);
 		if (FadeUI != nullptr)
 		{
 			FadeUI->AddToViewport();
@@ -207,6 +224,27 @@ void ABattleController::CreateBattleResultUI()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("BattleResultUIClass : %s"), L"UIClass is nullptr");
+	}
+}
+
+void ABattleController::CreateBattleGameStartUI()
+{
+	if (BattleGameStartUI)return;
+	if (BattleGameStartUIClass != nullptr)
+	{
+		BattleGameStartUI = CreateWidget<UBattleGameStartUI>(GetWorld(), BattleGameStartUIClass);
+		if (BattleGameStartUI != nullptr)
+		{
+			BattleGameStartUI->AddToViewport();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("BattleGameStartUIClass : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("BattleGameStartUIClass : %s"), L"UIClass is nullptr");
 	}
 }
 

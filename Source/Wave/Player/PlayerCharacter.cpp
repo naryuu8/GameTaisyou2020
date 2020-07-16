@@ -144,6 +144,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 				AnimInst->IsDeth = true;
 				PlayerDeth();
 			}
+			else
+			{
+				CurrentRaft->Destroy();
+			}
 			Water->AddPower(FVector(CurPos.X, CurPos.Y, 0.0f), ChargePowerMax);
 			IsDeth = true;
 			return;
@@ -194,9 +198,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 					Move(SubDirection.GetSafeNormal2D(), MoveSpeed * 0.5f);
 				}
 			}
-			else if (Water->GetLandPoint(CurPos + Direction * CollisionRadius * 2.0f, CollisionRadius * 0.5f) ||			// 陸を見つけた時
-					CheckTraceGround(HitResult, CurPos + Direction * CollisionRadius * 2.0f, CollisionRadius * 0.3f, CurrentRaft))   // 他のイカダを見つけた時
+			else if ((Water->GetLandPoint(CurPos + Direction * CollisionRadius * 2.0f, CollisionRadius * 0.5f) ||			// 陸を見つけた時
+					CheckTraceGround(HitResult, CurPos + Direction * CollisionRadius * 2.0f, CollisionRadius * 0.3f, CurrentRaft)) && BattleNumber == 0)   // 他のイカダを見つけた時
 			{
+
 				Move(Direction, MoveSpeed * MoveAmount);
 			}
 			// イカダの上に完全に乗っている状態
