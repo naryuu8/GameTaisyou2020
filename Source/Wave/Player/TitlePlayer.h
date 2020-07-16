@@ -12,12 +12,13 @@ class WAVE_API ATitlePlayer : public ACharacter
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere)
 		AActor* TargetPoint = nullptr;
+	UPROPERTY(EditAnywhere)
+		AActor* BattleTargetPoint = nullptr;
 	UPROPERTY(EditAnywhere, Category = "Instanced")
 		float MoveSpeed = 0.02f;//掲示板に向かう時の移動速度
 public:
 	// Sets default values for this character's properties
 	ATitlePlayer();
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -37,8 +38,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	void TargetRotation();//ターゲットの方に向く
-	void TargetMove();//ターゲットの方に移動する
+	void TargetRotation(const bool type);//ターゲットの方に向く
+	void TargetMove(const bool type);//ターゲットの方に移動する
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void SetIsMove(const bool type) { IsMove = type; };
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
