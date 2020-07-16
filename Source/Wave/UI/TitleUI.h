@@ -9,6 +9,7 @@ UENUM(BlueprintType)
 enum class TitleSelectState : uint8
 {
 	GAME_START,
+	BATTLE_MODE,
 	DATA_DELETE,
 	GAME_END,
 };

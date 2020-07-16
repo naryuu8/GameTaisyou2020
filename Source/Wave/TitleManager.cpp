@@ -3,6 +3,7 @@
 
 #include "TitleManager.h"
 #include "Camera/TitleCamera.h"
+#include "Camera/Title_BattleCamera.h"
 #include "Kismet/GameplayStatics.h"
 #include "InputManager.h"
 #include "Player/TitlePlayer.h"
@@ -36,7 +37,7 @@ void ATitleManager::BeginPlay()
 			instance->SetIsStageSelectMode(false);
 			SetCameraMove(StageSelectCamera, 0.0f);
 			StageSelectCamera->SetCenterTitleMemo();
-			TitlePlayer->TargetRotation();
+			TitlePlayer->TargetRotation(IsBattleMode);
 			CreateTitleTipsUI();
 			CreateFadeUI(true);
 		}
@@ -79,7 +80,7 @@ void ATitleManager::Tick(float DeltaTime)
 	CameraMoveCheck();
 	if (State == ETitleState::TitleMove)
 	{
-		TitlePlayer->TargetMove();
+		TitlePlayer->TargetMove(IsBattleMode);
 	}
 }
 
@@ -137,7 +138,14 @@ void ATitleManager::TitleInput()
 		}
 		if (input->Back.IsPress)
 		{
-			StageSelectCamera->SetBack();
+			if (IsBattleMode)
+			{
+				TitleBattleCamera->SetBack();
+			}
+			else
+			{
+				StageSelectCamera->SetBack();
+			}	
 			IsNoInput = true;
 			if (FadeUI)
 			{
@@ -197,8 +205,15 @@ void ATitleManager::SetTitleMoveState()
 {
 	State = ETitleState::TitleMove;
 
-	SetCameraMove(StageSelectCamera, StageSelectTime);
-	TitlePlayer->TargetRotation();
+	if (IsBattleMode)
+	{
+		SetCameraMove(TitleBattleCamera, StageSelectTime);
+	}
+	else
+	{
+		SetCameraMove(StageSelectCamera, StageSelectTime);
+	}
+	TitlePlayer->TargetRotation(IsBattleMode);
 }
 
 void ATitleManager::StageSelectState()
@@ -226,24 +241,32 @@ void ATitleManager::CheckTitleSelectNumber()
 				TitleUI->RemoveFromParent();
 				ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
 				break;
-				case static_cast<int>(TitleSelectState::DATA_DELETE) :
+				case static_cast<int>(TitleSelectState::BATTLE_MODE) :
+					IsBattleMode = true;
+					SetCameraMove(TitleBattleMoveCamera, TitleMoveTime);
 					IsNoInput = true;
-					TitleUI->DeleteSaveData();
-					if (FadeUI)
-					{
-						FadeUI->SetFadeLevel(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), 1.0f, *UGameplayStatics::GetCurrentLevelName(GetWorld()), false);
-					}
+					TitlePlayer->SetIsSelect(true);
+					TitleUI->RemoveFromParent();
 					ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
 					break;
-					case static_cast<int>(TitleSelectState::GAME_END) :
-						TitleUI->EndGame();
-						ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
+					case static_cast<int>(TitleSelectState::DATA_DELETE) :
 						IsNoInput = true;
+						TitleUI->DeleteSaveData();
 						if (FadeUI)
 						{
-							FadeUI->SetFade(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), true, 1.0f, false);
+							FadeUI->SetFadeLevel(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), 1.0f, *UGameplayStatics::GetCurrentLevelName(GetWorld()), false);
 						}
+						ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
 						break;
+						case static_cast<int>(TitleSelectState::GAME_END) :
+							TitleUI->EndGame();
+							ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
+							IsNoInput = true;
+							if (FadeUI)
+							{
+								FadeUI->SetFade(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), true, 1.0f, false);
+							}
+							break;
 		}
 	}
 }

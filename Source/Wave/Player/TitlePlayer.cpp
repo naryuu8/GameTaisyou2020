@@ -16,7 +16,6 @@ ATitlePlayer::ATitlePlayer()
 void ATitlePlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void ATitlePlayer::BeginPlay_C()
@@ -28,7 +27,6 @@ void ATitlePlayer::BeginPlay_C()
 void ATitlePlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -38,16 +36,32 @@ void ATitlePlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 }
 
-void ATitlePlayer::TargetRotation()
+void ATitlePlayer::TargetRotation(const bool type)
 {
-	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(FVector(GetActorLocation().X, GetActorLocation().Y,0.0f), FVector(TargetPoint->GetActorLocation().X, TargetPoint->GetActorLocation().Y, 0.0f)));
+	if (type)
+	{
+		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(FVector(GetActorLocation().X, GetActorLocation().Y, 0.0f), FVector(BattleTargetPoint->GetActorLocation().X, BattleTargetPoint->GetActorLocation().Y, 0.0f)));
+	}
+	else
+	{
+		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(FVector(GetActorLocation().X, GetActorLocation().Y, 0.0f), FVector(TargetPoint->GetActorLocation().X, TargetPoint->GetActorLocation().Y, 0.0f)));
+	}
 }
 
-void ATitlePlayer::TargetMove()
+void ATitlePlayer::TargetMove(const bool type)
 {
 	IsMove = true;
 	if (IsTarget)return;
-	FVector position = FMath::Lerp(this->GetActorLocation(), TargetPoint->GetActorLocation(), MoveSpeed);
+	FVector position;
+	if (type)
+	{
+		position = FMath::Lerp(this->GetActorLocation(), BattleTargetPoint->GetActorLocation(), MoveSpeed);
+	}
+	else
+	{
+		position = FMath::Lerp(this->GetActorLocation(), TargetPoint->GetActorLocation(), MoveSpeed);
+	}
+	
 	float z = this->GetActorLocation().Z;
 	SetActorLocation(FVector(position.X, position.Y,z));
 }
