@@ -36,6 +36,8 @@ public:
 		FORCEINLINE	int GetSelectNumber() const{ return SelectNumber; };
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		bool IsPlayAnimation;//アニメーション再生中ならtrue
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetTextStageNumber(const int number);
 	//呼び出し時にBPでアニメーション再生
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void InitPlayAnimation();
