@@ -17,11 +17,15 @@ ASectionController::ASectionController()
 void ASectionController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SetfromBP();
+
 	State = ESectionState::Challenge;
 	IsClear = false;
 
 	for (AActor* Actor : GoalActors)
 	{
+		if (!Actor) continue;
 		UActorComponent* Component = Actor->GetComponentByClass(UGoalComponent::StaticClass());
 		UGoalComponent* GoalComponent = Cast<UGoalComponent>(Component);
 		if (GoalComponent)

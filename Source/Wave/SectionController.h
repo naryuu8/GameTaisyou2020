@@ -23,14 +23,17 @@ class WAVE_API ASectionController : public AActor
 
 public:
 	//Å@ÉSÅ[Éã
-	UPROPERTY(EditAnywhere, Category = "Section")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Section")
 		TArray<AActor*> GoalActors;
 
 	//Å@ë´èÍ
-	UPROPERTY(EditAnywhere, Category = "Section")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Section")
 		TArray<AScaffold*> Scaffolds;
 
 	ESectionState State;
+
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetfromBP();
 
 protected:
 	bool IsClear;
