@@ -34,6 +34,9 @@ public:
 	//リザルト時入った荷物を取得
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		int CountMaxInNimotu = 0;
+	//表示用ステージ番号
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		int TextStageNumber = 0;
 	//リザルト時入った荷物を0からカウント
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		int CountInNimotu = 0;
@@ -55,6 +58,8 @@ public:
 		float ResultNormaAngle;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		int ResultNormaTime;
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void SetTextStageNumber(const int number) { TextStageNumber = number; };
 	//全てのスタンプが押されていたらtrueを返す
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		bool GetIsAllStamp() const;

@@ -52,6 +52,8 @@ public:
 		ResultState State;//リザルトのステート状態保持
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		ResultSelectState2 SelectState;
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetTextStageNumber(const int number);
 	//フェードインを行いリトライする
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void Retry();

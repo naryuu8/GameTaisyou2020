@@ -12,6 +12,7 @@ enum class ETitleState
 	StageSelect,
 };
 class ATitleCamera;
+class ATitle_BattleCamera;
 class ATitlePlayer;
 class UTitleUI;
 class UFadeUI;
@@ -28,6 +29,10 @@ private:
 		AActor* TitleMoveCamera = nullptr;
 	UPROPERTY(EditAnywhere)
 		ATitleCamera* StageSelectCamera = nullptr;
+	UPROPERTY(EditAnywhere)
+		AActor* TitleBattleMoveCamera = nullptr;
+	UPROPERTY(EditAnywhere)
+		ATitle_BattleCamera* TitleBattleCamera = nullptr;
 	UPROPERTY(EditAnywhere)
 		ATitlePlayer* TitlePlayer = nullptr;
 	UPROPERTY(EditAnywhere)
@@ -59,6 +64,7 @@ private:
 	void CreateTitleTipsUI();
 	UAudioComponent* AudioComponent;
 	UAudioComponent* SelectAudioComponent;
+	bool IsBattleMode = false;
 public:
 	// Sets default values for this pawn's properties
 	ATitleManager();

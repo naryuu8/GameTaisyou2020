@@ -21,6 +21,7 @@
 #include "Components/MaterialBillboardComponent.h"
 #include "../SoundManager.h"
 #include "../WaterSurface/WaterSurface.h"
+#include "../GlobalGameInstance.h"
 // Sets default values
 
 AGameController::AGameController()
@@ -182,6 +183,7 @@ void AGameController::CreateResultUI()
 			ResultUI->SetResultTokeiAnimeCheckEvent(TimeLimit, GetNowTimeAngle(), GetNormaTimeAngle(),NormaTime);
 			ResultUI->SetResultNowNimotuCheckEvent(GoalCount);
 			ResultUI->SetStampAnimeCheckEvent(NormaGoalCount, MaxNimotu);
+			ResultUI->SetTextStageNumber(UGlobalGameInstance::GetInstance()->GetStageNumber() + 1);
 			SetTimeCountPause();
 			IsResult = true;
 		}
@@ -541,6 +543,7 @@ void AGameController::PauseCall()
 				PauseUI->SetNeedleAndBG_Material(GetNowTimeAngle());
 				PauseUI->SetTimeLimit(TimeLimit);
 				PauseUI->SetNormaTime(TimeLimit - NormaTime);
+				PauseUI->SetTextStageNumber(UGlobalGameInstance::GetInstance()->GetStageNumber() + 1);
 				SetTimeCountPause();
 			}
 			else if (PauseUI)
@@ -551,6 +554,7 @@ void AGameController::PauseCall()
 				PauseUI->SetNeedleAndBG_Material(GetNowTimeAngle());
 				PauseUI->SetTimeLimit(TimeLimit);
 				PauseUI->SetNormaTime(TimeLimit - NormaTime);
+				PauseUI->SetTextStageNumber(UGlobalGameInstance::GetInstance()->GetStageNumber() + 1);
 				SetTimeCountPause();
 			}
 			//¶¬‚µ‚Ä‚ànullptr‚¾‚Á‚½‚çƒGƒ‰[•¶•\¦

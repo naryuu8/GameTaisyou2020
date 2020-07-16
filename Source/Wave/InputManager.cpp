@@ -43,8 +43,11 @@ void AInputManager::BeginPlay()
 		Instance->AutoReceiveInput = Instance->AutoPossessPlayer;
 		Instance->SetPlayerState(GetPlayerState());
 		Instance->Controller = UGameplayStatics::CreatePlayer(GetWorld(), i);
-		Instance->SetupPlayerInputComponent(Instance->Controller->InputComponent);
-		InputManagerInstances[i] = Instance;
+		if (Instance->Controller)
+		{
+			Instance->SetupPlayerInputComponent(Instance->Controller->InputComponent);
+			InputManagerInstances[i] = Instance;
+		}
 	}
 }
 
