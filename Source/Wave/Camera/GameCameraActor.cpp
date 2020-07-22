@@ -13,6 +13,7 @@ AGameCameraActor::AGameCameraActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.TickGroup = TG_StartPhysics;
 
 	// カメラブームを生成
 	GameCameraBoom = CreateDefaultSubobject<UGameCameraComponent>(TEXT("GameCameraBoom"));
@@ -25,7 +26,6 @@ AGameCameraActor::AGameCameraActor()
 
 	// カメラブームのメンバにアタッチ
 	GameCameraBoom->SetCamera(Camera);
-	//AActor * Actor = GetWorld()->SpawnActor<AActor>(FVector::ZeroVector, FRotator::ZeroRotator);
 }
 
 // Called when the game starts or when spawned
@@ -41,19 +41,12 @@ void AGameCameraActor::BeginPlay()
 	float Distance = FVector::Dist(Water->GetStartPos(), Center);
 	this->FieldDistance = Distance + FieldDistanceOffset;
 
-	// カメラのビューポートをセット
-	APlayerController *playerControtller = UGameplayStatics::GetPlayerController(this, 0);
-	if (playerControtller)
-	{
-		playerControtller->SetViewTarget(this);
-	}
-
 	ChangeState(new GameCameraStateIdle());
 }
 
 void AGameCameraActor::InputChangeType()
 {
-	auto IM = AInputManager::GetInstance();
+	auto IM = AInputManager::GetInstance((EAutoReceiveInput::Type)(ActiveNum + 1));
 	if (!IM) return;
 
 	auto input = IM->GetState();
@@ -69,6 +62,13 @@ void AGameCameraActor::InputChangeType()
 void AGameCameraActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// カメラのビューポートをセット
+	APlayerController *playerControtller = UGameplayStatics::GetPlayerController(this, ActiveNum);
+	if (playerControtller)
+	{
+		playerControtller->SetViewTarget(this);
+	}
 
 	if (!State) return;
 
