@@ -14,6 +14,7 @@
 #include "../MyFunc.h"
 #include "../SoundManager.h"
 #include "../VersusController.h"
+#include "../Stake.h"
 
 AWaterSurface::AWaterSurface() : AProceduralMeshActor()
 {
@@ -132,6 +133,15 @@ void AWaterSurface::BeginPlay()
 	{
 		// 結構処理に使うのでメンバに登録しておく
 		FoundBreakLand.Add(Cast<ABreakSquareLand>(Actor));
+	}
+
+
+	TArray<AActor*> FoundStakes;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AStake::StaticClass(), FoundStakes);
+	for (auto Actor : FoundStakes)
+	{
+		// 結構処理に使うのでメンバに登録しておく
+		Stakes.Add(Cast<AStake>(Actor));
 	}
 
 
@@ -378,6 +388,11 @@ void AWaterSurface::AddPower(FVector worldPos, float power)
 	int32 WaveY = (worldPos.Y - Vertices[0].Y) / SplitSpace;
 	float HeightPower = FMath::Abs(worldPos.Z);
 	HeightPower = (HeightPower > MaxWaveHight) ? 0.0f : (MaxWaveHight - HeightPower) / MaxWaveHight;
+	
+	for (AStake* Stake : Stakes)
+	{
+		Stake->Push(worldPos);
+	}
 
 	CreateWave(WaveX, WaveY, power * HeightPower);
 }

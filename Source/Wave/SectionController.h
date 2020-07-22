@@ -8,6 +8,7 @@
 
 class UGoalComponent;
 class AScaffold;
+class AStake;
 
 enum class ESectionState
 {
@@ -25,6 +26,10 @@ public:
 	//　ゴール
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Section")
 		TArray<AActor*> GoalActors;
+
+	//　スイッチ
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Section")
+		TArray<AStake*> Stakes;
 
 	//　足場
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Section")

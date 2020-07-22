@@ -5,6 +5,7 @@
 #include "Object/GoalComponent.h"
 #include "Scaffold.h"
 #include "TimerManager.h"
+#include "Stake.h"
 
 // Sets default values
 ASectionController::ASectionController()
@@ -56,6 +57,11 @@ bool ASectionController::CheckClear()
 	for (UGoalComponent* Goal : Goals)
 	{
 		if (!Goal->GetIsGoal()) return false;
+	}
+
+	for (AStake* Stake: Stakes)
+	{
+		if (!Stake->GetIsOn()) return false;
 	}
 
 	return true;
