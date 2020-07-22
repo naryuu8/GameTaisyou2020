@@ -32,8 +32,8 @@ public:
 
 	ESectionState State;
 
-	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
-		void SetfromBP();
+	TArray<UGoalComponent*> Goals;
+
 
 protected:
 	bool IsClear;
@@ -42,7 +42,10 @@ public:
 	// Sets default values for this actor's properties
 	ASectionController();
 
-	TArray<UGoalComponent*> Goals;
+	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
+		void SetfromBP();
+
+	bool GetIsClear() { return IsClear; }
 
 protected:
 	// Called when the game starts or when spawned

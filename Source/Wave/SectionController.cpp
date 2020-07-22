@@ -47,6 +47,7 @@ void ASectionController::Tick(float DeltaTime)
 	if (CheckClear())
 	{
 		OnClear();
+		State = ESectionState::Clear;
 	}
 }
 

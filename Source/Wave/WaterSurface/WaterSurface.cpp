@@ -13,6 +13,7 @@
 #include "BreakSquareLand.h"
 #include "../MyFunc.h"
 #include "../SoundManager.h"
+#include "../VersusController.h"
 
 AWaterSurface::AWaterSurface() : AProceduralMeshActor()
 {
@@ -22,6 +23,17 @@ AWaterSurface::AWaterSurface() : AProceduralMeshActor()
 void AWaterSurface::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// もしバーサスコントローラーが存在すれば、そちらの処理を最初にす
+	AActor* VersusActor = UGameplayStatics::GetActorOfClass(GetWorld(), AVersusController::StaticClass());
+	if (VersusActor)
+	{
+		AVersusController* VersusController = (AVersusController*)VersusActor;
+		if (VersusController)
+		{
+			VersusController->CreateSections();
+		}
+	}
 
 	SetActorTransform(FTransform::Identity);
 
