@@ -34,6 +34,9 @@ void AFloatActor::BeginPlay()
 	IsFall = false;
 	IsDeth = false;
 	IsTick = true;
+
+	if (Respawn)
+		ResetLocation = GetActorLocation();
 }
 
 // Called every frame
@@ -87,7 +90,14 @@ void AFloatActor::Tick(float DeltaTime)
 		// 数秒後にオブジェクトを削除
 		FTimerManager& timerManager = GetWorld()->GetTimerManager();
 		FTimerHandle handle;
-		timerManager.SetTimer(handle, this, &AFloatActor::MyDestroy, 3.5f);
+		if (Respawn)
+		{
+			timerManager.SetTimer(handle, this, &AFloatActor::Reset, 3.5f);
+		}
+		else
+		{
+			timerManager.SetTimer(handle, this, &AFloatActor::MyDestroy, 3.5f);
+		}
 		return;
 	}
 
@@ -105,6 +115,17 @@ void AFloatActor::Tick(float DeltaTime)
 	}
 
 	RootComponent->UpdateChildTransforms();
+}
+
+void AFloatActor::Reset()
+{
+	SetActorLocation(ResetLocation);
+	if (FloatAudio) 
+	{ 
+		if (FloatAudio->IsPlaying()) FloatAudio->Stop();
+	}
+	IsFall = false;
+	Velocity = FVector::ZeroVector;
 }
 
 FVector AFloatActor::AdjustMove_VS_Circle(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius)

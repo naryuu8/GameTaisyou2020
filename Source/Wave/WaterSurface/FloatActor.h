@@ -43,6 +43,12 @@ protected:
 		float Friction = 0.02f;	// –€ŽC
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0"))
 		float Repulsion = 1.0f;
+
+	UPROPERTY(EditAnywhere)
+		bool Respawn = false;
+
+	FVector ResetLocation;
+	void Reset();
 	
 	UPROPERTY(EditAnywhere)
 		TEnumAsByte<FloatType> Type = FloatType::Circle;
