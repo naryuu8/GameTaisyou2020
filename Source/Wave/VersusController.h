@@ -22,7 +22,7 @@ private:
 	TArray<ASectionController*> Player1Sections;
 	TArray<ASectionController*> Player2Sections;
 
-	float SectionSize = 1600;
+	float SectionSize = 2000;
 	
 public:	
 	// Sets default values for this actor's properties
