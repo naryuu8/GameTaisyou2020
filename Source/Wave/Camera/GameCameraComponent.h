@@ -20,6 +20,8 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	int inputTargetNum = 0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	class UCameraComponent * FollowCamera;
 

@@ -2,6 +2,7 @@
 
 #include "GameCameraComponent.h"
 #include "Camera/CameraComponent.h"
+#include "GameCameraActor.h"
 #include "../InputManager.h"
 #include "../MyFunc.h"
 
@@ -22,6 +23,9 @@ void UGameCameraComponent::BeginPlay()
 		// ‰Šú‚ÌƒJƒƒ‰‹——£‚Å‰Šú‰»
 		FollowDistance = FollowCamera->GetRelativeLocation().Z;
 	}
+	AGameCameraActor * camera = Cast<AGameCameraActor>(GetOwner());
+	if (camera)
+		inputTargetNum = camera->ActiveNum;
 }
 
 void UGameCameraComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -39,7 +43,7 @@ void UGameCameraComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 
 void UGameCameraComponent::InputUpdateRotation()
 {
-	const AInputManager * inputManager = AInputManager::GetInstance();
+	const AInputManager * inputManager = AInputManager::GetInstance((EAutoReceiveInput::Type)(inputTargetNum + 1));
 	if (!inputManager) return;
 	const InputState * input = inputManager->GetState();
 

@@ -9,6 +9,7 @@
 class ALandPoint;
 class AFlashFlood;
 class ABreakSquareLand;
+class AStake;
 
 enum class VertexType
 {
@@ -100,4 +101,5 @@ private:
 	TArray<ALandPoint*> LandPointActors;	// 衝突処理などに使うのでメンバにする
 	TArray<AFlashFlood*> FlashFloods;		// 水流の計算に使うのでメンバにする
 	TArray<ABreakSquareLand*> BreakLands;	// ハンマーで床壊すときに使う
+	TArray<AStake*> Stakes;
 };
