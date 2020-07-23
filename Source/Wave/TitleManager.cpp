@@ -26,6 +26,8 @@ ATitleManager::ATitleManager()
 void ATitleManager::BeginPlay()
 {
 	Super::BeginPlay();
+	// 画面分割無効
+	GetWorld()->GetGameViewport()->SetForceDisableSplitscreen(true);
 	UGlobalGameInstance* instance = UGlobalGameInstance::GetInstance();
 	if (instance)
 	{//リザルト画面やポーズ画面からステージ選択に戻ったらステージセレクト画面からにする
@@ -99,10 +101,21 @@ void ATitleManager::TitleInput()
 		}
 		if (State == ETitleState::StageSelect)
 		{
-			if (!StageSelectCamera->GetIsSelectMap())
+			if (IsBattleMode)
 			{
-				ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
-				StageSelectCamera->SelectInput();
+				if (!TitleBattleCamera->GetIsSelectMap())
+				{
+					ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
+					TitleBattleCamera->SelectInput();
+				}
+			}
+			else
+			{
+				if (!StageSelectCamera->GetIsSelectMap())
+				{
+					ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
+					StageSelectCamera->SelectInput();
+				}
 			}
 		}
 	}

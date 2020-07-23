@@ -302,13 +302,16 @@ void APlayerCharacter::Tick(float DeltaTime)
 	ChageUpDateEmmiter();
 
 	//カメラにレイを飛ばして当たらなければアウトライン適用
-	ACharacter* myCharacter = this;
-	FVector Start = this->GetActorLocation();
-	FVector End = (FollowCamera->Camera->GetComponentLocation() - Start) * 10000 + Start;
+	if (FollowCamera)
+	{
+		ACharacter* myCharacter = this;
+		FVector Start = this->GetActorLocation();
+		FVector End = (FollowCamera->Camera->GetComponentLocation() - Start) * 10000 + Start;
 
-	FHitResult HitData(ForceInit);
-	if (Trace(AActor::GetWorld(), myCharacter, Start, End, HitData) && HitData.GetActor()) OutLineDraw();
-	else OutLineNotDraw();
+		FHitResult HitData(ForceInit);
+		if (Trace(AActor::GetWorld(), myCharacter, Start, End, HitData) && HitData.GetActor()) OutLineDraw();
+		else OutLineNotDraw();
+	}
 }
 
 void APlayerCharacter::Move(const FVector & Direction, float Value)
