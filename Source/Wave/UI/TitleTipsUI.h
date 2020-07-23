@@ -14,8 +14,13 @@ class WAVE_API UTitleTipsUI : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		bool IsStickDraw = false;
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void SetNoDraw();
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void SetDraw();
+	void SetIsStickDraw(const bool type) { IsStickDraw = type; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE	bool GetIsStickDraw() const { return IsStickDraw; }
 };

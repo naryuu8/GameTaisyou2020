@@ -238,6 +238,14 @@ void ATitleManager::StageSelectState()
 		AudioComponent->Stop();
 	}
 	TitleTipsUI->SetDraw();
+	if (IsBattleMode)
+	{
+		TitleTipsUI->SetIsStickDraw(false);
+	}
+	else
+	{
+		TitleTipsUI->SetIsStickDraw(true);
+	}
 	IsNoInput = false;
 }
 
