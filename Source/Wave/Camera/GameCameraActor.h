@@ -27,6 +27,9 @@ public:
 	// Sets default values for this actor's properties
 	AGameCameraActor();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+		int ActiveNum = 0;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		UGameCameraComponent * GameCameraBoom;
 
@@ -59,6 +62,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	GameCameraState * State;
+	
 
 public:	
 	// Called every frame

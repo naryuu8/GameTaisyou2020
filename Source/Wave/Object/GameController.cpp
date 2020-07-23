@@ -34,6 +34,10 @@ AGameController::AGameController()
 void AGameController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// ‰æ–Ê•ªŠ„–³Œø
+	GetWorld()->GetGameViewport()->SetForceDisableSplitscreen(true);
+
 	GetPlayer = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	IsGameClear = false;
 	IsGameOver = false;

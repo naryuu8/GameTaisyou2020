@@ -20,6 +20,7 @@
 #include "Components/MaterialBillboardComponent.h"
 #include "../SoundManager.h"
 #include "../WaterSurface/WaterSurface.h"
+#include "Engine/GameViewportClient.h"
 
 // Sets default values
 ABattleController::ABattleController()
@@ -33,6 +34,9 @@ ABattleController::ABattleController()
 void ABattleController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 画面分割有効
+	GetWorld()->GetGameViewport()->SetForceDisableSplitscreen(false);
 
 	// 各プレイヤーを取得
 	TArray<class AActor*> FoundPlayers;
