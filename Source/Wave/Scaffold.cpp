@@ -70,13 +70,14 @@ void AScaffold::Clear()
 
 	SetIsUse(true);
 
-	TArray<AActor*> WaterSurface;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWaterSurface::StaticClass(), WaterSurface);
-	for (auto Actor : WaterSurface)
-	{
-		AWaterSurface * Water = Cast<AWaterSurface>(Actor);
-		if (!Water)continue;
-		SetIsUse(false);
-		Water->SetSquareLand(GetActorLocation(), XLength, YLength, VertexType::Land);
-	}
+	AActor* WaterActor = UGameplayStatics::GetActorOfClass(GetWorld(), AWaterSurface::StaticClass());
+	if (!WaterActor) return;
+
+	AWaterSurface* WaterSurface = (AWaterSurface*)WaterActor;
+	if (!WaterSurface) return;
+	
+	UE_LOG(LogTemp, Log, TEXT("LOG_TEST"));
+
+	SetIsUse(false);
+	WaterSurface->SetSquareLand(GetActorLocation(), XLength, YLength, VertexType::Land);
 }

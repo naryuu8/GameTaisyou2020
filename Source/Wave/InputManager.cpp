@@ -37,18 +37,35 @@ void AInputManager::BeginPlay()
 	
 	for (int i = 1; i < MAX_INPUT_INSTANCE; i++)
 	{
-		AInputManager * Instance = GetWorld()->SpawnActor<AInputManager>();
-		// 入力イベントを受け取る番号を指定
-		Instance->AutoPossessPlayer = (EAutoReceiveInput::Type)(i + 1);
-		Instance->AutoReceiveInput = Instance->AutoPossessPlayer;
-		Instance->SetPlayerState(GetPlayerState());
-		Instance->Controller = UGameplayStatics::CreatePlayer(GetWorld(), i);
-		if (Instance->Controller)
-		{
-			Instance->SetupPlayerInputComponent(Instance->Controller->InputComponent);
-			InputManagerInstances[i] = Instance;
-		}
+		UGameplayStatics::CreatePlayer(GetWorld(), i);
 	}
+
+	TArray<AActor*> actors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AInputManager::StaticClass(), actors);
+
+	int num = 1;
+	for (auto actor : actors)
+	{
+		if (actor == this) continue;
+
+		InputManagerInstances[num] = Cast<AInputManager>(actor);
+		num++;
+	}
+
+	//for (int i = 1; i < MAX_INPUT_INSTANCE; i++)
+	//{
+	//	AInputManager * Instance = GetWorld()->SpawnActor<AInputManager>();
+	//	// 入力イベントを受け取る番号を指定
+	//	Instance->AutoPossessPlayer = (EAutoReceiveInput::Type)(i + 1);
+	//	Instance->AutoReceiveInput = Instance->AutoPossessPlayer;
+	//	Instance->SetPlayerState(GetPlayerState());
+	//	Instance->Controller = UGameplayStatics::CreatePlayer(GetWorld(), i);
+	//	if (Instance->Controller)
+	//	{
+	//		Instance->SetupPlayerInputComponent(Instance->Controller->InputComponent);
+	//		InputManagerInstances[i] = Instance;
+	//	}
+	//}
 }
 
 const AInputManager * AInputManager::GetInstance(EAutoReceiveInput::Type Index)

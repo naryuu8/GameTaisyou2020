@@ -67,13 +67,15 @@ void APlayerCharacter::BeginPlay_C()
 	AnimInst->AttackEndCallBack.BindUObject(this, &APlayerCharacter::HummerAttackEnd);
 
 	// シーン上のゲームカメラを検索する
-	AGameCameraActor* cameraActor;
-	cameraActor = Cast<AGameCameraActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameCameraActor::StaticClass()));
-	if (cameraActor)
+	if (BattleNumber == 0)
+	{
+		FollowCamera = Cast<AGameCameraActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameCameraActor::StaticClass()));
+	}
+	
+	if (FollowCamera)
 	{
 		// 互いにプレイヤーとカメラの参照をセット
-		FollowCamera = cameraActor;
-		cameraActor->SetFollowTarget(this);
+		FollowCamera->SetFollowTarget(this);
 	}
 	HammerPower = 0.0f;
 	HammerHP = 0.0f;
@@ -146,7 +148,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			}
 			else
 			{
-				CurrentRaft->Destroy();
+				if(CurrentRaft) CurrentRaft->Destroy();
 			}
 			Water->AddPower(FVector(CurPos.X, CurPos.Y, 0.0f), ChargePowerMax);
 			IsDeth = true;
