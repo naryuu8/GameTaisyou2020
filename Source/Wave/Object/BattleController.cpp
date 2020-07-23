@@ -209,8 +209,6 @@ void ABattleController::CreateBattleResultUI()
 		if (BattleResultUI != nullptr)
 		{
 			BattleResultUI->AddToViewport();
-			BattleResultUI->SetPlayerScore(0, Player1Score);
-			BattleResultUI->SetPlayerScore(1, Player2Score);
 			if (Player1Score >= Player2Score)
 			{
 				BattleResultUI->SetWinPlayer(true);
