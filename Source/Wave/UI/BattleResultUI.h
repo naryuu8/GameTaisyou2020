@@ -41,4 +41,9 @@ public:
 	//フェードインを行いステージ選択画面に戻る
 	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
 		void StageSelectChenge();
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		void SetIsNoInput(const bool type) { IsNoInput = type; }
+	UFUNCTION(BlueprintCallable, Category = "C++Library")
+		FORCEINLINE bool GetIsNoInput() const { return IsNoInput; }
+	
 };
