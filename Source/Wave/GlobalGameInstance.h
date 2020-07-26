@@ -29,6 +29,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "GlobalC++Class")
 		FORCEINLINE bool GetIsStageSelectMode() const { return IsStageSelectMode; }
+	//ゲームパッドが接続されていたらtrueを返す
+	UFUNCTION(BlueprintCallable, Category = "GlobalC++Class")
+		bool GetIsGamePad() const;
 
 	void SetIsStageSelectMode(const bool set) { IsStageSelectMode = set; }
 	UFUNCTION(BlueprintCallable, Category = "GlobalC++Class")

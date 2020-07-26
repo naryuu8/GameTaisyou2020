@@ -4,6 +4,7 @@
 #include "GlobalGameInstance.h"
 #include "Engine/Engine.h"
 #include "Kismet/GameplayStatics.h"
+#include "GenericPlatform/GenericApplication.h"
 
 UGlobalGameInstance* UGlobalGameInstance::GetInstance()
 {
@@ -16,6 +17,18 @@ UGlobalGameInstance* UGlobalGameInstance::GetInstance()
 	}
 
 	return instance;
+}
+
+bool UGlobalGameInstance::GetIsGamePad() const
+{
+	auto genericApplication = FSlateApplication::Get().GetPlatformApplication();
+	if (genericApplication.Get() != nullptr &&
+		genericApplication->IsGamepadAttached())
+	{
+		return true;
+	}
+
+	return false;
 }
 
 void UGlobalGameInstance::StageSelectChenge()
