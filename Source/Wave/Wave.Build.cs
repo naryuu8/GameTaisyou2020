@@ -19,7 +19,8 @@ public class Wave : ModuleRules
             "InputCore",
             "ProceduralMeshComponent",
             "Slate",
-            "Niagara"
+            "Niagara",
+            "SlateCore",
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] {
