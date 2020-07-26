@@ -5,7 +5,8 @@
 #include "SectionController.h"
 #include "Kismet/GameplayStatics.h"
 #include "WaterSurface/WaterSurface.h"
-
+#include "UI/BattleResultUI.h"
+#include "InputManager.h"
 // Sets default values
 AVersusController::AVersusController()
 {
@@ -45,3 +46,46 @@ void AVersusController::Tick(float DeltaTime)
 
 }
 
+void AVersusController::CreateBattleResultUI()
+{
+	if (BattleResultUI)return;
+	if (BattleResultUIClass != nullptr)
+	{
+		BattleResultUI = CreateWidget<UBattleResultUI>(GetWorld(), BattleResultUIClass);
+		if (BattleResultUI != nullptr)
+		{
+			BattleResultUI->SetWinPlayer(true);
+			BattleResultUI->AddToViewport();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("BattleResultUIClass : %s"), L"Widget cannot create");
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("BattleResultUIClass : %s"), L"UIClass is nullptr");
+	}
+}
+
+void AVersusController::InputBattleResultUI()
+{
+	if (!BattleResultUI)return;
+	if (BattleResultUI->GetIsNoInput())return;
+	const AInputManager * inputManager = AInputManager::GetInstance();
+	if (!inputManager)return;
+
+	const InputState * input = inputManager->GetState();
+	if (input->Right.IsPress)
+	{
+		BattleResultUI->NextSelectState();
+	}
+	if (input->Left.IsPress)
+	{
+		BattleResultUI->BackSelectState();
+	}
+	if (input->Select.IsPress)
+	{
+		BattleResultUI->SelectStateAction();
+	}
+}

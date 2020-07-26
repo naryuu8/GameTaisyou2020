@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "VersusController.generated.h"
-
+class UBattleResultUI;
 UCLASS()
 class WAVE_API AVersusController : public AActor
 {
@@ -14,7 +14,10 @@ public:
 	// セクションの登録
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Versus")
 		TArray<TSubclassOf<class ASectionController>> Sections;
-
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UBattleResultUI> BattleResultUIClass = nullptr;
+	UPROPERTY()
+		UBattleResultUI* BattleResultUI = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Versus")
 		float SectionCount = 5;
 
@@ -23,7 +26,10 @@ private:
 	TArray<ASectionController*> Player2Sections;
 
 	float SectionSize = 2000;
-	
+	//リザルトUIを作成
+	//勝敗が決定したら呼ぶ
+	void CreateBattleResultUI();
+	void InputBattleResultUI();
 public:	
 	// Sets default values for this actor's properties
 	AVersusController();

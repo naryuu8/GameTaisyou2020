@@ -102,11 +102,18 @@ void ATitleManager::TitleInput()
 		if (State == ETitleState::StageSelect)
 		{
 			if (IsBattleMode)
-			{
-				if (!TitleBattleCamera->GetIsSelectMap())
+			{//ゲームパッドが接続されていたら対戦モード遷移
+				if (UGlobalGameInstance::GetInstance()->GetIsGamePad())
 				{
-					ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
-					TitleBattleCamera->SelectInput();
+					if (!TitleBattleCamera->GetIsSelectMap())
+					{
+						ASoundManager::SafePlaySound(SOUND_TYPE::MENU_DECISION);
+						TitleBattleCamera->SelectInput();
+					}
+				}
+				else
+				{
+					//なかったら音声を鳴らす
 				}
 			}
 			else
