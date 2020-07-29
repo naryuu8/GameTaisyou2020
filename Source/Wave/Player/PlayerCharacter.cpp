@@ -610,9 +610,10 @@ void APlayerCharacter::SetNoTick()
 	MoveAmount = 0.0f;
 }
 
-void APlayerCharacter::SetGameClear()
+void APlayerCharacter::SetGameFinish(bool isClear)
 {
-	AnimInst->IsClear = true;
+	((isClear) ? AnimInst->IsClear : AnimInst->IsGameOver) = true;
+
 	FollowCamera->ChangeState(new GameCameraStateClear());
 
 	// プレイヤーがイカダに乗っていたらイカダの更新を止める

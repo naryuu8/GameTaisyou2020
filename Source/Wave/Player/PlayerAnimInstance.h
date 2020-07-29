@@ -25,6 +25,8 @@ public:
 		bool IsClear;
 	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
 		bool IsDeth;
+	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
+		bool IsGameOver;
 private:
 	//UAnimMontage* AnimMontage;
 	FAnimNode_StateMachine * AnimState;
