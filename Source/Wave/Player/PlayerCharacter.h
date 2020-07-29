@@ -60,7 +60,7 @@ private:
 		int BattleNumber = 0;
 	// ƒvƒŒƒCƒ„[‚Ì“–‚½‚è”»’è‚Ì”¼Œa
 	//UPROPERTY(EditAnywhere, Category = "Parameter")
-		float CollisionRadius = 0.0f;
+		float CollisionRadius = 10.0f;
 
 	//UPROPERTY(EditAnywhere, Category = "Effect")
 	//	bool  Now = 100.0f;

@@ -67,7 +67,7 @@ void APlayerCharacter::BeginPlay_C()
 	AnimInst->AttackEndCallBack.BindUObject(this, &APlayerCharacter::HummerAttackEnd);
 
 	// シーン上のゲームカメラを検索する
-	if (BattleNumber == 0)
+//	if (BattleNumber == 0)
 	{
 		FollowCamera = Cast<AGameCameraActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameCameraActor::StaticClass()));
 	}
@@ -125,38 +125,29 @@ void APlayerCharacter::Tick(float DeltaTime)
 				ASoundManager::SafePlaySound(SOUND_TYPE::FALL_ACTOR);
 			}
 
-			if (BattleNumber == 0)
-			{
-				FollowCamera->ChangeState(new GameCameraStateFall(CurPos));
-				AGameCameraFocusPoint::SpawnFocusPoint(this, CurPos, 1.0f);
+			FollowCamera->ChangeState(new GameCameraStateFall(CurPos));
+			AGameCameraFocusPoint::SpawnFocusPoint(this, CurPos, 1.0f);
 
-				UCapsuleComponent * Collision = Cast<UCapsuleComponent>(GetComponentByClass(UCapsuleComponent::StaticClass()));
-				if (Collision)
-				{
-					Collision->ComponentVelocity = FVector::ZeroVector;
-					Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-					Collision->SetActive(false);
-				}
-				USkeletalMeshComponent * SkeletalMesh = Cast<USkeletalMeshComponent>(GetComponentByClass(USkeletalMeshComponent::StaticClass()));
-				if (SkeletalMesh)
-				{
-					SkeletalMesh->ComponentVelocity = FVector::ZeroVector;
-				}
-
-				AnimInst->IsDeth = true;
-				PlayerDeth();
-			}
-			else
+			UCapsuleComponent * Collision = Cast<UCapsuleComponent>(GetComponentByClass(UCapsuleComponent::StaticClass()));
+			if (Collision)
 			{
-				if(CurrentRaft) CurrentRaft->Destroy();
+				Collision->ComponentVelocity = FVector::ZeroVector;
+				Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				Collision->SetActive(false);
 			}
+			USkeletalMeshComponent * SkeletalMesh = Cast<USkeletalMeshComponent>(GetComponentByClass(USkeletalMeshComponent::StaticClass()));
+			if (SkeletalMesh)
+			{
+				SkeletalMesh->ComponentVelocity = FVector::ZeroVector;
+			}
+
+			AnimInst->IsDeth = true;
+			PlayerDeth();
 			Water->AddPower(FVector(CurPos.X, CurPos.Y, 0.0f), ChargePowerMax);
 			IsDeth = true;
 			return;
 		}
 	}
-
-
 
 	const AInputManager * inputManager = AInputManager::GetInstance(InputManagerIndex);
 	if (inputManager)
@@ -179,11 +170,12 @@ void APlayerCharacter::Tick(float DeltaTime)
 		FVector moveForce = Direction * MoveAmount * MoveSpeed;
 		FVector moveDir = moveForce.GetSafeNormal();
 
+		UE_LOG(LogTemp, Log, TEXT("PM1"));
 		// イカダに乗っている時
 		if (CurrentRaft != nullptr)
 		{
 			FHitResult HitResult(ForceInit);
-			
+
 			if (!IsInRaft)
 			{
 				if (CurrentRaft->IsInRaft(CurPos, CollisionRadius))
@@ -200,10 +192,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 					Move(SubDirection.GetSafeNormal2D(), MoveSpeed * 0.5f);
 				}
 			}
-			else if ((Water->GetLandPoint(CurPos + Direction * CollisionRadius * 2.0f, CollisionRadius * 0.5f) ||			// 陸を見つけた時
-					CheckTraceGround(HitResult, CurPos + Direction * CollisionRadius * 2.0f, CollisionRadius * 0.3f, CurrentRaft)) && BattleNumber == 0)   // 他のイカダを見つけた時
+			else if (Water->GetLandPoint(CurPos + Direction * CollisionRadius * 2.0f, CollisionRadius * 0.5f) ||			// 陸を見つけた時
+					CheckTraceGround(HitResult, CurPos + Direction * CollisionRadius * 2.0f, CollisionRadius * 0.3f, CurrentRaft))   // 他のイカダを見つけた時
 			{
-
 				Move(Direction, MoveSpeed * MoveAmount);
 			}
 			// イカダの上に完全に乗っている状態
@@ -227,6 +218,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			// 地上にいる時
 			else
 			{
+				UE_LOG(LogTemp, Log, TEXT("PM2"));
 				float WaterCheckRadius = CollisionRadius * 1.2f;
 				float dist = WaterCheckRadius * 1.3f;
 				FVector WaterCheckPos = CurPos + moveDir * dist;
