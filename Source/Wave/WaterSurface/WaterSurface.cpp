@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "CircleLand.h"
 #include "SquareLand.h"
+#include "../Scaffold.h"
 #include "FlashFlood.h"
 #include "FloatActor.h"
 #include "BreakSquareLand.h"
@@ -103,6 +104,8 @@ void AWaterSurface::BeginPlay()
 	for (auto Actor : LandPointActors)
 	{
 		if (Actor->IsLand) continue;
+		if (Cast<AScaffold>(Actor)) continue;
+
 		// ‰~Œ`‚Ì’nŒ`‚Ì‰Šú‰»
 		ACircleLand* CircleLand = Cast<ACircleLand>(Actor);
 		if (CircleLand)

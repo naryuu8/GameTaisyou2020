@@ -36,6 +36,7 @@ void AScaffold::BeginPlay()
 		SetIsUse(false);
 		Water->SetSquareLand(GetActorLocation(), XLength, YLength, VertexType::Water);
 	}
+	IsLand = false;
 }
 
 // Called every frame
@@ -79,5 +80,6 @@ void AScaffold::Clear()
 	UE_LOG(LogTemp, Log, TEXT("LOG_TEST"));
 
 	SetIsUse(false);
+	IsLand = true;
 	WaterSurface->SetSquareLand(GetActorLocation(), XLength, YLength, VertexType::Land);
 }
