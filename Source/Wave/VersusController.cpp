@@ -84,8 +84,8 @@ void AVersusController::BeginPlay()
 	//CreateGameTimeUI();
 
 	// TODO::バトル用のUIに作成
-	//GetPlayer1->CreateHammerCountBarUI();
-	//GetPlayer2->CreateHammerCountBarUI();
+	// GetPlayer1->CreateHammerCountBarUI();
+	// GetPlayer2->CreateHammerCountBarUI();
 	if (IsTips)
 	{
 		CreateControlTipsUI();
@@ -145,6 +145,8 @@ void AVersusController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	CheckPlayerFall();
+
+	if (IsBatlleFinish)InputBattleResultUI();
 
 	UpdateTime();
 	if (GetLimitTimeZero())
@@ -427,9 +429,6 @@ void AVersusController::SetAllInvisibleStageIcon()
 
 void AVersusController::BattleFinish()
 {
-	// TODO::勝敗の判定をしてバトル用リザルトUIを開く
-
-	IsBatlleFinish = true;
 }
 
 void AVersusController::CheckPlayerFall()
@@ -450,7 +449,14 @@ void AVersusController::CheckPlayerFall()
 
 void AVersusController::Goal(int BattleNumber)
 {
-	BattleFinish();
+	if (IsBatlleFinish) return;
 
-	UE_LOG(LogTemp, Error, TEXT("BattleNumber = %d"), BattleNumber);
+	CreateBattleResultUI();
+	BattleResultUI->SetWinPlayer(BattleNumber == 1);
+
+	GetPlayer1->SetNoTick();
+	GetPlayer2->SetNoTick();
+
+	UE_LOG(LogTemp, Error, TEXT("Goal %d P"),BattleNumber);
+	IsBatlleFinish = true;
 }
