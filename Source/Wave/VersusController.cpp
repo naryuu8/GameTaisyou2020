@@ -153,16 +153,16 @@ void AVersusController::Tick(float DeltaTime)
 	//	UGameplayStatics::SetGamePaused(GetWorld(), true);
 	//}
 
-	UpdateTime();
-	if (GetLimitTimeZero())
-	{
-		//Å@Ç«Ç§ÇµÇÊÇ§Ç©
-	}
-	if (IsTimeOver)
-	{
-		CreateBattleResultUI();
-		UGameplayStatics::SetGamePaused(GetWorld(), true);
-	}
+	//UpdateTime();
+	//if (GetLimitTimeZero())
+	//{
+	//	//Å@Ç«Ç§ÇµÇÊÇ§Ç©
+	//}
+	//if (IsTimeOver)
+	//{
+	//	CreateBattleResultUI();
+	//	UGameplayStatics::SetGamePaused(GetWorld(), true);
+	//}
 }
 
 void AVersusController::InputBattleResultUI()
