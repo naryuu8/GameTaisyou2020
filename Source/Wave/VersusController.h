@@ -22,9 +22,6 @@ class WAVE_API AVersusController : public AActor
 {
 	GENERATED_BODY()
 public:
-	//制限時間
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game")
-		int TimeLimit = 60;
 	//スクリーンショット用デバッグフラグ
 	UPROPERTY(EditAnywhere, Category = "Game")
 		bool DebugScreenMode = false;
@@ -43,7 +40,6 @@ private:
 	int Player2Score = 0;
 
 	bool IsBatlleFinish = false;
-	bool IsPause = false;
 	bool IsResult = false;
 	bool IsStartResultEvent = false;
 
@@ -53,8 +49,6 @@ private:
 		TSubclassOf<UFadeUI> FadeUIClass;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UControlTipsUI> ControlTipsUIClass;
-	UPROPERTY(EditAnywhere)
-		TSubclassOf<UBattleTimeUI> BattleTimeUIClass = nullptr;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UBattleResultUI> BattleResultUIClass = nullptr;
 	UPROPERTY(EditAnywhere)
@@ -78,28 +72,6 @@ private:
 	UPROPERTY()
 		UFadeUI* FadeUI = nullptr;
 public:
-	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
-		UBattleTimeUI* BattleTimeUI = nullptr;
-	UPROPERTY(BlueprintReadWrite, Category = "C++Class")
-		bool IsTimeOver = false;
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		float GetNowTimeAngle();
-
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		FORCEINLINE int GetTimeLimit() const { return TimeLimit; }
-
-	//制限時間をセット
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		void SetTime(const int time) { TimeLimit = time; }
-
-	//タイムカウントアニメが再生されていたら一時停止する
-	void SetTimeCountPause();
-	//タイムカウントアニメが止まっていたら続きから再生する
-	void SetTimeCountRePlay();
-
-	// ポーズ呼び出し
-	UFUNCTION(BlueprintCallable, Category = "C++Library")
-		void PauseCall();
 
 	//　ポーズやリザルト時に必要な入力関数
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
@@ -111,25 +83,16 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "C++Library")
 		void StopBGM();
-	//時間カウントタイムラインを開始
-	UFUNCTION(Category = "C++Event", BlueprintImplementableEvent, BlueprintCallable)
-		void StartTimeCount();
 private:
 
 	// 操作説明UIを作成
 	void CreateControlTipsUI();
-	//時間UIを作成
-	void CreateBattleTimeUI();
 	//リザルトUIを作成
 	void CreateBattleResultUI();
 	//開始時のカウントダウン作成
 	void CreateBattleGameStartUI();
 	//ゲーム開始時のフェードアウト
 	void InitFadeOut();
-	//時計の針を進める
-	void UpdateTime();
-	//カウントダウンの残り時間0の時trueを返す
-	bool GetLimitTimeZero();
 	//表示しているUIを非表示にする
 	void RemoveUI();
 	// ステージ上のアイコンを非表示
