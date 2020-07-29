@@ -182,12 +182,6 @@ void AVersusController::Tick(float DeltaTime)
 	CheckPlayerFall();
 
 	if (IsBatlleFinish)InputBattleResultUI();
-
-	//if (IsTimeOver)
-	//{
-	//	CreateBattleResultUI();
-	//	UGameplayStatics::SetGamePaused(GetWorld(), true);
-	//}
 }
 
 void AVersusController::InputBattleResultUI()
