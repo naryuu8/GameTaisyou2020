@@ -36,7 +36,10 @@ static TCHAR* FileNames[] =
 	TEXT("SoundWave'/Game/Main/Sound/SE/syukuhuku.syukuhuku'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/time_1.time_1'"),
 	TEXT("SoundWave'/Game/Main/Sound/SE/fade_in.fade_in'"),
-	TEXT("SoundWave'/Game/Main/Sound/SE/fade_out.fade_out'")
+	TEXT("SoundWave'/Game/Main/Sound/SE/fade_out.fade_out'"),
+	TEXT("SoundCue'/Game/Main/Sound/Versus.Versus'"),
+	TEXT("SoundWave'/Game/Main/Sound/Whistle.Whistle'"),
+	TEXT("SoundWave'/Game/Main/Sound/Repop1.Repop1'")
 };
 
 // Sets default values

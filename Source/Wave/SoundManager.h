@@ -43,7 +43,10 @@ enum class SOUND_TYPE : uint8
 	ALL_STAMP		UMETA(DisplayName = "AllStamp"),
 	TIME_CHECK		UMETA(DisplayName = "TimeCheck"),
 	FADE_IN			UMETA(DisplayName = "FadeIn"),
-	FADE_OUT		UMETA(DisplayName = "FadeOut")
+	FADE_OUT		UMETA(DisplayName = "FadeOut"),
+	VERSUS			UMETA(DisplayName = "Versus"),
+	WHISTLE			UMETA(DisplayName = "Whistle"),
+	REPOP			UMETA(DisplayName = "Repop")
 };
 
 UCLASS()
