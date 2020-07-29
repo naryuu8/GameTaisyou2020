@@ -451,4 +451,6 @@ void AVersusController::CheckPlayerFall()
 void AVersusController::Goal(int BattleNumber)
 {
 	BattleFinish();
+
+	UE_LOG(LogTemp, Error, TEXT("BattleNumber = %d"), BattleNumber);
 }

@@ -170,7 +170,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 		FVector moveForce = Direction * MoveAmount * MoveSpeed;
 		FVector moveDir = moveForce.GetSafeNormal();
 
-		UE_LOG(LogTemp, Log, TEXT("PM1"));
 		// イカダに乗っている時
 		if (CurrentRaft != nullptr)
 		{
@@ -218,7 +217,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 			// 地上にいる時
 			else
 			{
-				UE_LOG(LogTemp, Log, TEXT("PM2"));
 				float WaterCheckRadius = CollisionRadius * 1.2f;
 				float dist = WaterCheckRadius * 1.3f;
 				FVector WaterCheckPos = CurPos + moveDir * dist;

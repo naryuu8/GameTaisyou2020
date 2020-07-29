@@ -528,7 +528,6 @@ FVector AWaterSurface::AdjustMoveInField(const FVector & worldPos, float circleR
 // 水の座標を調べて移動する位置が衝突していたら押し出す関数
 FVector AWaterSurface::AdjustMoveInLand(const FVector & worldPos, const FVector & moveVec, float circleRadius, const FVector & WaterCheckPos, float WaterCheckRadius)
 {
-	UE_LOG(LogTemp, Log, TEXT("MoveVec = %f"), moveVec.Size());
 	FVector movedPos = worldPos + moveVec;
 
 	// フィールドの外に出ないようにする
