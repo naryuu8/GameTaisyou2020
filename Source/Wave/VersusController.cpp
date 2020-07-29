@@ -24,6 +24,7 @@
 #include "WaterSurface/WaterSurface.h"
 #include "UI/BattleResultUI.h"
 #include "InputManager.h"
+#include "../Wave/Camera/GameCameraActor.h"
 // Sets default values
 AVersusController::AVersusController()
 {
@@ -97,6 +98,9 @@ void AVersusController::BeginPlay()
 	// BGMÇçƒê∂
 	AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::STAGE_BGM);
 	AudioComponent->Play(0.0f);
+
+	GetPlayer1->GetCameraActor()->Type = AGameCameraActor::FollowType::CharacterFollow_Far;
+	GetPlayer2->GetCameraActor()->Type = AGameCameraActor::FollowType::CharacterFollow_Far;
 }
 
 void AVersusController::CreateSections()
@@ -148,6 +152,17 @@ void AVersusController::Tick(float DeltaTime)
 	//	CreateBattleResultUI();
 	//	UGameplayStatics::SetGamePaused(GetWorld(), true);
 	//}
+
+	UpdateTime();
+	if (GetLimitTimeZero())
+	{
+		//Å@Ç«Ç§ÇµÇÊÇ§Ç©
+	}
+	if (IsTimeOver)
+	{
+		CreateBattleResultUI();
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+	}
 }
 
 void AVersusController::InputBattleResultUI()
