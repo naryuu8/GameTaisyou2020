@@ -67,7 +67,7 @@ void APlayerCharacter::BeginPlay_C()
 	AnimInst->AttackEndCallBack.BindUObject(this, &APlayerCharacter::HummerAttackEnd);
 
 	// シーン上のゲームカメラを検索する
-//	if (BattleNumber == 0)
+	if (BattleNumber == 0)
 	{
 		FollowCamera = Cast<AGameCameraActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameCameraActor::StaticClass()));
 	}
