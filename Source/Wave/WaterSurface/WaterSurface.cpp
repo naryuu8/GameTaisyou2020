@@ -737,6 +737,7 @@ ALandPoint * AWaterSurface::GetLandPoint(const FVector & WorldPos, bool IsLand)
 			return Actor;
 		}
 	}
+
 	return nullptr;
 }
 
