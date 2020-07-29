@@ -100,7 +100,7 @@ void AVersusController::BeginPlay()
 	GetPlayer1->SetNoTickSingle(true);
 	GetPlayer2->SetNoTickSingle(true);
 	// BGM‚ðÄ¶
-	AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::STAGE_BGM);
+	AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::VERSUS);
 	AudioComponent->Play(0.0f);
 
 	GetPlayer1->GetCameraActor()->Type = AGameCameraActor::FollowType::CharacterFollow_Far;
