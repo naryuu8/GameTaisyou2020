@@ -126,6 +126,7 @@ void AFloatActor::Reset()
 	}
 	IsFall = false;
 	Velocity = FVector::ZeroVector;
+	ASoundManager::GetInstance()->PlaySound(SOUND_TYPE::VERSUS);
 }
 
 FVector AFloatActor::AdjustMove_VS_Circle(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius)
