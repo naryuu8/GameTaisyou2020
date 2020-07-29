@@ -36,7 +36,10 @@ void AFloatActor::BeginPlay()
 	IsTick = true;
 
 	if (Respawn)
+	{
 		ResetLocation = GetActorLocation();
+		ResetLocation.Z = 100;
+	}
 }
 
 // Called every frame
@@ -126,7 +129,11 @@ void AFloatActor::Reset()
 	}
 	IsFall = false;
 	Velocity = FVector::ZeroVector;
-	ASoundManager::GetInstance()->PlaySound(SOUND_TYPE::VERSUS);
+	ASoundManager::GetInstance()->PlaySound(SOUND_TYPE::REPOP);
+
+		UE_LOG(LogTemp, Log, TEXT("RESPAWN"));
+
+	SetActorRotation(FRotator::MakeFromEuler(FVector::ZeroVector));
 }
 
 FVector AFloatActor::AdjustMove_VS_Circle(const FVector & OldPos, FVector MovedPos, FVector & MoveVec, float CircleRadius)
