@@ -40,7 +40,7 @@ private:
 		float MaxHammerHP = 100.0f;
 	//1フレーム毎に溜めるハンマーパワー
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-		float ChargeSpeed = 0.7f;
+		float ChargeSpeed = 1.0f;
 	// 一回で溜められる最大パワー
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 		float ChargePowerMax = 100.0f;
@@ -60,7 +60,7 @@ private:
 		int BattleNumber = 0;
 	// プレイヤーの当たり判定の半径
 	//UPROPERTY(EditAnywhere, Category = "Parameter")
-		float CollisionRadius = 0.0f;
+		float CollisionRadius = 10.0f;
 
 	//UPROPERTY(EditAnywhere, Category = "Effect")
 	//	bool  Now = 100.0f;
@@ -191,7 +191,7 @@ public:
 	void SetNoTick();
 	//NoTickのみのフラグを引数で与えた値にする
 	void SetNoTickSingle(const bool type) { NoTick = type; };
-	void SetGameClear();
+	void SetGameFinish(bool isClear = true);
 	FORCEINLINE	bool GetNoTick() const { return NoTick; }
 	//プレイヤーを非表示にする
 	UFUNCTION(BlueprintCallable, Category = "C++Library")

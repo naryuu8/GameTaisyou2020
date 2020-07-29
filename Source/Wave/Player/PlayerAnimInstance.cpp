@@ -22,6 +22,7 @@ void UPlayerAnimInstance::NativeBeginPlay()
 	IsAttack = false;
 	IsDeth = false;
 	IsClear = false;
+	IsGameOver = false;
 
 	// ステートマシンを取得
 	AnimState = GetStateMachineInstanceFromName(FName("Cat State Machine"));

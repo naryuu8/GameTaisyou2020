@@ -112,7 +112,7 @@ void AGameController::Tick(float DeltaTime)
 		}
 		else if (IsGameClear)
 		{
-			GetPlayer->SetGameClear();
+			GetPlayer->SetGameFinish();
 		    ASoundManager::GetInstance()->PlaySound(SOUND_TYPE::CLEAR_BGM);
 			FTimerManager& timerManager = GetWorld()->GetTimerManager();
 			FTimerHandle handle;
