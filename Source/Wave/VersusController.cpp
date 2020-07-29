@@ -447,3 +447,8 @@ void AVersusController::CheckPlayerFall()
 		GetPlayer2->PlayerRespawn(Player2RespawnLocation);
 	}
 }
+
+void AVersusController::Goal(int BattleNumber)
+{
+	BattleFinish();
+}

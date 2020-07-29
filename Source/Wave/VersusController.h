@@ -146,6 +146,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Versus")
 		float SectionCount = 5;
 
+	void Goal(int BattleNumber);
+
 private:
 	TArray<ASectionController*> Player1Sections;
 	TArray<ASectionController*> Player2Sections;
