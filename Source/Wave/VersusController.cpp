@@ -90,11 +90,6 @@ void AVersusController::BeginPlay()
 	{
 		CreateControlTipsUI();
 	}
-	CreateBattleTimeUI();
-	if (BattleTimeUI)
-	{
-		StartTimeCount();
-	}
 	//最後にフェードアウトを出すため最後に生成
 	InitFadeOut();
 	GetPlayer1->SetNoTickSingle(true);
@@ -148,16 +143,11 @@ void AVersusController::Tick(float DeltaTime)
 
 	if (IsBatlleFinish)InputBattleResultUI();
 
-	UpdateTime();
-	if (GetLimitTimeZero())
-	{
-		BattleFinish();
-	}
-	if (IsTimeOver)
-	{
-		CreateBattleResultUI();
-		UGameplayStatics::SetGamePaused(GetWorld(), true);
-	}
+	//if (IsTimeOver)
+	//{
+	//	CreateBattleResultUI();
+	//	UGameplayStatics::SetGamePaused(GetWorld(), true);
+	//}
 }
 
 void AVersusController::InputBattleResultUI()
@@ -225,27 +215,6 @@ void AVersusController::CreateControlTipsUI()
 	}
 }
 
-void AVersusController::CreateBattleTimeUI()
-{
-	if (BattleTimeUI)return;
-	if (BattleTimeUIClass != nullptr)
-	{
-		BattleTimeUI = CreateWidget<UBattleTimeUI>(GetWorld(), BattleTimeUIClass);
-		if (BattleTimeUI != nullptr)
-		{
-			BattleTimeUI->AddToViewport();
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("BattleTimeUIClass : %s"), L"Widget cannot create");
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("BattleTimeUIClass : %s"), L"UIClass is nullptr");
-	}
-}
-
 void AVersusController::CreateBattleResultUI()
 {
 	if (BattleResultUI)return;
@@ -293,87 +262,6 @@ void AVersusController::CreateBattleGameStartUI()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("BattleGameStartUIClass : %s"), L"UIClass is nullptr");
-	}
-}
-
-void AVersusController::UpdateTime()
-{
-	//ゲームが終了していたら時計を進めない
-	if (IsBatlleFinish)return;
-	if (UGameplayStatics::IsGamePaused(GetWorld()))
-	{
-		SetTimeCountPause();
-		return;
-	}
-	if (!UGameplayStatics::IsGamePaused(GetWorld()))
-	{
-		SetTimeCountRePlay();
-	}
-
-	// バトル用時間のUIの更新を行う
-	//if (GameTimeUI)
-	//{
-	//	GameTimeUI->UpDateTime();
-	//}
-}
-
-bool AVersusController::GetLimitTimeZero()
-{
-	// TODO::バトル用の時間のUIを参照して時間終了かどうかを判定する
-	//if (GameTimeUI)
-	//{
-	//	//カウントダウンと針が0を指していたら時間終了とする
-	//	if (GameTimeUI->GetIsCountZero() && GameTimeUI->GetIsTimeEnd())
-	//	{
-	//		return true;
-	//	}
-	//}
-	return false;
-}
-
-void AVersusController::SetTimeCountPause()
-{
-	// TODO::バトル用の時間のUIを一時停止
-	//if (GameTimeUI)
-	//{
-	//	GameTimeUI->AnimationPause();
-	//}
-}
-
-void AVersusController::SetTimeCountRePlay()
-{
-	// TODO::バトル用の時間のUIを再開
-	//if (GameTimeUI)
-	//{
-	//	GameTimeUI->AnimationRePlay();
-	//}
-}
-
-float AVersusController::GetNowTimeAngle()
-{
-	// バトル用時間ＵＩから現在の針の角度を取得する
-	//return GameTimeUI->GetNowTimeAngle();
-	return 0;
-}
-
-void AVersusController::PauseCall()
-{
-	//アタックアニメ中はポーズを開けないようにする
-	if (IsBatlleFinish)return;
-	if (GetPlayer1->GetIsAttack())return;
-	if (GetPlayer1->GetIsCharge())return;
-	if (GetPlayer2->GetIsAttack())return;
-	if (GetPlayer2->GetIsCharge())return;
-	IsPause = true;
-	if (!UGameplayStatics::IsGamePaused(GetWorld()))
-	{
-		// TODO::バトル用ポーズUIを作成して開く
-	}
-	else if (UGameplayStatics::IsGamePaused(GetWorld()))
-	{
-		if (!PauseUI)return;
-		IsPause = false;
-		// TODO::バトル用ポーズUIを閉じる
 	}
 }
 
