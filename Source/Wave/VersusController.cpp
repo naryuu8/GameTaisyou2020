@@ -14,6 +14,8 @@
 #include "TimerManager.h"
 #include "../Wave/SoundManager.h"
 #include "../Wave/Camera/GameCameraFocusPoint.h"
+#include "../Wave/Camera/State/GameCameraStateTargetFocus.h"
+#include "../Wave/Camera/State/GameCameraStateIdle.h"
 #include "../Wave/UI/FadeUI.h"
 #include "../Wave/Camera/GameCameraActor.h"
 #include "Components/MaterialBillboardComponent.h"
@@ -25,6 +27,8 @@
 #include "UI/BattleResultUI.h"
 #include "InputManager.h"
 #include "../Wave/Camera/GameCameraActor.h"
+#include "Object/Flag.h"
+
 // Sets default values
 AVersusController::AVersusController()
 {
@@ -43,7 +47,7 @@ void AVersusController::BeginPlay()
 
 	// 各プレイヤーを取得
 	TArray<class AActor*> FoundPlayers;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), FoundPlayers);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), FoundPlayers);
 	for (auto Actor : FoundPlayers)
 	{
 		// 取得したアクターがプレイヤーかどうかを判定
@@ -78,7 +82,7 @@ void AVersusController::BeginPlay()
 		GetPlayer2->DebugHammerCountBarParent();
 		GetPlayer2->SetNoTick();
 		SetAllInvisibleStageIcon();
-		return;
+		//return;
 	}
 
 	// TODO::バトル用の時間のUIを作成
@@ -96,7 +100,7 @@ void AVersusController::BeginPlay()
 	GetPlayer1->SetNoTickSingle(true);
 	GetPlayer2->SetNoTickSingle(true);
 	// BGMを再生
-	AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::STAGE_BGM);
+	AudioComponent = ASoundManager::CreateAudioComponent(SOUND_TYPE::VERSUS);
 	AudioComponent->Play(0.0f);
 
 	GetPlayer1->GetCameraActor()->Type = AGameCameraActor::FollowType::CharacterFollow_Far;
@@ -128,41 +132,56 @@ void AVersusController::Tick(float DeltaTime)
 {
 	if (DebugScreenMode)return;
 	if (FadeUI->GetFadeIsEnable())return;
-	if (BattleGameStartUIClass != nullptr)
+
+	float start_time = 1.0f;
+	float start_focus_time = 2.0f;
+	if (!IsBattleStart)
 	{
-		if (!FadeUI->GetFadeIsEnable() && !BattleGameStartUI)
+		StartIdleTimer += DeltaTime;
+
+		if (StartIdleTimer > start_time)
 		{
-			//フェードアウト終了次第カウントダウンを開始するようにする
-			CreateBattleGameStartUI();
+			IsBattleStart = true;
+			TArray<class AActor*> FoundGoals;
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFlag::StaticClass(), FoundGoals);
+			for (auto goal : FoundGoals)
+			{
+				AFlag * flag = Cast<AFlag>(goal);
+				if (!flag) continue;
+				if (flag->GetNumber() == GetPlayer1->GetBattleNumber())
+				{
+					GetPlayer1->GetCameraActor()->ChangeState(new GameCameraStateTargetFocus(flag->GetActorLocation()));
+					continue;
+				}
+				if (flag->GetNumber() == GetPlayer2->GetBattleNumber())
+				{
+					GetPlayer2->GetCameraActor()->ChangeState(new GameCameraStateTargetFocus(flag->GetActorLocation()));
+					continue;
+				}
+			}
+
+			FTimerManager& timerManager = GetWorld()->GetTimerManager();
+			FTimerHandle handle;
+			timerManager.SetTimer(handle, this, &AVersusController::GameStart, start_focus_time);
 		}
+		else return;
+	}
+	
+
+	if (BattleGameStartUIClass != nullptr && BattleGameStartUI)
+	{
 		if (BattleGameStartUI->GetIsCountDownZero() && GetPlayer1->GetNoTick())
 		{
 			GetPlayer1->SetNoTickSingle(false);
 			GetPlayer2->SetNoTickSingle(false);
 		}
 	}
+
 	Super::Tick(DeltaTime);
 
 	CheckPlayerFall();
 
 	if (IsBatlleFinish)InputBattleResultUI();
-
-	//if (IsTimeOver)
-	//{
-	//	CreateBattleResultUI();
-	//	UGameplayStatics::SetGamePaused(GetWorld(), true);
-	//}
-
-	UpdateTime();
-	if (GetLimitTimeZero())
-	{
-		//　どうしようか
-	}
-	if (IsTimeOver)
-	{
-		CreateBattleResultUI();
-		UGameplayStatics::SetGamePaused(GetWorld(), true);
-	}
 }
 
 void AVersusController::InputBattleResultUI()
@@ -330,6 +349,15 @@ void AVersusController::SetAllInvisibleStageIcon()
 	}
 }
 
+void AVersusController::GameStart()
+{
+	//フェードアウト終了次第カウントダウンを開始するようにする
+	CreateBattleGameStartUI();
+
+	GetPlayer1->GetCameraActor()->ChangeState(new GameCameraStateIdle());
+	GetPlayer2->GetCameraActor()->ChangeState(new GameCameraStateIdle());
+}
+
 void AVersusController::BattleFinish()
 {
 }
@@ -353,9 +381,13 @@ void AVersusController::CheckPlayerFall()
 void AVersusController::Goal(int BattleNumber)
 {
 	if (IsBatlleFinish) return;
+	bool is_player1_win = (BattleNumber == 1);
 
 	CreateBattleResultUI();
-	BattleResultUI->SetWinPlayer(BattleNumber == 1);
+	BattleResultUI->SetWinPlayer(is_player1_win);
+
+	GetPlayer1->SetGameFinish(is_player1_win);
+	GetPlayer2->SetGameFinish(!is_player1_win);
 
 	GetPlayer1->SetNoTick();
 	GetPlayer2->SetNoTick();

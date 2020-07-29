@@ -20,7 +20,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite)
-		float BattleNumber;
+		int BattleNumber;
 
 	UFUNCTION(Category = "C++Event", BlueprintCallable)
 		void OnPlayerCheck(class AActor* OtherActor);
@@ -28,6 +28,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	int GetNumber() { return BattleNumber; }
 
 	bool IsGoal;
 };

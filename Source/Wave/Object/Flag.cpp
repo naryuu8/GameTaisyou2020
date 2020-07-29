@@ -5,6 +5,7 @@
 #include "../Player/PlayerCharacter.h"
 #include "../VersusController.h"
 #include "Kismet/GameplayStatics.h"
+#include "../SoundManager.h"
 
 // Sets default values
 AFlag::AFlag()
@@ -39,6 +40,7 @@ void AFlag::OnPlayerCheck(AActor * OtherActor)
 	if (Versus)
 		Versus->Goal(BattleNumber);
 
+	ASoundManager::GetInstance()->PlaySound(SOUND_TYPE::WHISTLE);
 	IsGoal = true;
 }
 

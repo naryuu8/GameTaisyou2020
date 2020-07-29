@@ -39,9 +39,12 @@ private:
 	int Player1Score = 0;
 	int Player2Score = 0;
 
+	bool IsBattleStart = false;
 	bool IsBatlleFinish = false;
 	bool IsResult = false;
 	bool IsStartResultEvent = false;
+
+	float StartIdleTimer = 0.0f;
 
 	// 表示するUI　エディタで指定する
 	// TODO::バトル用リザルトUI,バトル用時間UI,バトル用ポーズUIが必要
@@ -97,6 +100,9 @@ private:
 	void RemoveUI();
 	// ステージ上のアイコンを非表示
 	void SetAllInvisibleStageIcon();
+
+	// ゲーム開始関数
+	void GameStart();
 
 	// プレイヤーが落ちたかを判定してスコアやリスポーンの処理を行う
 	void CheckPlayerFall();
